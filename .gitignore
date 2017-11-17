@@ -14,7 +14,7 @@
 
 # sftp configuration file
 sftp-config.json
-
+key.key
 
 ###Python###
 

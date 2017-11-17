@@ -1,7 +1,8 @@
-
+from lib.log import log
 
 def main():
-    pass
+    logger = log(log, True)
+
 
 
 if __name__ == '__main__':
