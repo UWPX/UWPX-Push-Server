@@ -33,14 +33,14 @@ class log(object):
         if self.__doLog:
             self.__writetoFile(message)
 
-    def printError(self, fehler):
-        message = self.__getTime() + "\t[ ERROR ]\t" + fehler
+    def printError(self, error):
+        message = self.__getTime() + "\t[ ERROR ]\t" + error
         print(message)
         if self.__doLog:
             self.__writetoFile(message)
 
-    def printMessage(self, Message):
-        message = self.__getTime() + "\t[MESSAGE]\t" + Message
+    def printMessage(self, theMessage):
+        message = self.__getTime() + "\t[MESSAGE]\t" + theMessage
         print(message)
         if self.__doLog:
             self.__writetoFile(message)
