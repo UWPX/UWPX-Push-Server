@@ -42,11 +42,9 @@ class Clientmanager(object):
         pass
         # TODO
 
-    def deleteClient(self, criteria):
+    def deleteClient(self, hash):
         try:
-            pass
-            # TODO
-            # self.cursor.execute("DELETE FROM Zoznam WHERE Name=?", criteria)
+            self.cursor.execute("DELETE FROM Clients WHERE Hash = ?", (hash))
         except:
             self.log.printError("Database entry couldn't be deleted!")
 
