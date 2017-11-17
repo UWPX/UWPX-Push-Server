@@ -1,5 +1,5 @@
 import sqlite3
-from lib.log import log
+from log import log
 
 
 class Clientmanager(object):
@@ -33,9 +33,9 @@ class Clientmanager(object):
 
     def addClient(self, hash, ip, server):
         try:
-            self.cursor.execute("INSERT INTO clients VALUES (?, ?, ?)",
+            self.cursor.execute("INSERT INTO Client VALUES (?, ?, ?)",
                 (hash, ip, server))
-        except:
+        except :
             self.log.printError("Couldn't write new entry to database")
 
     def readClientData(self):
@@ -44,7 +44,7 @@ class Clientmanager(object):
 
     def deleteClient(self, hash):
         try:
-            self.cursor.execute("DELETE FROM Clients WHERE Hash = ?", (hash))
+            self.cursor.execute("DELETE FROM Client WHERE Hash = ?", (hash))
         except:
             self.log.printError("Database entry couldn't be deleted!")
 
