@@ -3,8 +3,6 @@ from time import gmtime, strftime
 
 
 class log(object):
-    """Server logger"""
-
     def __init__(self, name, isOn):
         self.__doLog = isOn
         if self.__doLog:
@@ -20,29 +18,29 @@ class log(object):
                 if not path.isdir("log/"):
                     makedirs("log/")
 
-    def writetoFile(self, message):
+    def __writetoFile(self, message):
         newMassage = message + "\n"
         logFile = open(self.__fileName, "a")
         logFile.write(newMassage)
         logFile.close()
 
-    def getTime(self):
+    def __getTime(self):
         return str(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
 
     def printWarning(self, warning):
-        message = self.getTime() + "\t[WARNING]\t" + warning
+        message = self.__getTime() + "\t[WARNING]\t" + warning
         print(message)
         if self.__doLog:
-            self.writetoFile(message)
+            self.__writetoFile(message)
 
     def printError(self, fehler):
-        message = self.getTime() + "\t[ ERROR ]\t" + fehler
+        message = self.__getTime() + "\t[ ERROR ]\t" + fehler
         print(message)
         if self.__doLog:
-            self.writetoFile(message)
+            self.__writetoFile(message)
 
     def printMessage(self, Message):
-        message = self.getTime() + "\t[MESSAGE]\t" + Message
+        message = self.__getTime() + "\t[MESSAGE]\t" + Message
         print(message)
         if self.__doLog:
-            self.writetoFile(message)
+            self.__writetoFile(message)
