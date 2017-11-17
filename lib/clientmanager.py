@@ -33,7 +33,7 @@ class Clientmanager(object):
 
     def addClient(self, hash, ip, server):
         try:
-            self.cursor.execute("INSERT INTO Client VALUES (?, ?, ?)",
+            self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?)",
                 (hash, ip, server))
         except :
             self.log.printError("Couldn't write new entry to database")
