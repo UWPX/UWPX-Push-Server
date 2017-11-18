@@ -51,13 +51,13 @@ class Clientmanager(object):
 
 
 if __name__ == '__main__':
-    #pass
+    pass
 
-    
-    manager = Clientmanager(logger = log("test", False))
-    manager.connectToDatabase("C:\\Users\\Tim\\Documents\\GitHub\\XMPP-Push\\db\\client.db")
+    """
+    manager = Clientmanager(logger = log("test", False), datebaseName="C:\\Users\\Tim\\Documents\\GitKraken\\XMPP-Push\\db\\client.db")
     manager.addClient(wns_id=1234, server="fuck.you.com", token="token", wns_secret = "secret")
     manager.addClient(wns_id=2345, server="fuck.you.com", token="token1", wns_secret="secret1")
     manager.deleteClient(wns_id=2345)
     manager.commitChanges()
     manager.closeConncection()
+    """
