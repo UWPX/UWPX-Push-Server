@@ -3,16 +3,16 @@ from lib.log import log
 
 
 class wns_connector(object):
-    log = None
     token = None
 
     def __init__(self, log):
         self.log = log
         try:
-           with open("key.key", "r") as keyFile:
+            with open("key.key", "r") as keyFile:
                 self.token = keyFile.readline()
-                print(self.token)
-        except:
-            self.log.printError("no key file found (key.key), terminating")
-            from os import close
-            close(1)
+        except FileNotFoundError:
+            self.log.printError("no key file found (key.key), terminating!")
+            exit(-1)
+
+    def sendNotification(wns_id, message):
+        pass

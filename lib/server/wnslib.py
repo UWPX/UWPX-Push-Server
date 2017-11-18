@@ -33,8 +33,9 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from io import StringIO
-import eventlet
-requests = eventlet.import_patched('requests.__init__')
+#should be changed
+#import eventlet
+#requests = eventlet.import_patched('requests.__init__')
 
 try:
     register_namespace = ET.register_namespace
