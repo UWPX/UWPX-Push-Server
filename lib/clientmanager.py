@@ -31,10 +31,10 @@ class Clientmanager(object):
         except:
             self.log.printError("Couldn't commit (save) changes in database!")
 
-    def addClient(self, hash, ip, server):
+    def addClient(self, hash, ip, server, token):
         try:
-            self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?)",
-                (hash, ip, server))
+            self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?, ?)",
+                (hash, ip, server, token))
         except :
             self.log.printError("Couldn't write new entry to database")
 
@@ -44,7 +44,8 @@ class Clientmanager(object):
 
     def deleteClient(self, hash):
         try:
-            self.cursor.execute("DELETE FROM Client WHERE Hash = (?)", (hash, )) #if not working check without brakket sourrnding of questionmark
+            self.cursor.execute("DELETE FROM Client WHERE Hash = (?)", (hash, ))
+            # if not working check without brakket sourrnding of questionmark
         except IOError:
             self.log.printError("Database entry couldn't be deleted!")
 
