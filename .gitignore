@@ -15,6 +15,7 @@
 # sftp configuration file
 sftp-config.json
 key.key
+test.py
 
 ###Python###
 
@@ -42,8 +43,8 @@ var/
 *.egg
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
+#  Usually these files are written by a python script from a template
 *.manifest
 *.spec
 db/*
