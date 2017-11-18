@@ -30,7 +30,7 @@ class xmpp_socket(object):
         self.context.verify_mode = ssl.CERT_REQUIRED
         self.context.check_hostname = True
         self.context.load_verify_locations("/etc/pki/tls/certs/ca-bundle.crt")
-        self.sock = self.context.wrap_socket(self.sock,server_hostname=self.hostname)
+        self.sock = self.context.wrap_socket(self.sock, server_hostname=self.hostname)
         return self.sock
 
 
