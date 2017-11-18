@@ -38,8 +38,9 @@ class Clientmanager(object):
         except :
             self.log.printError("Couldn't write new entry to database")
 
-    def readClientData(self):
+    def readClientData(self, criteria):
         pass
+        self.cursor.execute("SELECT * FROM Client WHERE Xyz=?", criteria)
         # TODO
 
     def deleteClient(self, hash):
@@ -51,10 +52,13 @@ class Clientmanager(object):
 
 
 if __name__ == '__main__':
+    pass
+    """
     manager = Clientmanager(logger = log("test", False))
-    manager.connectToDatabase("/home/kilian/Projekte/GitHub/XMPP-Push/db/client.db")
-    manager.addClient(hash="superAwsomeHash", ip = "localhost", server = "fuck.you.com")
-    manager.addClient(hash="superAwsomeHash1", ip = "localhost", server = "fuck.you.com")
+    manager.connectToDatabase("C:\\Users\\Tim\\Documents\\GitHub\\XMPP-Push\\db\\client.db")
+    manager.addClient(hash="superAwsomeHash", ip = "localhost", server = "fuck.you.com", token="token")
+    manager.addClient(hash="superAwsomeHash1", ip = "localhost", server = "fuck.you.com", token="token1")
     manager.deleteClient(hash="superAwsomeHash1")
     manager.commitChanges()
     manager.closeConncection()
+    """
