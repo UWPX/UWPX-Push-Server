@@ -7,9 +7,9 @@ class log(object):
         self.__doLog = isOn
         if self.__doLog:
             if platform.system() == "Windows":
-                self.__fileName = "log\\" + str(name)
+                self.__fileName = "log\\" + str(name)+".log"
             else:
-                self.__fileName = "log/" + str(name)
+                self.__fileName = "log/" + str(name)+".log"
             try:
                 test = open(self.__fileName, "a")
                 test.close()
