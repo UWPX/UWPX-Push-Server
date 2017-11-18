@@ -18,7 +18,6 @@ class Clientmanager(object):
             self.log.printError("Connection to database couldn't be established!")
             exit(-1)
 
-
     def closeConncection(self):
         try:
             self.connection.close()
@@ -31,10 +30,10 @@ class Clientmanager(object):
         except:
             self.log.printError("Couldn't commit (save) changes in database!")
 
-    def addClient(self, hash, ip, server, token):
+    def addClient(self, wns_id, server, token, wns_secret):
         try:
             self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?, ?)",
-                (hash, ip, server, token))
+                (wns_id, server, token, wns_secret))
         except :
             self.log.printError("Couldn't write new entry to database")
 
@@ -43,22 +42,22 @@ class Clientmanager(object):
         self.cursor.execute("SELECT * FROM Client WHERE Xyz=?", criteria)
         # TODO
 
-    def deleteClient(self, hash):
+    def deleteClient(self, wns_id):
         try:
-            self.cursor.execute("DELETE FROM Client WHERE Hash = (?)", (hash, ))
+            self.cursor.execute("DELETE FROM Client WHERE wns_id = (?)", (wns_id, ))
             # if not working check without brakket sourrnding of questionmark
         except IOError:
             self.log.printError("Database entry couldn't be deleted!")
 
 
 if __name__ == '__main__':
-    pass
-    """
+    #pass
+
+    
     manager = Clientmanager(logger = log("test", False))
     manager.connectToDatabase("C:\\Users\\Tim\\Documents\\GitHub\\XMPP-Push\\db\\client.db")
-    manager.addClient(hash="superAwsomeHash", ip = "localhost", server = "fuck.you.com", token="token")
-    manager.addClient(hash="superAwsomeHash1", ip = "localhost", server = "fuck.you.com", token="token1")
-    manager.deleteClient(hash="superAwsomeHash1")
+    manager.addClient(wns_id=1234, server="fuck.you.com", token="token", wns_secret = "secret")
+    manager.addClient(wns_id=2345, server="fuck.you.com", token="token1", wns_secret="secret1")
+    manager.deleteClient(wns_id=2345)
     manager.commitChanges()
     manager.closeConncection()
-    """
