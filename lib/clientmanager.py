@@ -44,10 +44,16 @@ class Clientmanager(object):
 
     def deleteClient(self, hash):
         try:
-            self.cursor.execute("DELETE FROM Client WHERE Hash = ?", (hash))
-        except:
+            self.cursor.execute("DELETE FROM Client WHERE Hash = (?)", (hash, )) #if not working check without brakket sourrnding of questionmark
+        except IOError:
             self.log.printError("Database entry couldn't be deleted!")
 
 
 if __name__ == '__main__':
-    pass
+    manager = Clientmanager(logger = log("test", False))
+    manager.connectToDatabase("/home/kilian/Projekte/GitHub/XMPP-Push/db/client.db")
+    manager.addClient(hash="superAwsomeHash", ip = "localhost", server = "fuck.you.com")
+    manager.addClient(hash="superAwsomeHash1", ip = "localhost", server = "fuck.you.com")
+    manager.deleteClient(hash="superAwsomeHash1")
+    manager.commitChanges()
+    manager.closeConncection()
