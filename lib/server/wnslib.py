@@ -32,9 +32,11 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from io import StringIO
-import lib.server.eventlet
-requests = eventlet.import_patched('requests.__init__')
-
+try:
+    import eventlet
+    requests = eventlet.import_patched('requests.__init__')
+except ModuleNotFoundError:
+    print("should not happen")
 try:
     register_namespace = ET.register_namespace
 except AttributeError:
