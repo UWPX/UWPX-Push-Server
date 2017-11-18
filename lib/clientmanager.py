@@ -61,10 +61,10 @@ if __name__ == '__main__':
     pass
     """
     manager = Clientmanager(logger = log("test", False), datebaseName="C:\\Users\\Tim\\Documents\\GitKraken\\XMPP-Push\\db\\client.db")
-    manager.addClient(wns_id=1234, server="fuck.you.com", token="token", wns_secret = "secret")
-    manager.addClient(wns_id=2345, server="fuck.you.com", token="token1", wns_secret="secret1")
-    print(manager.getWnsSecret(wns_id=2345))
-    print(manager.readClientData(wns_id=2345))
+    manager.addClient(wns_id=1234, server="fuck.you.com", token="token", wns_secret = "secret", jabber_id="jabber")
+    manager.addClient(wns_id=2345, server="fuck.you.com", token="token1", wns_secret="secret1", jabber_id="jabber1")
+    #print(manager.getWnsSecret(wns_id=2345))
+    #print(manager.readClientData(wns_id=2345))
     manager.deleteClient(wns_id=1234)
     manager.deleteClient(wns_id=2345)
     manager.commitChanges()
