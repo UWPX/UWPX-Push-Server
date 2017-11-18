@@ -1,5 +1,5 @@
 import sqlite3
-from log import log
+from lib.log import log
 
 
 class Clientmanager(object):

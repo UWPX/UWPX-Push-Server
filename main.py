@@ -1,5 +1,5 @@
 from lib.log import log
-from lib.server.wns_connector import wns_connector
+from lib.server.wns.wns_connector import wns_connector
 from concurrent import futures
 
 

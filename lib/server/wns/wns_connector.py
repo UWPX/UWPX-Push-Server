@@ -1,4 +1,4 @@
-from lib.server.wnslib import WNSClient
+from lib.server.wns.wnslib import WNSClient
 from lib.log import log
 from lib.clientmanager import Clientmanager
 
