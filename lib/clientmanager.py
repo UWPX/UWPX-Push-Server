@@ -37,27 +37,36 @@ class Clientmanager(object):
         except :
             self.log.printError("Couldn't write new entry to database")
 
-    def readClientData(self, criteria):
-        pass
-        self.cursor.execute("SELECT * FROM Client WHERE Xyz=?", criteria)
-        # TODO
+    def readClientData(self, wns_id):
+        try:
+            return self.cursor.execute("SELECT * FROM Client WHERE wns_id= ?", (wns_id, )).fetchone()
+        except:
+            self.log.printError("Couldn't get data from Database!")
 
     def deleteClient(self, wns_id):
         try:
             self.cursor.execute("DELETE FROM Client WHERE wns_id = (?)", (wns_id, ))
             # if not working check without brakket sourrnding of questionmark
-        except IOError:
+        except:
             self.log.printError("Database entry couldn't be deleted!")
+
+    def getWnsSecret(self, wns_id):
+        try:
+            return self.cursor.execute("SELECT wns_secret FROM Client WHERE wns_id= ?", (wns_id, )).fetchone()[0]
+        except:
+            self.log.printError("Couldn't get wns_secret from Database!")
 
 
 if __name__ == '__main__':
     pass
-
     """
     manager = Clientmanager(logger = log("test", False), datebaseName="C:\\Users\\Tim\\Documents\\GitKraken\\XMPP-Push\\db\\client.db")
     manager.addClient(wns_id=1234, server="fuck.you.com", token="token", wns_secret = "secret")
     manager.addClient(wns_id=2345, server="fuck.you.com", token="token1", wns_secret="secret1")
+    print(manager.getWnsSecret(wns_id=2345))
+    print(manager.readClientData(wns_id=2345))
+    manager.deleteClient(wns_id=1234)
     manager.deleteClient(wns_id=2345)
     manager.commitChanges()
     manager.closeConncection()
-    """
+    """    
