@@ -9,15 +9,15 @@ class Clientmanager(object):
     connection = None
     cursor = None
 
-    def __init__(self, logger):
+    def __init__(self, logger, datebaseName):
         self.log = logger
-
-    def connectToDatabase(self, datebaseName):
         try:
             self.connection = sqlite3.connect(datebaseName)
             self.cursor = self.connection.cursor()
         except:
             self.log.printError("Connection to database couldn't be established!")
+            exit(-1)
+
 
     def closeConncection(self):
         try:

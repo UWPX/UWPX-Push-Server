@@ -1,6 +1,5 @@
 from __future__ import absolute_import
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
 
 # Copyright (c) 2012, Dongsheng Cai
 #
@@ -33,9 +32,8 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from io import StringIO
-#should be changed
-#import eventlet
-#requests = eventlet.import_patched('requests.__init__')
+import lib.server.eventlet
+requests = eventlet.import_patched('requests.__init__')
 
 try:
     register_namespace = ET.register_namespace
@@ -56,10 +54,10 @@ WNSACCESSTOKEN_URL = 'https://login.live.com/accesstoken.srf'
 
 
 class WNSClient():
-    def __init__(self, params):
-        self.clientid = params['wnsclientid']
-        self.clientsecret = params['wnsclientsecret']
-        self.timeout = params['timeout'] if 'timeout' in params else None
+    def __init__(self, wnsclientid, wnsclientsecret, timeout = None):
+        self.clientid = wnsclientid
+        self.clientsecret = wnsclientsecret
+        self.timeout = timeout
         self.tokenexpiry = None
         self.accesstoken = None
 
