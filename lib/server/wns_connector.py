@@ -2,7 +2,7 @@ from lib.server.wnslib import WNSClient
 from lib.log import log
 
 
-class pushConnenction(object):
+class wns_connector(object):
     log = None
     token = None
 
