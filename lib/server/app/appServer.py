@@ -1,7 +1,7 @@
 import socket
 from lib.log import log
 from threading import Thread
-
+from lib.server.xmpp.xml_parser import XML_Parser
 
 class appServer(object):
 
@@ -16,7 +16,8 @@ class appServer(object):
         try:
             self.sock.bind(('', 6000))
         except socket.error as e:
-            self.log.printError("appserver bind failed. Error Code: "+str(e[0]) + " message: " + str(e[1]))
+            self.log.printError("appserver bind failed.")
+            exit(-1)
         self.log.printMessage("appserver successfuly added webserver")
         self.sock.listen(10)
         self.active = True
@@ -28,10 +29,12 @@ class appServer(object):
     def processClient(self, conn):
         input = conn.recv(1024)
         print(input.decode())
-        
-        
+        pros =XML_Parser(input.decode())
+        d = pros.pushNotification()
+        for x, y in d.items():
+            print(x + ": " + y)
         conn.sendall(b'success')
-        conn.close
+        conn.close()
 
     def loop(self):
         while self.active:
