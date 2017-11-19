@@ -17,7 +17,7 @@ class appServer(object):
             self.sock.bind(('', 6000))
         except socket.error as e:
             self.log.printError("appserver bind failed. Error Code: "+str(e[0]) + " message: " + str(e[1]))
-        self.log.printMessage("appserver socket binded")
+        self.log.printMessage("appserver successfuly added webserver")
         self.sock.listen(10)
         self.active = True
 

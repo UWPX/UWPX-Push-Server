@@ -34,7 +34,7 @@ class Clientmanager(object):
         try:
             self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?, ?, ?)",
                 (wns_id, server, token, wns_secret, jabber_id))
-        except :
+        except:
             self.log.printError("Couldn't write new entry to database")
 
     def readClientData(self, wns_id):
