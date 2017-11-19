@@ -9,6 +9,9 @@ class XML_Parser(object):
 		self.xml_dom = minidom.parseString("<push clientId='sauter.fabian@zefix.xyz' chatId='kili@zefix.xyzsauter.fabian@zefix.xyz' key='someKey' wns_id='123' wns_secret='string'/>")
 		# use minidom.parse(filename) to process files
 
+	def __replaceQuotes(self, stream):
+		return stream.replace('"', '\'')
+
 	def pushNotification(self):
 		# Search for tag 'push'
 		push = self.xml_dom.getElementsByTagName("push")[0]
