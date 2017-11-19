@@ -1,18 +1,24 @@
 import ssl
 import socket
+from lib.log import log
 
 
 class xmpp_socket(object):
 
-    def __init__(self, hostname, port):
+    def __init__(self, hostname, port, log):
         self.hostname = hostname
         self.port = port
         self.sock = socket.socket(socket.AF_INET)
         self.context = ssl.create_default_context()
+        self.log = log
         self.connect()
 
     def connect(self):
-        self.sock.connect((self.hostname, self.port))
+        try:
+            self.sock.connect((self.hostname, self.port))
+        except OSError:
+            self.log.printError("xmpp_socket couldn connect!")
+            exit(-1)            
 
     def close(self):
         self.sock.close()
