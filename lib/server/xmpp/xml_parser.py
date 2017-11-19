@@ -23,6 +23,7 @@ class XML_Parser(object):
         for item in var_dict:
             if item is None or item == "NULL":
                 raise Exception('Error: Missing elememt in XML string!')
+               
         return (var_dict['wns_id'], var_dict['client_id'], var_dict['push_channel'])
         # tupel body: see clientmanager.py
 
