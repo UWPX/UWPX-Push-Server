@@ -1,6 +1,7 @@
 from lib.log import log
 from lib.server.app.appServer import appServer
 
+
 def main():
     import sys
     print(sys.version)

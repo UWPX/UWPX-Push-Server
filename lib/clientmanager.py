@@ -30,10 +30,10 @@ class Clientmanager(object):
         except:
             self.log.printError("Couldn't commit (save) changes in database!")
 
-    def addClient(self, wns_id, server, token, wns_secret, jabber_id):
+    def addClient(self, inputTupel):
         try:
             self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?, ?, ?)",
-                (wns_id, server, token, wns_secret, jabber_id))
+                inputTupel)
         except:
             self.log.printError("Couldn't write new entry to database")
 
