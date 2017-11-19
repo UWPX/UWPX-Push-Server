@@ -16,7 +16,7 @@ class raw_Server(object):
     def connect(self):
         try:
             self.sock.bind(('', self.port))
-        except socket.error.bind as e:
+        except socket.error as e:
             self.log.printError("server bind on port: "+str(self.port)+" failed.")
             exit(-1)
         self.log.printMessage("server sccesfuly binded port: "+str(self.port))
@@ -33,13 +33,13 @@ class raw_Server(object):
     def upgradetoTLS(self, server):
         if(server):
             try:
-                self.sock = ssl.wrap_socket(self.sock, server_side=True, certfile='/home/kilian/Projekte/GitHub/XMPP-Push/cert/rbg.cert', keyfile='/home/kilian/Projekte/GitHub/XMPP-Push/cert/rgb.key')
+                self.sock = ssl.wrap_socket(self.sock, server_side=True, certfile='cert/rbg.cert', keyfile='cert/rgb.key', ssl_version=ssl.PROTOCOL_TLSv1_2)
             except FileNotFoundError: 
                 self.log.printError("cert or keyfile not found terminating!")
                 exit(-1)
         else:
             self.context = ssl.create_default_context()
-            self.context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+            self.context = ssl.SSLContext(PROTOCOL_TLSv1_2)
             self.context.verify_mode = ssl.CERT_REQUIRED
             self.context.check_hostname = True
             self.sock = self.context.wrap_socket(self.sock, server_hostname=self.hostname)
