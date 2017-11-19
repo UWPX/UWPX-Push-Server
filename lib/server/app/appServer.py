@@ -28,6 +28,8 @@ class appServer(object):
     def processClient(self, conn):
         input = conn.recv(1024)
         print(input.decode())
+        
+        
         conn.sendall(b'success')
         conn.close
 
