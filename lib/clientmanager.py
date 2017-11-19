@@ -34,6 +34,7 @@ class Clientmanager(object):
         try:
             self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?, ?, ?)",
                 inputTupel)
+                # tupel body: (wns_id, server, token, wns_secret, jabber_id)
         except:
             self.log.printError("Couldn't write new entry to database")
 
