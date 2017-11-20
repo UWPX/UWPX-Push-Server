@@ -12,7 +12,11 @@ class app_Server(raw_Server):
         self.upgradetoTLS(True)
 
     def processClient(self, conn):
-        input = conn.recv(1024).decode()
+        try:
+            input = conn.recv(1024).decode()
+        except ConnectionResetError:
+            self.log.printWarning("app_Server Connection reset by peer!")
+            return
         try:
             print(input)
             pros =XML_Parser(input)

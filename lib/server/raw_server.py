@@ -6,25 +6,25 @@ from threading import Thread
 
 class raw_Server(object):
     def __init__(self, hostname, log, port):
-        self.sock = socket.socket(socket.AF_INET)
-        self.hostname = hostname
+        self.__sock = socket.socket(socket.AF_INET)
+        self.__hostname = hostname
         self.log = log
-        self.port = port
-        self.active = False
+        self.__port = port
+        self.__active = False
         self.connect()
 
     def connect(self):
         try:
-            self.sock.bind(('', self.port))
+            self.__sock.bind(('', self.__port))
         except socket.error as e:
-            self.log.printError("server bind on port: "+str(self.port)+" failed.")
+            self.log.printError("server bind on port: "+str(self.__port)+" failed.")
             exit(-1)
-        self.log.printMessage("server sccesfuly binded port: "+str(self.port))
-        self.sock.listen(10)
-        self.active = True
+        self.log.printMessage("server sccesfuly binded port: "+str(self.__port))
+        self.__sock.listen(10)
+        self.__active = True
 
     def close(self):
-        self.active = False
+        self.__active = False
         self.log.printMessage("closeing appserver, requested by other class")
 
     def processClient(self, conn):
@@ -33,24 +33,24 @@ class raw_Server(object):
     def upgradetoTLS(self, server):
         if(server):
             try:
-                self.sock = ssl.wrap_socket(self.sock, server_side=True, certfile='cert/rbg.cert', keyfile='cert/rgb.key', ssl_version=ssl.PROTOCOL_TLSv1_2)
+                self.__sock = ssl.wrap_socket(self.__sock, server_side=True, certfile='cert/rbg.cert', keyfile='cert/rgb.key', ssl_version=ssl.PROTOCOL_TLSv1_2)
             except FileNotFoundError: 
                 self.log.printError("cert or keyfile not found terminating!")
                 exit(-1)
         else:
-            self.context = ssl.create_default_context()
-            self.context = ssl.SSLContext(PROTOCOL_TLSv1_2)
-            self.context.verify_mode = ssl.CERT_REQUIRED
-            self.context.check_hostname = True
-            self.sock = self.context.wrap_socket(self.sock, server_hostname=self.hostname)
-        return self.sock
+            self.__context = ssl.create_default_context()
+            self.__context = ssl.SSLContext(PROTOCOL_TLSv1_2)
+            self.__context.verify_mode = ssl.CERT_REQUIRED
+            self.__context.check_hostname = True
+            self.__sock = self.__context.wrap_socket(self.__sock, server_hostname=self.__hostname)
+        return self.__sock
 
     def loop(self):
-        while self.active:
+        while self.__active:
             try:
-                conn, addr = self.sock.accept()
+                conn, addr = self.__sock.accept()
                 Thread(target=self.processClient, args=(conn,)).start()
 
             except ssl.SSLError:
                 self.log.printWarning("unecrypted connection, blocked!")
-        self.sock.close()
+        self.__sock.close()
