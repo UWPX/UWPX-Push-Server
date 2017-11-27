@@ -5,10 +5,10 @@ from threading import Thread
 
 
 class raw_Server(object):
-    def __init__(self, hostname, log, port):
+    def __init__(self, hostname, thelog, port):
         self.__sock = socket.socket(socket.AF_INET)
         self.__hostname = hostname
-        self.log = log
+        self.log = thelog
         self.__port = port
         self.__active = False
         self.connect()
@@ -34,7 +34,7 @@ class raw_Server(object):
         if(server):
             try:
                 self.__sock = ssl.wrap_socket(self.__sock, server_side=True, certfile='cert/rbg.cert', keyfile='cert/rgb.key', ssl_version=ssl.PROTOCOL_TLSv1_2)
-            except FileNotFoundError: 
+            except FileNotFoundError:
                 self.log.printError("cert or keyfile not found terminating!")
                 exit(-1)
         else:

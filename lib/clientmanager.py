@@ -3,8 +3,6 @@ from lib.log import log
 
 
 class Clientmanager(object):
-    """docstring for Clientmanager"""
-    log = None
 
     connection = None
     cursor = None
@@ -32,9 +30,8 @@ class Clientmanager(object):
 
     def addClient(self, inputTupel):
         try:
-            self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?, ?, ?)",
-                inputTupel)
-                # tupel body: (wns_id, server, token, wns_secret, jabber_id)
+            self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?, ?, ?)", inputTupel)
+            # tupel body: (wns_id, server, token, wns_secret, jabber_id)
         except:
             self.log.printError("Couldn't write new entry to database")
 

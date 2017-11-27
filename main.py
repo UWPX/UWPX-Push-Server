@@ -14,7 +14,5 @@ def main():
         logger.printWarning("server stopped by keyboard interrupt")
 
 
-
-
 if __name__ == '__main__':
     main()

@@ -18,7 +18,7 @@ class xmpp_socket(object):
             self.sock.connect((self.hostname, self.port))
         except OSError:
             self.log.printError("xmpp_socket couldn connect!")
-            exit(-1)            
+            exit(-1)
 
     def close(self):
         self.sock.close()

@@ -14,8 +14,8 @@ class xml_Processor(object):
     def identifyAsPush(self, userID, resource):
         pass
 
+
 class xml_generator(object):
-  
     hostname = None
 
     def __init__(self, hostname):

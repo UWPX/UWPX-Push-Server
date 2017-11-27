@@ -35,7 +35,7 @@ if __name__ == '__main__':
     teststr = "<push clientId='sauter.fabian@mailbox.org' pushChannel='https://db5.not ify.windows.com/?token=AwYAAACyXwnMijF375zd8XnwRkbdDuPhdn5ODXFjlTbcLCgqa%2fhH%2bU4kA3JSjlelYJEJ1d0tfqN0HsgIKkyQoBVD%2frK3eOwGSutgqmsyJXEmt9%2bg4O1RrjSH3%2fujvyxvujwLv6nJhOZjxMIDp2o4hjB0jIGt' />"
     parser = XML_Parser(teststr)
     push_dict = parser.pushToTupel()
-    
+
     for x, y in push_dict.items():
         print(x + ": " + y)
     """
