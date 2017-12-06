@@ -11,7 +11,7 @@ class app_Server(raw_Server):
         super(app_Server, self).__init__(hostname, log, 6000)
         self.upgradetoTLS(True)
 
-    def processClient(self, conn):
+    def __processClient(self, conn):
         try:
             input = conn.recv(1024).decode()
         except ConnectionResetError:
@@ -19,11 +19,11 @@ class app_Server(raw_Server):
             return
         try:
             print(input)
-            pros =XML_Parser(input)
+            pros = XML_Parser(input)
             d = pros.pushToTupel()
             print(d)
-            #C = Clientmanager(self.log, "db/client.db")
-            #C.addClient(d)
+            # C = Clientmanager(self.log, "db/client.db")
+            # C.addClient(d)
             conn.sendall(b'<success/>')
         except ExpatError:
             conn.sendall(b'Error empy request')

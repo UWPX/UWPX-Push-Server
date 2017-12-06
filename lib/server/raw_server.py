@@ -27,7 +27,7 @@ class raw_Server(object):
         self.__active = False
         self.log.printMessage("closeing appserver, requested by other class")
 
-    def processClient(self, conn):
+    def __processClient(self, conn):
         raise NotImplementedError("raw_Server isn't ment to be used as standalone")
 
     def upgradetoTLS(self, server):
@@ -49,8 +49,7 @@ class raw_Server(object):
         while self.__active:
             try:
                 conn, addr = self.__sock.accept()
-                Thread(target=self.processClient, args=(conn,)).start()
-
+                Thread(target=self.__processClient, args=(conn,)).start()
             except ssl.SSLError:
                 self.log.printWarning("unecrypted connection, blocked!")
         self.__sock.close()
