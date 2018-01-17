@@ -13,7 +13,6 @@ class XML_Parser(object):
     def pushToTupel(self):
         # Search for tag 'push'
         push = self.xml_dom.getElementsByTagName('push')[0]
-
         var_dict = dict()
         # Write values of attributes to dictionary
         var_dict['client_id'] = push.attributes['clientId'].value

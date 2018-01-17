@@ -56,7 +56,7 @@ class Clientmanager(object):
 
 
 if __name__ == '__main__':
-    pass
+    print("this file is not intended for standalone use")
     """
     manager = Clientmanager(logger = log("test", False), datebaseName="C:\\Users\\Tim\\Documents\\GitKraken\\XMPP-Push\\db\\client.db")
     manager.addClient(wns_id=1234, server="fuck.you.com", token="token", wns_secret = "secret", jabber_id="jabber")
