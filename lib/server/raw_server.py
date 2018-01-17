@@ -17,7 +17,7 @@ class raw_Server(object):
         try:
             self.__sock.bind(('', self.__port))
         except socket.error as e:
-            self.log.printError("server bind on port: "+str(self.__port)+" failed.")
+            self.log.printError("server bind on port: "+str(self.__port) + " failed.")
             exit(-1)
         self.log.printMessage("server sccesfuly binded port: "+str(self.__port))
         self.__sock.listen(10)
@@ -33,9 +33,12 @@ class raw_Server(object):
     def upgradetoTLS(self, server):
         if(server):
             try:
-                self.__sock = ssl.wrap_socket(self.__sock, server_side=True, certfile='cert/rbg.cert', keyfile='cert/rgb.key', ssl_version=ssl.PROTOCOL_TLSv1_2)
+                self.__sock = ssl.wrap_socket(self.__sock, server_side=True, certfile='cert/tls.cert', keyfile='cert/tls.key', ssl_version=ssl.PROTOCOL_TLSv1_2)
             except FileNotFoundError:
                 self.log.printError("cert or keyfile not found terminating!")
+                exit(-1)
+            except ssl.SSLError:
+                self.log.printError("cert or keyfile faulty")
                 exit(-1)
         else:
             self.__context = ssl.create_default_context()
