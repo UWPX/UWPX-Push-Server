@@ -1,5 +1,6 @@
 from __future__ import absolute_import
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Copyright (c) 2012, Dongsheng Cai
 #
@@ -32,11 +33,9 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from io import StringIO
-try:
-    import eventlet
-    requests = eventlet.import_patched('requests.__init__')
-except ModuleNotFoundError:
-    print("should not happen")
+import eventlet
+requests = eventlet.import_patched('requests.__init__')
+
 try:
     register_namespace = ET.register_namespace
 except AttributeError:
@@ -56,10 +55,10 @@ WNSACCESSTOKEN_URL = 'https://login.live.com/accesstoken.srf'
 
 
 class WNSClient():
-    def __init__(self, wnsclientid, wnsclientsecret, timeout = None):
-        self.clientid = wnsclientid
-        self.clientsecret = wnsclientsecret
-        self.timeout = timeout
+    def __init__(self, params):
+        self.clientid = params['wnsclientid']
+        self.clientsecret = params['wnsclientsecret']
+        self.timeout = params['timeout'] if 'timeout' in params else None
         self.tokenexpiry = None
         self.accesstoken = None
 
@@ -194,11 +193,9 @@ class WNSBase(object):
     def send(self, uri, payload):
         """
         Send push message. Input parameters:
-
         uri - channel uri
         payload - message payload (see help for subclasses)
         accesstoken - token
-
         """
         data = self.prepare_payload(payload)
         response = requests.post(uri, headers=self.headers, data=data, timeout=self.timeout)

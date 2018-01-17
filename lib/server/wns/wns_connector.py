@@ -1,4 +1,4 @@
-from lib.server.wns.wnslib import WNSClient
+from wnslib import WNSClient
 from lib.log import log
 from lib.clientmanager import Clientmanager
 
@@ -6,8 +6,8 @@ from lib.clientmanager import Clientmanager
 class wns_connector(object):
     token = None
 
-    def __init__(self, log, clients):
-        self.log = log
+    def __init__(self, logger, clients):
+        self.log = logger
         self.client = clients
         try:
             with open("key.key", "r") as keyFile:

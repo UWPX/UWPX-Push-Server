@@ -4,13 +4,12 @@ from lib.log import log
 
 
 class xmpp_socket(object):
-
-    def __init__(self, hostname, port, log):
+    def __init__(self, hostname, port, logger):
         self.hostname = hostname
         self.port = port
         self.sock = socket.socket(socket.AF_INET)
         self.context = ssl.create_default_context()
-        self.log = log
+        self.log = logger
         self.connect()
 
     def connect(self):
