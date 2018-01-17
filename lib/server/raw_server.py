@@ -36,9 +36,11 @@ class raw_Server(object):
                 self.__sock = ssl.wrap_socket(self.__sock, server_side=True, certfile='cert/tls.cert', keyfile='cert/tls.key', ssl_version=ssl.PROTOCOL_TLSv1_2)
             except FileNotFoundError:
                 self.log.printError("cert or keyfile not found terminating!")
+                self.cleanup()
                 exit(-1)
             except ssl.SSLError:
                 self.log.printError("cert or keyfile faulty")
+                self.cleanup()
                 exit(-1)
         else:
             self.__context = ssl.create_default_context()
@@ -48,6 +50,9 @@ class raw_Server(object):
             self.__sock = self.__context.wrap_socket(self.__sock, server_hostname=self.__hostname)
         return self.__sock
 
+    def cleanup(self):
+        self.__sock.close()
+
     def loop(self):
         while self.__active:
             try:
@@ -55,4 +60,4 @@ class raw_Server(object):
                 Thread(target=self.__processClient, args=(conn,)).start()
             except ssl.SSLError:
                 self.log.printWarning("unecrypted connection, blocked!")
-        self.__sock.close()
+        self.cleanup()
