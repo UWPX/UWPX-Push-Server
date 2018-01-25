@@ -34,7 +34,7 @@ class raw_Server(object):
         if(server):
             try:
                 self.__sock = ssl.wrap_socket(self.__sock, server_side=True, certfile='cert/tls.cert', keyfile='cert/tls.key', ssl_version=ssl.PROTOCOL_TLSv1_2)
-            except FileNotFoundError:
+            except IOError:
                 self.log.printError("cert or keyfile not found terminating!")
                 self.cleanup()
                 exit(-1)

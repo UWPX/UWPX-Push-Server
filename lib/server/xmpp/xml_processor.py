@@ -42,5 +42,4 @@ class xml_generator(object):
                 tempChild2 = doc.createElement(value2)
                 tempChild2.setAttribute("var2", "2222")
                 tempChild.appendChild(tempChild2)
-
         print(doc.toprettyxml())
