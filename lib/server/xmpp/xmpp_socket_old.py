@@ -1,6 +1,5 @@
 import ssl
 import socket
-from lib.log import log
 
 
 class xmpp_socket(object):

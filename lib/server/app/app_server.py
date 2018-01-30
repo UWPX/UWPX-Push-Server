@@ -1,7 +1,5 @@
 from lib.server.raw_server import raw_Server
 from lib.server.xmpp.xml_parser import XML_Parser
-from lib.log import log
-from lib.clientmanager import Clientmanager
 from xml.parsers.expat import ExpatError
 
 

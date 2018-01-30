@@ -1,7 +1,5 @@
 from lib.server.raw_server import raw_Server
-from lib.clientmanager import Clientmanager
 from lib.server.wns.wns_connector import wns_connector
-from lib.log import log
 from lib.server.xmpp import xml_processor
 
 

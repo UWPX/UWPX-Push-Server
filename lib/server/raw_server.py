@@ -1,6 +1,5 @@
 import socket
 import ssl
-from lib.log import log
 from threading import Thread
 
 

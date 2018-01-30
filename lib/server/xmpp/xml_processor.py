@@ -1,4 +1,3 @@
-from lib.log import log
 from xml.dom import minidom
 
 

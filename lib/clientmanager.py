@@ -1,5 +1,4 @@
 import sqlite3
-from lib.log import log
 
 
 class Clientmanager(object):
