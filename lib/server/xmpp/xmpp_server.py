@@ -27,6 +27,7 @@ class xmpp_s2s():
         self.__ownDomain = ownDomain
         self.__log = logger
         self.__sock = socket.socket(socket.AF_INET)
+        self.__hostname = host
         self.__handshake = '<stream:stream xmlns:stream="http://etherx.jabber.org/streams" version="1.0" xmlns="jabber:server" to="'+host+'" from="'+self.__ownDomain+'" xml:lang="en">'
         self.connect(host, 5269)
 
@@ -44,9 +45,15 @@ class xmpp_s2s():
         if self.recvMessage() == "<proceed xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>":
             self.__context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
             self.__context.verify_mode = ssl.CERT_REQUIRED
-            self.context.load_cert_chain(certfile='cert/tls.cert', keyfile='cert/tls.key')
             self.__context.check_hostname = True
-            self.__sock = self.__context.wrap_socket(self.__sock, server_hostname=self.__hostname)
+            self.__context.load_verify_locations("/etc/pki/tls/certs/ca-bundle.crt")
+            self.__context.load_cert_chain(certfile='cert/tls.cert', keyfile='cert/tls.key')
+            self.__context.check_hostname = True
+            try:
+                self.__sock = self.__context.wrap_socket(self.__sock, server_hostname=self.__hostname)
+            except ssl.SSLError:
+                self.__log.printWarning("error with certificat from: "+self.__hostname)
+                raise s2sException("bad certificat")
             self.sendMessage(self.__handshake)
             print(self.recvMessage())
         else:

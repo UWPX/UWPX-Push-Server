@@ -32,7 +32,7 @@ class xmpp_socket(object):
         return temp
 
     def upgradetoTLS(self):
-        self.context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_1)
+        self.context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
         self.context.verify_mode = ssl.CERT_REQUIRED
         self.context.check_hostname = True
         self.context.load_cert_chain(certfile='cert/tls.cert', keyfile='cert/tls.key')
