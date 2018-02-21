@@ -1,4 +1,16 @@
 from xml.dom import minidom
+from xml.parsers.expat import ExpatError
+
+def beautifyXMLString(s):
+    try:
+        return minidom.parseString(s).toprettyxml()
+    except ExpatError:
+        try:
+            return minidom.parseString(s+"</stream:stream>").toprettyxml()
+        except ExpatError:
+            return s
+
+
 
 
 class xml_Processor(object):
