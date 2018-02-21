@@ -12,7 +12,6 @@ class xmpp_server(raw_Server):
         # self.__wnsCon = wns_connector(logger)
 
     def close(self):
-        print(2)
         super.close()
 
     def __processClient(self, conn):
@@ -38,7 +37,7 @@ class xmpp_s2s():
             self.logger.printWarning("couldn't connect to: "+host+":"+port)
             raise s2sException
         self.sendMessage(self.__handshake)
-        print(self.recvMessage())
+        print(xml_processor.beautifyXMLString(self.recvMessage()))
 
     def upgradetoTLS(self):
         self.sendMessage('<starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls"/>')
@@ -55,7 +54,7 @@ class xmpp_s2s():
                 self.__log.printWarning("error with certificat from: "+self.__hostname)
                 raise s2sException("bad certificat")
             self.sendMessage(self.__handshake)
-            print(self.recvMessage())
+            print(xml_processor.beautifyXMLString(self.recvMessage()))
         else:
             self.log.printWarning("Server seems to have problems with TLS")
 
