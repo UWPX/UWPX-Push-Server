@@ -46,7 +46,11 @@ class xmpp_s2s():
             self.__context.verify_mode = ssl.CERT_REQUIRED
             self.__context.check_hostname = True
             self.__context.load_verify_locations("/etc/pki/tls/certs/ca-bundle.crt")
-            self.__context.load_cert_chain(certfile='cert/tls.cert', keyfile='cert/tls.key')
+            try:
+                self.__context.load_cert_chain(certfile='cert/tls.cert', keyfile='cert/tls.key')
+            except (IOError, ssl.SSLError) as e:
+                self.log.printError("cert or keyfile faulty: " + e)
+                raise s2sException(e)
             self.__context.check_hostname = True
             try:
                 self.__sock = self.__context.wrap_socket(self.__sock, server_hostname=self.__hostname)

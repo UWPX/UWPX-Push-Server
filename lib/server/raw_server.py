@@ -44,8 +44,10 @@ class raw_Server(object):
         else:
             self.__context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
             self.__context.verify_mode = ssl.CERT_REQUIRED
-            self.context.load_cert_chain(certfile='cert/tls.cert', keyfile='cert/tls.key')
+            self.__context.load_cert_chain(certfile='cert/tls.cert', keyfile='cert/tls.key')
             self.__context.check_hostname = True
+            self.__context.load_verify_locations("/etc/pki/tls/certs/ca-bundle.crt")
+
             self.__sock = self.__context.wrap_socket(self.__sock, server_hostname=self.__hostname)
         return self.__sock
 
