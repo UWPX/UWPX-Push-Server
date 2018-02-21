@@ -10,7 +10,7 @@ class raw_Server(object):
         self.log = thelog
         self.__port = port
         self.__active = False
-        self.connect()
+
 
     def connect(self):
         try:
@@ -24,13 +24,13 @@ class raw_Server(object):
 
     def close(self):
         self.__active = False
-        self.log.printMessage("closeing appserver, requested by other class")
+        self.log.printMessage("closeing server, requested by other class")
 
     def __processClient(self, conn):
         raise ImplementationError("raw_Server isn't ment to be used as standalone")
 
-    def upgradetoTLS(self, server):
-        if(server):
+    def upgradetoTLS(self):
+        if(self.server):
             try:
                 self.__sock = ssl.wrap_socket(self.__sock, server_side=True, certfile='cert/tls.cert', keyfile='cert/tls.key', ssl_version=ssl.PROTOCOL_TLSv1_2)
             except IOError:
@@ -42,7 +42,6 @@ class raw_Server(object):
                 self.cleanup()
                 exit(-1)
         else:
-            self.__context = ssl.create_default_context()
             self.__context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
             self.__context.verify_mode = ssl.CERT_REQUIRED
             self.context.load_cert_chain(certfile='cert/tls.cert', keyfile='cert/tls.key')

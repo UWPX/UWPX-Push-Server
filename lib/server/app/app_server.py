@@ -7,6 +7,7 @@ class app_Server(raw_Server):
 
     def __init__(self, hostname, log):
         super(app_Server, self).__init__(hostname, log, 6000)
+        self.connect()
         self.upgradetoTLS(True)
 
     def __processClient(self, conn):

@@ -12,6 +12,8 @@
 # proportion of contributors will probably not be using SublimeText
 *.sublime-project
 cert/*
+*.cert
+*.key
 # sftp configuration file
 sftp-config.json
 key.key

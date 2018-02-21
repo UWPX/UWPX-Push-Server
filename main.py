@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 from lib.log import log
 from lib.server.xmpp.xmpp_server import xmpp_server
 from lib.server.app.app_server import app_Server
@@ -17,4 +17,7 @@ def main():
 
 
 if __name__ == '__main__':
+    from lib.server.raw_server import raw_Server
+    r = raw_Server("localhost", log("", False), 3333)
+    r.__processClient(None)
     main()
