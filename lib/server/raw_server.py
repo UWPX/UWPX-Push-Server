@@ -11,7 +11,6 @@ class raw_Server(object):
         self.__port = port
         self.__active = False
 
-
     def connect(self):
         try:
             self.__sock.bind(('', self.__port))
