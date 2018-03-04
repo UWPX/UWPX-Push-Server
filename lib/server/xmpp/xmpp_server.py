@@ -1,6 +1,5 @@
 from lib.server.raw_server import raw_Server
-from lib.server.wns.wns_connector import wns_connector
-from lib.server.xmpp import xml_processor
+from lib.server.xmpp.xml.xml_processor import xml_processor
 import socket
 import ssl
 
@@ -28,6 +27,7 @@ class xmpp_s2s():
         self.__sock = socket.socket(socket.AF_INET)
         self.__hostname = host
         self.__handshake = '<stream:stream xmlns:stream="http://etherx.jabber.org/streams" version="1.0" xmlns="jabber:server" to="'+host+'" from="'+self.__ownDomain+'" xml:lang="en">'
+        print(xml_processor.beautifyXMLString(self.__handshake))
         self.connect(host, 5269)
 
     def connect(self, host, port):
@@ -60,7 +60,7 @@ class xmpp_s2s():
             self.sendMessage(self.__handshake)
             print(xml_processor.beautifyXMLString(self.recvMessage()))
         else:
-            self.log.printWarning("Server seems to have problems with TLS")
+            self.__log.printWarning("Server seems to have problems with TLS")
 
     def close(self):
         self.sendMessage("</stream:stream>")
@@ -71,7 +71,13 @@ class xmpp_s2s():
         self.__sock.send(message.encode())
 
     def recvMessage(self):
-        return self.__sock.recv(4096).decode()
+        var = self.__sock.recv(4096).decode()
+        if var == "</stream:stream>":
+            self.__sock.close()
+            self.__log.printWarning("session closed by server: "+self.__hostname)
+            raise s2sException("session closed")
+        else:
+            return self.__sock.recv(4096).decode()
 
 
 class s2sException(Exception):

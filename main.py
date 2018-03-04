@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 from lib.log import log
 from lib.server.xmpp.xmpp_server import xmpp_server
 from lib.server.app.app_server import app_Server

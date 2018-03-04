@@ -16,6 +16,10 @@ class xml_Processor(object):
     def __init__(self, logger, serverAddr):
         self.log = logger
         self.serverAddr = serverAddr
+        self.__xeps = list()
+
+    def appendXEP(self, xep):
+        self.__xeps.append(xep)
 
     def sessionEncrytable(xml):
         return True
