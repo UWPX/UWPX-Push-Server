@@ -17,7 +17,7 @@ def main():
 
 
 if __name__ == '__main__':
-    from lib.server.raw_server import raw_Server
+    from lib.server.raw_server import 
     r = raw_Server("localhost", log("", False), 3333)
     r.__processClient(None)
     main()
