@@ -27,6 +27,10 @@ class XML_Parser(object):
         # tupel body: see clientmanager.py
 
 
+class XML_Parser_v2 (XML_Parser):
+    pass
+
+
 if __name__ == '__main__':
     pass
 

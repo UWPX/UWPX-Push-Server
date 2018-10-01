@@ -1,4 +1,5 @@
 import sqlite3
+from typing import Tuple
 
 
 class Clientmanager(object):
@@ -6,7 +7,7 @@ class Clientmanager(object):
     connection = None
     cursor = None
 
-    def __init__(self, logger, datebaseName):
+    def __init__(self, logger, datebaseName: str) -> None:
         self.log = logger
         try:
             self.connection = sqlite3.connect(datebaseName)
@@ -15,43 +16,45 @@ class Clientmanager(object):
             self.log.printError("Connection to database couldn't be established!")
             exit(-1)
 
-    def closeConncection(self):
+    def closeConncection(self) -> None:
         try:
             self.connection.close()
         except:
             self.log.printError("Connection to database couldn't be closed!")
 
-    def commitChanges(self):
+    def commitChanges(self) -> None:
         try:
             self.connection.commit()
         except:
             self.log.printError("Couldn't commit (save) changes in database!")
 
-    def addClient(self, inputTupel):
+    def addClient(self, inputTupel: Tuple[str, str, str, str, str]) -> None:
         try:
             self.cursor.execute("INSERT OR REPLACE INTO Client VALUES (?, ?, ?, ?, ?)", inputTupel)
             # tupel body: (wns_id, server, token, wns_secret, jabber_id)
         except:
             self.log.printError("Couldn't write new entry to database")
 
-    def readClientData(self, wns_id):
+    def readClientData(self, wns_id: str)-> Tuple:
         try:
             return self.cursor.execute("SELECT * FROM Client WHERE wns_id= ?", (wns_id, )).fetchone()
         except:
             self.log.printError("Couldn't get data from Database!")
+            raise Exception
 
-    def deleteClient(self, wns_id):
+    def deleteClient(self, wns_id: str) -> None:
         try:
             self.cursor.execute("DELETE FROM Client WHERE wns_id = (?)", (wns_id, ))
             # if not working check without brakket sourrnding of questionmark
         except:
             self.log.printError("Database entry couldn't be deleted!")
 
-    def getWnsSecret(self, wns_id):
+    def getWnsSecret(self, wns_id: str) -> str:
         try:
             return self.cursor.execute("SELECT wns_secret FROM Client WHERE wns_id= ?", (wns_id, )).fetchone()[0]
         except:
             self.log.printError("Couldn't get wns_secret from Database!")
+            raise Exception
 
 
 if __name__ == '__main__':

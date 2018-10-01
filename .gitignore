@@ -77,3 +77,6 @@ target/
 
 #local protoypes
 *_prot.py
+
+#ignore mypy folder
+.mypy_cache/*
