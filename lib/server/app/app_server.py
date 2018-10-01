@@ -1,16 +1,16 @@
 from lib.server.raw_server import raw_Server
-from lib.server.xmpp.xml_parser import XML_Parser
+from lib.server.xmpp.xml.xml_parser import XML_Parser
 from xml.parsers.expat import ExpatError
 
 
 class app_Server(raw_Server):
 
-    def __init__(self, hostname, log):
+    def __init__(self, hostname, log) -> None:
         super(app_Server, self).__init__(hostname, log, 6000)
         self.connect()
         self.upgradetoTLS(True)
 
-    def __processClient(self, conn):
+    def __processClient(self, conn) -> None:
         try:
             input = conn.recv(1024).decode()
         except ConnectionResetError:
