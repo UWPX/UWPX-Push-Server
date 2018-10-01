@@ -39,7 +39,7 @@ class log(object):
         if self.__doLog:
             self.__writetoFile(message)
 
-    def printMessagke(self, theMessage: str) -> None:
+    def printMessage(self, theMessage: str) -> None:
         message = self.__getTime() + "\t[MESSAGE]\t" + theMessage
         print(message)
         if self.__doLog:
