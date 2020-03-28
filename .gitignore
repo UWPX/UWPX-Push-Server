@@ -75,8 +75,11 @@ docs/_build/
 # PyBuilder
 target/
 
-#local protoypes
+# local protoypes
 *_prot.py
 
-#ignore mypy folder
+# ignore mypy folder
 .mypy_cache/*
+
+# WNS credentials
+# credentials.py
