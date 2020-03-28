@@ -82,4 +82,4 @@ target/
 .mypy_cache/*
 
 # WNS credentials
-# credentials.py
+credentials.py
