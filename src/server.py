@@ -52,7 +52,8 @@ class Server:
         self.tcpServer.requestStop()
         self.tcpServer.removeValidMessageReceivedCallback(self.__onValidMessageReceived)
         self.tcpServer.join()
-        self.db.close()
+        self.db.requestStop()
+        self.db.join()
         print("Server stopped.")
     
     def __updateChannelUri(self, channelUri: str, deviceId: str):
