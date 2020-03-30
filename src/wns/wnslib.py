@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import requests
 from typing import Dict, Any, Optional
 

@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
 from enum import Enum
-from wns import WNSClient
-from tcpServer import TcpServer
+from wns.wnslib import WNSClient
+from wns.credentials import CLIENT_SECRET, PACKET_ID
+from tcp.tcpServer import TcpServer
 from typing import Dict, Any
-from credentials import CLIENT_SECRET, PACKET_ID
 
 class ServerState(Enum):
     NOT_RUNNING = 0
@@ -39,6 +39,7 @@ class Server:
 
     def stop(self):
         print("Stopping the server...")
-        self.tcpServer.stop()
+        self.tcpServer.requestStop()
+        self.tcpServer.join()
         print("Server stopped.")
         
