@@ -40,14 +40,18 @@ class Server:
             print("Unable to start the server - already running. State: {} ".format(self.state))
             return
         print("Starting the server...")
+        # DB
         self.db.start()
+
+        # TCP:
         self.tcpServer.registerValidMessageReceivedCallback(self.__onValidMessageReceived)
         self.tcpServer.start()
-        
-        # self.wnsClient.requestToken()
-        # print("Token requested.")
-        # channelUrl: str = "https://am3p.notify.windows.com/?token=AwYAAACZOIJlnEQfx5r8GKGyA6SAGFoK4RAKMGxo%2bab9tZg4F7g1cCOr4tpODbBwaIiMuWlFtHVDqX1Zk%2f0gF2VlAAOeVacebP5wKsY4Er%2bq5%2fEpOjkYJiKc4%2fdjkX40F%2fvYNCHAD28MwO7Zv3auzmQ1%2f8UC"
-        # self.wnsClient.sendRawNotification(channelUrl, "Some test content!")
+
+        # WNS:
+        if self.wnsClient.requestToken():
+            print("WNS token requested successfully.")
+        else:
+            print("WNS token requested failed.")
 
         print("Server started.")
 
@@ -59,10 +63,11 @@ class Server:
         self.db.requestStop()
         self.db.join()
         print("Server stopped.")
-    
+
     def __updateChannelUri(self, deviceId: str, channelUri: str):
         self.db.updateChannelUri(deviceId, channelUri, datetime.now())
         print("Channel URI set for 'device' {} to: {}".format(deviceId, channelUri))
+        self.wnsClient.sendRawNotification(channelUri, "Channel URI set")
         pass
 
     def __updatePushDevices(self, deviceId: str, accounts: List[str], sock:socket):
@@ -75,10 +80,11 @@ class Server:
             accountsResponse.append(account, pAcc.node, pAcc.secret)
 
         # Update the DB:
-        
+        self.db.updatePushAccounts(deviceId, accountsResult)
 
         # Send the success response:
         self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(accountsResponse)), sock)
+        print("Set {} push device(s) for device '{}'.".format(len(accountsResult), deviceId))
 
     # Handle all incoming messages:
     def __onValidMessageReceived(self, msg: AbstractMessage, sock: socket):
@@ -88,5 +94,4 @@ class Server:
         if isinstance(msg, SetPushAccountsMessage):
             self.__updatePushDevices(msg.deviceId, msg.accounts, sock)
         else:
-            self.tcpServer.respondClientWithErrorMessage("Unsupported message typ.", sock)
-        
+            self.tcpServer.respondClientWithErrorMessage("Unsupported message type.", sock)

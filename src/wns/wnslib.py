@@ -76,14 +76,14 @@ class WNSClient:
         print("Successfully requested a new WNS token.")
         return True
 
-    def sendRawNotification(self, channelUrl, content: str):
+    def sendRawNotification(self, channelUri, content: str):
         print("Sending raw notification...")
         # https://docs.microsoft.com/en-us/previous-versions/windows/apps/hh465435(v=win.10)#request-parameters
         headers: Dict[str, str] = {"X-WNS-Type": "wns/raw",
                                    "X-WNS-RequestForStatus": "true",
                                    "Content-Type": "application/octet-stream",
                                    "Authorization": self.token.toAuthorizationString()}
-        response: requests.Response = requests.post(url = channelUrl, headers = headers, data = content)
+        response: requests.Response = requests.post(url = channelUri, headers = headers, data = content)
 
         if response.status_code != 200:
             print("Sending a raw notification failed. Status code: {}".format(response.status_code))
