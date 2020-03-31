@@ -107,17 +107,18 @@ On success the server returns a success message, including a `node` and `secret`
 ## What the push server stores
 The push server stores the following information persistentend.
 
-| `device_id` | `channel_uri` | `time_stamp` |
+| `deviceId` | `channelUri` | `timeStamp` |
 |:-:|:-:|:-:|
 | 32709957262332954093 | ms-app://s-1-15-2-3598129719-3378870262-4208132049-182512184-2493220926-1891298429-4035237700 | 2020-03-31T02:51:53Z |
 
-The `time_stamp` column represents a UTC timestamp when the entry last has been updated.
+The `timeStamp` column represents a UTC timestamp when the entry last has been updated.
 This allows the server to invalidate and remove outdated entries.
-| `device_id` | `bare_jid_hash` | `domain_part` | `node` | `secret` |
+
+| `deviceId` | `bareJidHash` | `domainPart` | `node` | `secret` |
 |:-:|:-:|:-:|:-:|:-:|
 | 32709957262332954093 | 2e8d751fee8e5fb8b8662f60a431a8246c946180f1b0572de136c28d279101a1 | xmpp.uwpx.org | 773bds9nf932 | sdf/82h)=1 |
 
-The `bare_jid_hash` column represents the bare JID (e.g. someClient@xmpp.uwpx.org ) hashed using SHA-256 with the `device-id` (e.g. 32709957262332954093) as salt.
+The `bareJidHash` column represents the bare JID (e.g. someClient@xmpp.uwpx.org ) hashed using SHA-256 with the `deviceId` (e.g. 32709957262332954093) as salt.
 
 ## What the app server sends via the WNS to the client
 

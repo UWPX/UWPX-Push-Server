@@ -1,5 +1,6 @@
 import json
 from tcp.messages.SetChannelUriMessage import SetChannelUriMessage
+from tcp.messages.SetPushAccountsMessage import SetPushAccountsMessage
 from typing import Any
 
 def parseJson(jsonObj: Any):
@@ -7,6 +8,8 @@ def parseJson(jsonObj: Any):
 
     if action == SetChannelUriMessage.ACTION:
         return SetChannelUriMessage(jsonObj)
+    elif action == SetPushAccountsMessage.ACTION:
+        return SetPushAccountsMessage(jsonObj)
 
     print("Unknown message received: {}".format(jsonObj))
     return None

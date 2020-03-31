@@ -4,13 +4,17 @@ from enum import Enum
 from wns.wnslib import WNSClient
 from wns.credentials import CLIENT_SECRET, PACKET_ID
 from tcp.tcpServer import TcpServer
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 from socket import socket
 from tcp.messages.AbstractMessage import AbstractMessage
 from tcp.messages.SetChannelUriMessage import SetChannelUriMessage
 from tcp.messages.ErrorResponseMessage import ErrorResponseMessage
 from tcp.messages.SuccessResponseMessage import SuccessResponseMessage
+from tcp.messages.SetPushAccountsMessage import SetPushAccountsMessage
+from tcp.messages.SuccessSetPushAccountsMessage import SuccessSetPushAccountsMessage
 from db.dbManager import DbManager
+from datetime import datetime
+from PushAccount import PushAccount
 
 class ServerState(Enum):
     NOT_RUNNING = 0
@@ -56,15 +60,33 @@ class Server:
         self.db.join()
         print("Server stopped.")
     
-    def __updateChannelUri(self, channelUri: str, deviceId: str):
-        self.db.updateChannelUri(channelUri, deviceId)
+    def __updateChannelUri(self, deviceId: str, channelUri: str):
+        self.db.updateChannelUri(deviceId, channelUri, datetime.now())
         print("Channel URI set for 'device' {} to: {}".format(deviceId, channelUri))
         pass
 
+    def __updatePushDevices(self, deviceId: str, accounts: List[str], sock:socket):
+        accountsResult: List[PushAccount] = list()
+        accountsResponse: List[Tuple[str, str, str]] = list()
+        for account in accounts:
+            pAcc: PushAccount = PushAccount(deviceId)
+            pAcc.generate(account)
+            accountsResult.append(pAcc)
+            accountsResponse.append(account, pAcc.node, pAcc.secret)
+
+        # Update the DB:
+        
+
+        # Send the success response:
+        self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(accountsResponse)), sock)
+
+    # Handle all incoming messages:
     def __onValidMessageReceived(self, msg: AbstractMessage, sock: socket):
         if isinstance(msg, SetChannelUriMessage):
-            self.__updateChannelUri(msg.channelUri, msg.deviceId)
+            self.__updateChannelUri(msg.deviceId, msg.channelUri)
             self.tcpServer.respondClientWithSuccessMessage(sock)
+        if isinstance(msg, SetPushAccountsMessage):
+            self.__updatePushDevices(msg.deviceId, msg.accounts, sock)
         else:
             self.tcpServer.respondClientWithErrorMessage("Unsupported message typ.", sock)
         
