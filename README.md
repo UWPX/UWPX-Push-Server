@@ -1,10 +1,11 @@
 # XMPP-Push Server
 This is the push server for XMPP client [UWPX](https://github.com/UWPX/UWPX-Client).
-I based my implementation roughly on the [Conversations Push Proxy](https://github.com/iNPUTmice/p2) from [@iNPUTmice](https://github.com/iNPUTmice).
+I based my implementation roughly on the [Conversations Push Proxy](https://github.com/iNPUTmice/p2) by [@iNPUTmice](https://github.com/iNPUTmice).
 
 ## Terminology
  * `push server`: The [UWPX](https://github.com/UWPX/UWPX-Client) push server (this magic piece of software).
  * `user's XMPP server`: The XMPP server of the user.
+ * `client`: The device running [UWPX](https://github.com/UWPX/UWPX-Client).
 
 ## Protocol
 The following protocol is used to register and send [XEP-0357: Push Notifications](https://xmpp.org/extensions/xep-0357.html) to devices running [UWPX](https://github.com/UWPX/UWPX-Client).  
