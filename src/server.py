@@ -12,6 +12,7 @@ from tcp.messages.ErrorResponseMessage import ErrorResponseMessage
 from tcp.messages.SuccessResponseMessage import SuccessResponseMessage
 from tcp.messages.SetPushAccountsMessage import SetPushAccountsMessage
 from tcp.messages.SuccessSetPushAccountsMessage import SuccessSetPushAccountsMessage
+from tcp.messages.RequestTestPushMessage import RequestTestPushMessage
 from db.dbManager import DbManager
 from datetime import datetime
 from PushAccount import PushAccount
@@ -86,12 +87,17 @@ class Server:
         self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(accountsResponse)), sock)
         print("Set {} push device(s) for device '{}'.".format(len(accountsResult), deviceId))
 
+    def __sendTestPush(self, deviceId: str, sock: socket):
+        pass
+
     # Handle all incoming messages:
     def __onValidMessageReceived(self, msg: AbstractMessage, sock: socket):
         if isinstance(msg, SetChannelUriMessage):
             self.__updateChannelUri(msg.deviceId, msg.channelUri)
             self.tcpServer.respondClientWithSuccessMessage(sock)
-        if isinstance(msg, SetPushAccountsMessage):
+        elif isinstance(msg, SetPushAccountsMessage):
             self.__updatePushDevices(msg.deviceId, msg.accounts, sock)
+        elif isinstance(msg, RequestTestPushMessage):
+            self.__sendTestPush(msg.deviceId, sock)
         else:
             self.tcpServer.respondClientWithErrorMessage("Unsupported message type.", sock)

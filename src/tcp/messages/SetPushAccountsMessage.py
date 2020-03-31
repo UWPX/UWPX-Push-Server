@@ -2,7 +2,7 @@ from tcp.messages.AbstractMessage import AbstractMessage
 from typing import Any, List, Dict
 
 class SetPushAccountsMessage(AbstractMessage):
-    ACTION: str = "set_accounts"
+    ACTION: str = "set_push_accounts"
 
     deviceId: str
     accounts: List[str]
