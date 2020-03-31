@@ -33,10 +33,13 @@ class DbManager(Thread):
                 sleep(0.2)
                 continue
             item = self.q.get(True, 0)
-            if item[1]:
-                c.execute(item[0], item[1])
-            else:
-                c.execute(item[0])
+            try:
+                if item[1]:
+                    c.execute(item[0], item[1])
+                else:
+                    c.execute(item[0])
+            except Exception as e:
+                print("Failed to execute DB statement. Exception: {}".format(e))
         self.con.close()
         print("DB thread stopped.")
 
