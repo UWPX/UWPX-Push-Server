@@ -26,7 +26,7 @@ Without this identifier, it wouldn't be possible to update/remove push channels 
 {
 	"version": 1,
 	"action": "set_channel_uri",
-	"device_id": "32709957262332954093",
+	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
 	"channel_uri": "ms-app://s-1-15-2-3598129719-3378870262-4208132049-182512184-2493220926-1891298429-4035237700"
 }
 ```
@@ -60,7 +60,7 @@ This ensures, the client only receives notifications for those devices, that are
 {
 	"version": 1,
 	"action": "set_accounts",
-	"device_id": "32709957262332954093",
+	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
 	"accounts": [
 		{
 			"bare_jid": "someClient@xmpp.uwpx.org"
@@ -109,17 +109,35 @@ The push server stores the following information persistentend.
 
 | `deviceId` | `channelUri` | `timeStamp` |
 |:-:|:-:|:-:|
-| 32709957262332954093 | ms-app://s-1-15-2-3598129719-3378870262-4208132049-182512184-2493220926-1891298429-4035237700 | 2020-03-31T02:51:53Z |
+| 5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b | ms-app://s-1-15-2-3598129719-3378870262-4208132049-182512184-2493220926-1891298429-4035237700 | 2020-03-31T02:51:53Z |
 
 The `timeStamp` column represents a UTC timestamp when the entry last has been updated.
 This allows the server to invalidate and remove outdated entries.
 
 | `deviceId` | `bareJidHash` | `domainPart` | `node` | `secret` |
 |:-:|:-:|:-:|:-:|:-:|
-| 32709957262332954093 | 2e8d751fee8e5fb8b8662f60a431a8246c946180f1b0572de136c28d279101a1 | xmpp.uwpx.org | 773bds9nf932 | sdf/82h)=1 |
+| 5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b | e5397e96c6ff4d629ab9f203eec3ff17c777b2127cf1b41005e54877487ba982 | xmpp.uwpx.org | 773bds9nf932 | sdf/82h)=1 |
 
-The `bareJidHash` column represents the bare JID (e.g. someClient@xmpp.uwpx.org ) hashed using SHA-256 with the `deviceId` (e.g. 32709957262332954093) as salt.
+The `bareJidHash` column represents the bare JID (e.g. someClient@xmpp.uwpx.org ) hashed using SHA-256 with the `deviceId` (e.g. 5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b) as salt.
 
 ## What the app server sends via the WNS to the client
 
 ## What the user's XMPP server sends to the app server
+
+## Dependencies
+* [Peewee](https://github.com/coleifer/peewee) is a simple and small ORM. It has few (but expressive) concepts, making it easy to learn and intuitive to use. It allows the push server to interact with the sqlite3 DB from multiple threads.
+
+## Installation
+```BASH
+$ pip3 install --user -r requirements.txt
+```
+
+## Execution
+### Start
+```BASH
+$ cd src/
+$ python3 main.py
+```
+
+### Stop
+`Ctrl + C`

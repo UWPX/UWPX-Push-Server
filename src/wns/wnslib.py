@@ -1,5 +1,6 @@
 import requests
 from typing import Dict, Any, Optional
+from datetime import datetime, timedelta, timezone
 
 class WNSTokenParseException(Exception):
     field: str
@@ -10,6 +11,7 @@ class WNSTokenParseException(Exception):
 class WNSToken:
     tokenType: str
     token: str
+    # Seconds. Usually 24 hours.
     expiresIn: int
 
     def __init__(self, tokenType: str, token: str, expiresIn: int):
@@ -20,8 +22,11 @@ class WNSToken:
     def toAuthorizationString(self):
         return "{} {}".format(self.tokenType, self.token)
 
-    @staticmethod
-    def fromResponse(response: requests.Response):
+    def getExpireDateUtc(self):
+        return datetime.now(timezone.utc) + timedelta(seconds=self.expiresIn)
+
+    @classmethod
+    def fromResponse(cls, response: requests.Response):
         data: Any = response.json()
         if not "token_type" in data:
             raise WNSTokenParseException("token_type")
