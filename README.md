@@ -74,11 +74,13 @@ This ensures, the client only receives notifications for those devices, that are
 
 #### Success: Server -> Client
 On success the server returns a success message, including a `node` and `secret` attribute for each account.
+It also includes a `push_bare_jid` field, which represents the bare JID of the push server.
 ```JSON
 {
 	"version": 1,
 	"action": "response",
 	"status": 1,
+	"push_bare_jid": "push@xmpp.uwpx.org",
 	"accounts": [
 		{
 			"bare_jid": "someClient@xmpp.uwpx.org",

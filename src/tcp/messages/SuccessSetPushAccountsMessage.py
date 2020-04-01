@@ -2,17 +2,18 @@ from tcp.messages.SuccessResponseMessage import SuccessResponseMessage
 from typing import Any, List, Dict, Tuple
 
 class SuccessSetPushAccountsMessage(SuccessResponseMessage):
-    deviceId: str
+    pushBareJid: str
     # List of accounts where each account has a 'bare_jid', 'node' and 'secret'
     accounts: List[Tuple[str, str, str]]
 
-    def __init__(self, accounts: List[Tuple[str, str, str]]):
+    def __init__(self, pushBareJid: str, accounts: List[Tuple[str, str, str]]):
         super(SuccessSetPushAccountsMessage, self).__init__()
+        self.pushBareJid = pushBareJid
         self.accounts = accounts
 
     def _fromJson(self, jsonObj: Any):
         super()._fromJson(jsonObj)
-        self.deviceId = jsonObj["device_id"]
+        self.pushBareJid = jsonObj["push_bare_jid"]
 
         self.accounts = list()
         jsonAccountsObj: Any = jsonObj["accounts"]
@@ -22,7 +23,7 @@ class SuccessSetPushAccountsMessage(SuccessResponseMessage):
 
     def _toJson(self):
         jsonObj: Any = super()._toJson()
-        jsonObj["device_id"] = self.deviceId
+        jsonObj["push_bare_jid"] = self.pushBareJid
 
         jsonAccountsObj: List[Dict[str, Any]] = list()
         for account in self.accounts:

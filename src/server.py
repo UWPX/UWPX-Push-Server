@@ -92,7 +92,7 @@ class Server:
             accountsResponse.append(account, pAcc.node, pAcc.secret)
 
         # Send the success response:
-        self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(accountsResponse)), sock)
+        self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage("push@xmpp.uwpx.org", accountsResponse)), sock)
         print("Set {} push device(s) for device '{}'.".format(len(accountsResult), deviceId))
 
     def __sendTestPush(self, deviceId: str, sock: socket):
