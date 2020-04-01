@@ -13,7 +13,7 @@ from tcp.messages.SuccessResponseMessage import SuccessResponseMessage
 from tcp.messages.SetPushAccountsMessage import SetPushAccountsMessage
 from tcp.messages.SuccessSetPushAccountsMessage import SuccessSetPushAccountsMessage
 from tcp.messages.RequestTestPushMessage import RequestTestPushMessage
-from db.dbManager import ChannelUri, PushAccount, WNSToken, initDb
+from db.dbManager import ChannelUri, PushAccount, WNSTokenModel, initDb
 from peewee import DoesNotExist
 from datetime import datetime, timezone, timedelta
 
@@ -47,11 +47,12 @@ class Server:
         self.tcpServer.start()
 
         # WNS:
-        if self.__shouldRequestWnsToken():
+        self.wnsClient.loadTokenFromDb()
+        if self.wnsClient.isTokenExpired():
             print("Requesting a new WNS token...")
             if self.wnsClient.requestToken():
-                WNSToken.truncate_table()
-                WNSToken.create(token=self.wnsClient.token.token, expires=self.wnsClient.token.getExpireDateUtc())
+                WNSTokenModel.truncate_table()
+                self.wnsClient.token.toWNSTokenModel().save()
                 print("WNS token requested successfully.")
             else:
                 print("WNS token requested failed.")
@@ -59,20 +60,6 @@ class Server:
             print("No need to request a new WNS token.")
 
         print("Server started.")
-
-    def __shouldRequestWnsToken(self):
-        token: Optional[WNSToken] = None
-        try:
-            token: WNSToken = WNSToken.get_by_id(1)
-        except DoesNotExist:
-            print("No WNS token found.")
-            return True
-        return self.__isWnsTokenExpired(token)
-    
-    def __isWnsTokenExpired(self, token: WNSToken):
-        date = datetime.now(timezone.utc)
-        date += timedelta(hours=2) # Two hours backup before a token expires
-        return token.expires <= date
 
     def stop(self):
         print("Stopping the server...")
@@ -82,13 +69,14 @@ class Server:
         print("Server stopped.")
 
     def __updateChannelUri(self, deviceId: str, channelUri: str, sock: socket):
-        ChannelUri.replace(deviceId=deviceId, channelUri=channelUri)
+        ChannelUri.replace(deviceId=deviceId, channelUri=channelUri).execute()
         self.tcpServer.respondClientWithSuccessMessage(sock)
         print("Channel URI set for 'device' {} to: {}".format(deviceId, channelUri))
 
     def __updatePushDevices(self, deviceId: str, accounts: List[str], sock:socket):
-        channelUri = ChannelUri.get(ChannelUri.deviceId == deviceId)
-        if not channelUri:
+        try:
+            channelUri = ChannelUri.get(ChannelUri.deviceId == deviceId)
+        except DoesNotExist:
             print("Update push for unknown device id.")
             self.tcpServer.respondClientWithErrorMessage("Device id unknown.", sock)
             return
@@ -108,12 +96,14 @@ class Server:
         print("Set {} push device(s) for device '{}'.".format(len(accountsResult), deviceId))
 
     def __sendTestPush(self, deviceId: str, sock: socket):
-        channelUri = ChannelUri.get(ChannelUri.deviceId == deviceId)
-        if not channelUri:
+        try:
+            channelUri = ChannelUri.get(ChannelUri.deviceId == deviceId)
+        except DoesNotExist:
             print("Test push for unknown device id.")
             self.tcpServer.respondClientWithErrorMessage("Device id unknown.", sock)
             return
         self.wnsClient.sendRawNotification(channelUri.channelUri, "Test push notification from your push server.")
+        print("Test push notification send to: {}" + channelUri.channelUri)
 
     # Handle all incoming messages:
     def __onValidMessageReceived(self, msg: AbstractMessage, sock: socket):

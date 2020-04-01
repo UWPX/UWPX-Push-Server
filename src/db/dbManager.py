@@ -30,9 +30,10 @@ class PushAccount(BaseModel):
     secret: CharField = CharField(null=False)
 
 
-class WNSToken(BaseModel):
+class WNSTokenModel(BaseModel):
     token: CharField = CharField(unique=True)
-    expires: DateTimeField(default=datetime.now(timezone.utc))
+    tokenType: CharField = CharField(unique=True)
+    expires: DateTimeField(default=datetime.now(timezone.utc), null=False)
 
     @classmethod
     def createFrom(cls, channelUri: ChannelUri, bareJid: str):
@@ -57,5 +58,5 @@ class WNSToken(BaseModel):
 def initDb():
     print("Initalizing the DB...")
     db.connect()
-    db.create_tables([ChannelUri, PushAccount, WNSToken])
+    db.create_tables([ChannelUri, PushAccount, WNSTokenModel])
     print("DB initialized.")

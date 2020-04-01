@@ -83,3 +83,4 @@ target/
 
 # WNS credentials
 credentials.py
+*.db

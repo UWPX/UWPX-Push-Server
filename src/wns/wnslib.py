@@ -1,6 +1,8 @@
 import requests
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta, timezone
+from db.dbManager import WNSTokenModel
+from peewee import DoesNotExist
 
 class WNSTokenParseException(Exception):
     field: str
@@ -11,19 +13,26 @@ class WNSTokenParseException(Exception):
 class WNSToken:
     tokenType: str
     token: str
-    # Seconds. Usually 24 hours.
-    expiresIn: int
+    expires: datetime
 
-    def __init__(self, tokenType: str, token: str, expiresIn: int):
+    def __init__(self, tokenType: str, token: str, expires: datetime):
         self.tokenType = tokenType
         self.token = token
-        self.expiresIn = expiresIn
+        self.expires = expires
 
     def toAuthorizationString(self):
         return "{} {}".format(self.tokenType, self.token)
 
-    def getExpireDateUtc(self):
-        return datetime.now(timezone.utc) + timedelta(seconds=self.expiresIn)
+    @classmethod
+    def getExpireDateUtc(cls, expiresInSeconds: int):
+        return datetime.now(timezone.utc) + timedelta(seconds=expiresInSeconds)
+
+    def toWNSTokenModel(self):
+        return WNSTokenModel.create(token=self.token, tokenType=self.tokenType, expires=self.expires)
+
+    @classmethod
+    def fromWNSTokenModel(cls, tokenModel: WNSTokenModel):
+        return WNSToken(tokenModel.tokenType, tokenModel.token, tokenModel.expires)
 
     @classmethod
     def fromResponse(cls, response: requests.Response):
@@ -42,11 +51,11 @@ class WNSToken:
             raise WNSTokenParseException("expires_in")
 
         try:
-            expiresIn: int = int(data["expires_in"])
+            expiresInSeconds: int = int(data["expires_in"])
         except ValueError:
             raise WNSTokenParseException("expires_in")
 
-        return WNSToken(tokenType, token, expiresIn)
+        return WNSToken(tokenType, token, WNSToken.getExpireDateUtc(expiresInSeconds))
 
 class WNSClient:
     REQUEST_TOKEN_URL: str = "https://login.live.com/accesstoken.srf"
@@ -60,6 +69,18 @@ class WNSClient:
         self.clientSecret = clientSecret
         self.token = None
     
+    def loadTokenFromDb(self):
+        try:
+            self.token = WNSToken.fromWNSTokenModel(WNSTokenModel.get_by_id(1))
+            print("WNS token successfully loaded.")
+        except DoesNotExist:
+            self.token = None
+            print("No WNS token found.")
+
+    def isTokenExpired(self):
+        # A two hours backup window before the token expires:
+        return self.token is None or self.token.expires <= (datetime.now(timezone.utc) + timedelta(hours=2))
+
     # https://docs.microsoft.com/en-us/previous-versions/windows/apps/hh465435(v=win.10)
     def requestToken(self):
         data: Dict[str, str] = {"grant_type": "client_credentials",
