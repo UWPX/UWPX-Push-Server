@@ -15,6 +15,7 @@ from tcp.messages.RequestTestPushMessage import RequestTestPushMessage
 from db.dbManager import ChannelUri, PushAccount, WNSTokenModel, initDb
 from peewee import DoesNotExist
 from datetime import datetime, timezone, timedelta
+from xmpp.xmppClient import XmppClient
 
 
 class ServerState(Enum):
@@ -26,15 +27,17 @@ class ServerState(Enum):
 
 class Server:
     __state: ServerState
+    config: Any
     wnsClient: WNSClient
     tcpServer: TcpServer
-    config: Any
+    xmppClient: XmppClient
 
     def __init__(self, config: Any):
         self.config = config
         self.__state = ServerState.NOT_RUNNING
         self.wnsClient = WNSClient(config["wns"]["packet_id"], config["wns"]["client_secret"])
         self.tcpServer = TcpServer(config["tcp"]["port"])
+        self.xmppClient: XmppClient = XmppClient(config["xmpp"]["bare_jid"], config["xmpp"]["password"])
 
     def start(self):
         if self.__state != ServerState.NOT_RUNNING and self.state != ServerState.ERROR:
@@ -42,11 +45,7 @@ class Server:
             return
         print("Starting the server...")
         # DB
-        initDb()
-
-        # TCP:
-        self.tcpServer.registerValidMessageReceivedCallback(self.__onValidMessageReceived)
-        self.tcpServer.start()
+        initDb()        
 
         # WNS:
         self.wnsClient.loadTokenFromDb()
@@ -63,11 +62,20 @@ class Server:
 
         print("Server started.")
 
+        # TCP:
+        self.tcpServer.registerValidMessageReceivedCallback(self.__onValidMessageReceived)
+        self.tcpServer.start()
+
+        # XMPP client:
+        self.xmppClient.start()
+
     def stop(self):
         print("Stopping the server...")
         self.tcpServer.requestStop()
         self.tcpServer.removeValidMessageReceivedCallback(self.__onValidMessageReceived)
         self.tcpServer.join()
+        self.xmppClient.requestStop()
+        self.xmppClient.join()
         print("Server stopped.")
 
     def __updateChannelUri(self, deviceId: str, channelUri: str, sock: socket):
@@ -94,7 +102,7 @@ class Server:
             accountsResponse.append(account, pAcc.node, pAcc.secret)
 
         # Send the success response:
-        self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage("push@xmpp.uwpx.org", accountsResponse)), sock)
+        self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(config["xmpp"]["bare_jid"], accountsResponse)), sock)
         print("Set {} push device(s) for device '{}'.".format(len(accountsResult), deviceId))
 
     def __sendTestPush(self, deviceId: str, sock: socket):
