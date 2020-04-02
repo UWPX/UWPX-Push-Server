@@ -134,6 +134,28 @@ The `bareJidHash` column represents the bare JID (e.g. someClient@xmpp.uwpx.org 
 $ pip3 install --user -r requirements.txt
 ```
 
+## Configuration
+The server expects a file called `configuration.json` to be located in the same directory, where you execute the server from.
+It should have the following format:
+```JSON
+{
+    "wns": {
+        "packet_id": "The UWPX package ID starting with: 'ms-app://...'",
+        "client_secret": "The secret obtained from the Devcenter"
+    },
+    "xmpp": {
+        "bare_jid": "pushServer@xmpp.example.com",
+        "password": "I'm your super secure password"
+    },
+    "tcp": {
+        "port": 1997
+    },
+    "db": {
+        "path" : "pushServer.db"
+    }
+}
+```
+
 ## Execution
 ### Start
 ```BASH

@@ -1,0 +1,16 @@
+{
+    "wns": {
+        "packet_id": "The UWPX package ID starting with: 'ms-app://...'",
+        "client_secret": "The secret obtained from the Devcenter"
+    },
+    "xmpp": {
+        "bare_jid": "pushServer@xmpp.example.com",
+        "password": "I'm your super secure password"
+    },
+    "tcp": {
+        "port": 1997
+    },
+    "db": {
+        "path" : "pushServer.db"
+    }
+}
