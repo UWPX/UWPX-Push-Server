@@ -2,6 +2,7 @@ from peewee import *
 from datetime import datetime, timezone
 from secrets import token_hex, token_urlsafe
 from hashlib import sha256
+from aioxmpp import JID
 
 '''
 Documentation for peewee:
@@ -63,7 +64,7 @@ class WNSTokenModel(BaseModel):
     
     @classmethod
     def __getDomainPart(cls, bareJid: str):
-        return bareJid
+        return JID.fromstr(bareJid).domain
 
 
 def initDb():
