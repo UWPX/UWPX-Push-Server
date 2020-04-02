@@ -83,4 +83,9 @@ target/
 
 # WNS credentials
 credentials.py
+
+# Database
 *.db
+
+# Configuration file
+configuration.json
