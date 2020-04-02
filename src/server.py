@@ -2,7 +2,6 @@
 
 from enum import Enum
 from wns.wnslib import WNSClient
-from wns.credentials import CLIENT_SECRET, PACKET_ID
 from tcp.tcpServer import TcpServer
 from typing import Dict, Any, List, Tuple, Optional
 from socket import socket
@@ -17,6 +16,7 @@ from db.dbManager import ChannelUri, PushAccount, WNSTokenModel, initDb
 from peewee import DoesNotExist
 from datetime import datetime, timezone, timedelta
 
+
 class ServerState(Enum):
     NOT_RUNNING = 0
     STARTING = 1
@@ -28,11 +28,13 @@ class Server:
     __state: ServerState
     wnsClient: WNSClient
     tcpServer: TcpServer
+    config: Any
 
-    def __init__(self):
+    def __init__(self, config: Any):
+        self.config = config
         self.__state = ServerState.NOT_RUNNING
-        self.wnsClient = WNSClient(PACKET_ID, CLIENT_SECRET)
-        self.tcpServer = TcpServer()
+        self.wnsClient = WNSClient(config["wns"]["packet_id"], config["wns"]["client_secret"])
+        self.tcpServer = TcpServer(config["tcp"]["port"])
 
     def start(self):
         if self.__state != ServerState.NOT_RUNNING and self.state != ServerState.ERROR:

@@ -81,9 +81,6 @@ target/
 # ignore mypy folder
 .mypy_cache/*
 
-# WNS credentials
-credentials.py
-
 # Database
 *.db
 

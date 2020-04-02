@@ -2,10 +2,11 @@
 
 from server import Server
 from time import sleep
+from config import loadConfig
 
 
 def main():
-    server: Server = Server()
+    server: Server = Server(loadConfig())
     try:
         server.start()
 
