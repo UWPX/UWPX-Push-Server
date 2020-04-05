@@ -6,6 +6,7 @@ from tcp.messages.AbstractMessage import AbstractMessage
 from tcp.messages.ErrorResponseMessage import ErrorResponseMessage
 from tcp.messages.SuccessResponseMessage import SuccessResponseMessage
 from tcp.messages.parser import parse
+from ssl import create_default_context, CERT_REQUIRED, Purpose, SSLContext, PROTOCOL_TLSv1_2, SSLSocket
 
 
 class TcpServerState(Enum):
@@ -16,46 +17,70 @@ class TcpServerState(Enum):
     ERROR = 4
 
 class TcpServer(Thread):
-    DEFAULT_PORT: int = 1997
     BUFFER_SIZE: int = 1024
 
-    port: int
-    sock: Optional[socket]
+    __port: int
     __state: TcpServerState
+    __serverCertPath: str
+    __serverKeyPath: str
 
     # Callbacks:
     __validMessageReceivedCallbacks: Set[Callable[[AbstractMessage, socket], None]]
 
-    def __init__(self, port: int = DEFAULT_PORT):
+    def __init__(self, port: int, serverCertPath: str, serverKeyPath: str):
         Thread.__init__(self, name=("TCPServerThread"))
-        self.port = port
+        self.__port = port
         self.__state = TcpServerState.NOT_RUNNING
-        self.sock = None
+        self.__serverCertPath = serverCertPath
+        self.__serverKeyPath = serverKeyPath
 
         # Callbacks:
         self.__validMessageReceivedCallbacks: Set[Callable[[AbstractMessage, socket], None]] = set()
 
+    def __prepSslCtx(self):
+        sslCtx: SSLContext = create_default_context(purpose=Purpose.CLIENT_AUTH)
+        # sslCtx.options |= PROTOCOL_TLSv1_2 # TLS1.2 since C# does not yet fully support TLS1.3
+        sslCtx.load_cert_chain(certfile=self.__serverCertPath, keyfile=self.__serverKeyPath)
+        return sslCtx
+
     def run(self):
         self.__state = TcpServerState.STARTING
-        self.sock = socket(AF_INET, SOCK_STREAM)
-        self.sock.bind((gethostname(), self.port))
-        self.sock.listen(100)
-        self.sock.settimeout(1)
-        self.__state = TcpServerState.RUNNING
+        with socket(AF_INET, SOCK_STREAM) as sock:
+            sock = socket(AF_INET, SOCK_STREAM)
+            sock.bind((gethostname(), self.__port))
+            sock.listen(100)
+            sock.settimeout(1)
+        
+            # Upgrade to TLS:
+            sslCtx: SSLContext = self.__prepSslCtx()
+            with sslCtx.wrap_socket(sock, True) as ssock:
+                self.__state = TcpServerState.RUNNING
 
-        while self.__state == TcpServerState.RUNNING:
-            try:
-                conn: Tuple[socket, Any] = self.sock.accept()
-            except Exception as e:
-                continue
-            print("New TCP connection from {} accepted.".format(conn[1]))
-            msg: str = self.readFromClient(conn[0], conn[1])
-            if msg:
-                self.processMessage(msg, conn[0])
-            conn[0].close()
-            print("TCP connection with {} closed.".format(conn[1]))
+                while self.__state == TcpServerState.RUNNING:
+                    # Accept:
+                    try:
+                        conn: Tuple[socket, Any] = ssock.accept()
+                    except Exception as e:
+                        continue
+                    print("New TCP connection from {} accepted.".format(conn[1]))
 
-        self.sock.close()
+                    # Read:
+                    try:
+                        msg: str = self.readFromClient(conn[0], conn[1])
+                    except Exception as e:
+                        print("Reading from client failed - {}. Disconnecting...".format(e))
+                        conn[0].close()    
+                        continue
+
+                    # Process:
+                    if msg:
+                        try:
+                            self.processMessage(msg, conn[0])
+                        except Exception as e:
+                            print("Processing message failed - {}. Disconnecting...".format(e))
+                    conn[0].close()
+                    print("TCP connection with {} closed.".format(conn[1]))
+
         self.__state = TcpServerState.NOT_RUNNING
         print("Stopped the TCP server.")
 

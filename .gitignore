@@ -86,3 +86,6 @@ target/
 
 # Configuration file
 configuration.json
+
+# Cert and private key:
+cert/

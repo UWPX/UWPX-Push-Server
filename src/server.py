@@ -36,7 +36,7 @@ class Server:
         self.config = config
         self.__state = ServerState.NOT_RUNNING
         self.wnsClient = WNSClient(config["wns"]["packet_id"], config["wns"]["client_secret"])
-        self.tcpServer = TcpServer(config["tcp"]["port"])
+        self.tcpServer = TcpServer(config["tcp"]["port"], config["tcp"]["tls"]["server_cert_path"], config["tcp"]["tls"]["server_key_path"])
         self.xmppClient: XmppClient = XmppClient(config["xmpp"]["bare_jid"], config["xmpp"]["password"])
 
     def start(self):
@@ -67,7 +67,7 @@ class Server:
         self.tcpServer.start()
 
         # XMPP client:
-        self.xmppClient.start()
+        # self.xmppClient.start()
 
     def stop(self):
         print("Stopping the server...")
