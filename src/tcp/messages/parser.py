@@ -3,6 +3,8 @@ from tcp.messages.SetChannelUriMessage import SetChannelUriMessage
 from tcp.messages.SetPushAccountsMessage import SetPushAccountsMessage
 from tcp.messages.RequestTestPushMessage import RequestTestPushMessage
 from typing import Any
+from traceback import print_exc
+from sys import stdout
 
 def parseJson(jsonObj: Any):
     action: str = jsonObj["action"]
@@ -22,6 +24,7 @@ def parseJsonSave(jsonObj: Any):
         return parseJson(jsonObj)
     except Exception as e:
         print("Failed to parse message: '{}' - {}".format(jsonObj, e))
+        print_exc(file=stdout)
         return None
 
 def parse(msg: str):

@@ -3,6 +3,8 @@ from typing import Dict, Any, Optional
 from datetime import datetime, timedelta, timezone
 from db.dbManager import WNSTokenModel
 from peewee import DoesNotExist
+from traceback import print_exc
+from sys import stdout
 
 class WNSTokenParseException(Exception):
     field: str
@@ -98,6 +100,7 @@ class WNSClient:
             self.token = WNSToken.fromResponse(response)
         except Exception as e:
             print("Failed to parse WNS token response: {} Exception: {}".format(response.content, e))
+            print_exc(file=stdout)
             return False
         print("Successfully requested a new WNS token.")
         return True

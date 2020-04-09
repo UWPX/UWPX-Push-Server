@@ -1,5 +1,5 @@
 from enum import Enum
-from socket import socket, AF_INET, SOCK_STREAM, gethostname
+from socket import socket, AF_INET, SOCK_STREAM, gethostname, timeout
 from typing import Optional, Any, Tuple, Set, Callable
 from threading import Thread
 from tcp.messages.AbstractMessage import AbstractMessage
@@ -7,6 +7,9 @@ from tcp.messages.ErrorResponseMessage import ErrorResponseMessage
 from tcp.messages.SuccessResponseMessage import SuccessResponseMessage
 from tcp.messages.parser import parse
 from ssl import create_default_context, CERT_REQUIRED, Purpose, SSLContext, PROTOCOL_TLSv1_2, SSLSocket
+from time import sleep
+from traceback import print_exc
+from sys import stdout
 
 
 class TcpServerState(Enum):
@@ -43,11 +46,15 @@ class TcpServer(Thread):
         sslCtx.load_cert_chain(certfile=self.__serverCertPath, keyfile=self.__serverKeyPath)
         return sslCtx
 
-    def run(self):
-        self.__state = TcpServerState.STARTING
+    def __runUnsafe(self):
+        print("Starting the TCP server...")
         with socket(AF_INET, SOCK_STREAM) as sock:
             sock = socket(AF_INET, SOCK_STREAM)
-            sock.bind((gethostname(), self.__port))
+            try:
+                sock.bind((gethostname(), self.__port))
+            except Exception:
+                print("Binding TCP server to {} failed.".format(self.__port))
+                return
             sock.listen(100)
             sock.settimeout(1)
         
@@ -55,12 +62,17 @@ class TcpServer(Thread):
             sslCtx: SSLContext = self.__prepSslCtx()
             with sslCtx.wrap_socket(sock, True) as ssock:
                 self.__state = TcpServerState.RUNNING
+                print("TCP server started.")
 
                 while self.__state == TcpServerState.RUNNING:
                     # Accept:
                     try:
-                        conn: Tuple[socket, Any] = ssock.accept()
+                        conn: Tuple[SSLSocket, Any] = ssock.accept()
+                    except timeout:
+                        continue
                     except Exception as e:
+                        # print("TCP server accept() failed with: {}".format(e))
+                        # print_exc(file=stdout)
                         continue
                     print("New TCP connection from {} accepted.".format(conn[1]))
 
@@ -69,22 +81,42 @@ class TcpServer(Thread):
                         msg: str = self.readFromClient(conn[0], conn[1])
                     except Exception as e:
                         print("Reading from client failed - {}. Disconnecting...".format(e))
-                        conn[0].close()    
+                        print_exc(file=stdout)
+                        self.__closeSock(conn)  
                         continue
 
                     # Process:
                     if msg:
                         try:
-                            self.processMessage(msg, conn[0])
+                            self.processMessage(msg, conn)
                         except Exception as e:
                             print("Processing message failed - {}. Disconnecting...".format(e))
-                    conn[0].close()
-                    print("TCP connection with {} closed.".format(conn[1]))
+                            print_exc(file=stdout)
+                            self.___closeSock(conn)
 
+    def __closeSock(self, conn: Tuple[SSLSocket, Any]):
+        conn[0].close()
+        print("TCP connection with {} closed.".format(conn[1]))
+
+    def run(self):
+        while True:
+            self.__state = TcpServerState.STARTING
+            try:
+                self.__runUnsafe()
+            except Exception as e:
+                print("TCP run() failed with: {}".format(e))
+                print_exc(file=stdout)
+            if self.__state != TcpServerState.RUNNING and self.__state != TcpServerState.STARTING:
+                break
+            else:
+                print("TCP run() 5 second timeout started...")
+                sleep(5)
+                if self.__state != TcpServerState.RUNNING and self.__state != TcpServerState.STARTING:
+                    break
         self.__state = TcpServerState.NOT_RUNNING
         print("Stopped the TCP server.")
 
-    def readFromClient(self, sock: socket, addr: Any):
+    def readFromClient(self, sock: SSLSocket, addr: Any):
         msg: str = ""
         while True:
             data: bytes = sock.recv(self.BUFFER_SIZE)
@@ -95,23 +127,29 @@ class TcpServer(Thread):
             else:
                 return msg
 
-    def sendToClient(self, msg: str, sock: socket):
+    def sendToClient(self, msg: str, sock: SSLSocket):
         data: bytes = msg.encode("utf-8")
         # Append a NULL-Byte to signal the end of the message:
         data += b'\x00'
         sock.send(data)
 
-    def processMessage(self, msg: str, sock: socket):
+    def processMessage(self, msg: str, conn: Tuple[SSLSocket, Any]):
         result: Optional[AbstractMessage] = parse(msg)
         if result:
-            self.__fireValidMessageReceived(result, sock)
+            self.__processMessageInTasklet(result, conn)
         else:
-            self.respondClientWithErrorMessage("Malformed message!", sock)
+            self.respondClientWithErrorMessage("Malformed message!", conn[0])
+            self.__closeSock(conn)
 
-    def respondClientWithErrorMessage(self, msg: str, sock: socket):
+    def __processMessageInTasklet(self, msg: AbstractMessage, conn: Tuple[SSLSocket, Any]):
+        self.__fireValidMessageReceived(msg, conn[0])
+        sleep(5) # Sleep 5 seconds to give the client time to read the response
+        self.__closeSock(conn)
+
+    def respondClientWithErrorMessage(self, msg: str, sock: SSLSocket):
         self.sendToClient(str(ErrorResponseMessage(msg)), sock)
     
-    def respondClientWithSuccessMessage(self, sock: socket):
+    def respondClientWithSuccessMessage(self, sock: SSLSocket):
         self.sendToClient(str(SuccessResponseMessage()), sock)
 
     def requestStop(self):
@@ -133,7 +171,7 @@ class TcpServer(Thread):
         except Exception:
             pass
 
-    def __fireValidMessageReceived(self, msg: AbstractMessage, sock: socket):
+    def __fireValidMessageReceived(self, msg: AbstractMessage, sock: SSLSocket):
         """
         Invokes all registered valid message received callbacks
         """

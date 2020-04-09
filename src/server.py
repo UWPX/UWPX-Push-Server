@@ -16,6 +16,7 @@ from db.dbManager import ChannelUri, PushAccount, WNSTokenModel, initDb
 from peewee import DoesNotExist
 from datetime import datetime, timezone, timedelta
 from xmpp.xmppClient import XmppClient
+from ssl import SSLSocket
 
 
 class ServerState(Enum):
@@ -78,7 +79,7 @@ class Server:
         self.xmppClient.join()
         print("Server stopped.")
 
-    def __updateChannelUri(self, deviceId: str, channelUri: str, sock: socket):
+    def __updateChannelUri(self, deviceId: str, channelUri: str, sock: SSLSocket):
         ChannelUri.replace(deviceId=deviceId, channelUri=channelUri).execute()
         self.tcpServer.respondClientWithSuccessMessage(sock)
         print("Channel URI set for 'device' {} to: {}".format(deviceId, channelUri))
@@ -104,7 +105,7 @@ class Server:
         self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(self.config["xmpp"]["bare_jid"], accountsResponse)), sock)
         print("Set {} push accounts(s) for device '{}'.".format(len(accountsResult), deviceId))
 
-    def __sendTestPush(self, deviceId: str, sock: socket):
+    def __sendTestPush(self, deviceId: str, sock: SSLSocket):
         try:
             channelUri = ChannelUri.get(ChannelUri.deviceId == deviceId)
         except DoesNotExist:
@@ -115,7 +116,7 @@ class Server:
         print("Test push notification send to: {}" + channelUri.channelUri)
 
     # Handle all incoming messages:
-    def __onValidMessageReceived(self, msg: AbstractMessage, sock: socket):
+    def __onValidMessageReceived(self, msg: AbstractMessage, sock: SSLSocket):
         if isinstance(msg, SetChannelUriMessage):
             self.__updateChannelUri(msg.deviceId, msg.channelUri, sock)
         elif isinstance(msg, SetPushAccountsMessage):
