@@ -35,17 +35,11 @@ class ChannelUri(BaseModel):
 
 
 class PushAccount(BaseModel):
-    channelUri: ForeignKeyField(ChannelUri, backref="pushAccounts")
+    channelUri: ForeignKeyField = ForeignKeyField(ChannelUri, backref="pushAccounts")
     bareJidHash: TextField = TextField(null=False)
     domainPart: TextField = TextField(null=False)
     node: TextField = TextField(null=False)
     secret: TextField = TextField(null=False)
-
-
-class WNSTokenModel(BaseModel):
-    token: TextField = TextField(unique=True)
-    tokenType: TextField = TextField(unique=True)
-    expires: DateTimeTZField = DateTimeTZField(default=datetime.now(timezone.utc), null=False)
 
     @classmethod
     def createFrom(cls, channelUri: ChannelUri, bareJid: str):
@@ -60,11 +54,17 @@ class WNSTokenModel(BaseModel):
     @classmethod
     def __genBareJidHash(cls, deviceId: str, bareJid: str):
         # Based on: https://gist.github.com/markito/30a9bc2afbbfd684b31986c2de305d20
-        return sha256(deviceId + bareJid).hexdigest()
+        return sha256(deviceId.encode('utf-8') + bareJid.encode('utf-8')).hexdigest()
     
     @classmethod
     def __getDomainPart(cls, bareJid: str):
         return JID.fromstr(bareJid).domain
+
+
+class WNSTokenModel(BaseModel):
+    token: TextField = TextField(unique=True)
+    tokenType: TextField = TextField(unique=True)
+    expires: DateTimeTZField = DateTimeTZField(default=datetime.now(timezone.utc), null=False)
 
 
 def initDb():

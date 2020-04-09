@@ -21,7 +21,7 @@ def parseJsonSave(jsonObj: Any):
     try:
         return parseJson(jsonObj)
     except Exception as e:
-        print("Unknown message received: {}".format(jsonObj))
+        print("Failed to parse message: '{}' - {}".format(jsonObj, e))
         return None
 
 def parse(msg: str):

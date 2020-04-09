@@ -90,20 +90,19 @@ class Server:
             print("Update push for unknown device id.")
             self.tcpServer.respondClientWithErrorMessage("Device id unknown.", sock)
             return
-        linesAffected: int = PushAccount.delete().where(PushAccount.channelUri == channelUri)
+        linesAffected: int = PushAccount.delete().where(PushAccount.channelUri == channelUri).execute()
         print("Removed {} old push accounts for device '{}'.".format(linesAffected, deviceId))
 
         accountsResult: List[PushAccount] = list()
         accountsResponse: List[Tuple[str, str, str]] = list()
         for account in accounts:
             pAcc: PushAccount = PushAccount.createFrom(channelUri, account)
-            pAcc.generate(account)
             accountsResult.append(pAcc)
-            accountsResponse.append(account, pAcc.node, pAcc.secret)
+            accountsResponse.append((account, pAcc.node, pAcc.secret))
 
         # Send the success response:
-        self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(config["xmpp"]["bare_jid"], accountsResponse)), sock)
-        print("Set {} push device(s) for device '{}'.".format(len(accountsResult), deviceId))
+        self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(self.config["xmpp"]["bare_jid"], accountsResponse)), sock)
+        print("Set {} push accounts(s) for device '{}'.".format(len(accountsResult), deviceId))
 
     def __sendTestPush(self, deviceId: str, sock: socket):
         try:
