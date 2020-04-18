@@ -46,7 +46,7 @@ class TcpServer(Thread):
         sslCtx.load_cert_chain(certfile=self.__serverCertPath, keyfile=self.__serverKeyPath)
         return sslCtx
 
-    def __runUnsafe(self):
+    def __runUnsafe(self, socketHandler: Any):
         print("Starting the TCP server...")
         with socket(AF_INET, SOCK_STREAM) as sock:
             sock = socket(AF_INET, SOCK_STREAM)
@@ -88,21 +88,25 @@ class TcpServer(Thread):
                     # Process:
                     if msg:
                         try:
-                            self.processMessage(msg, conn)
+                            self.processMessage(msg, conn, socketHandler)
                         except Exception as e:
                             print("Processing message failed - {}. Disconnecting...".format(e))
                             print_exc(file=stdout)
-                            self.___closeSock(conn)
+                            self.__closeSock(conn)
 
     def __closeSock(self, conn: Tuple[SSLSocket, Any]):
         conn[0].close()
         print("TCP connection with {} closed.".format(conn[1]))
 
     def run(self):
+        from tcp.socketHandler import SocketHandler
+        socketHandler: SocketHandler = SocketHandler()
+        socketHandler.start()
+
         while True:
             self.__state = TcpServerState.STARTING
             try:
-                self.__runUnsafe()
+                self.__runUnsafe(socketHandler)
             except Exception as e:
                 print("TCP run() failed with: {}".format(e))
                 print_exc(file=stdout)
@@ -113,6 +117,10 @@ class TcpServer(Thread):
                 sleep(5)
                 if self.__state != TcpServerState.RUNNING and self.__state != TcpServerState.STARTING:
                     break
+
+        socketHandler.requestStop()
+        socketHandler.join()
+
         self.__state = TcpServerState.NOT_RUNNING
         print("Stopped the TCP server.")
 
@@ -133,15 +141,15 @@ class TcpServer(Thread):
         data += b'\x00'
         sock.send(data)
 
-    def processMessage(self, msg: str, conn: Tuple[SSLSocket, Any]):
+    def processMessage(self, msg: str, conn: Tuple[SSLSocket, Any], socketHandler: Any):
         result: Optional[AbstractMessage] = parse(msg)
         if result:
-            self.__processMessageInTasklet(result, conn)
+            socketHandler.addSocket(result, conn, self)
         else:
             self.respondClientWithErrorMessage("Malformed message!", conn[0])
             self.__closeSock(conn)
 
-    def __processMessageInTasklet(self, msg: AbstractMessage, conn: Tuple[SSLSocket, Any]):
+    def processMessageInThread(self, msg: AbstractMessage, conn: Tuple[SSLSocket, Any]):
         self.__fireValidMessageReceived(msg, conn[0])
         sleep(5) # Sleep 5 seconds to give the client time to read the response
         self.__closeSock(conn)

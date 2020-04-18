@@ -113,7 +113,7 @@ class Server:
             self.tcpServer.respondClientWithErrorMessage("Device id unknown.", sock)
             return
         self.wnsClient.sendRawNotification(channelUri.channelUri, "Test push notification from your push server.")
-        print("Test push notification send to: {}" + channelUri.channelUri)
+        print("Test push notification send to: {}".format(channelUri.channelUri))
 
     # Handle all incoming messages:
     def __onValidMessageReceived(self, msg: AbstractMessage, sock: SSLSocket):
