@@ -8,7 +8,6 @@ from socket import socket
 from tcp.messages.AbstractMessage import AbstractMessage
 from tcp.messages.SetChannelUriMessage import SetChannelUriMessage
 from tcp.messages.ErrorResponseMessage import ErrorResponseMessage
-from tcp.messages.SuccessResponseMessage import SuccessResponseMessage
 from tcp.messages.SetPushAccountsMessage import SetPushAccountsMessage
 from tcp.messages.SuccessSetPushAccountsMessage import SuccessSetPushAccountsMessage
 from tcp.messages.RequestTestPushMessage import RequestTestPushMessage
@@ -113,6 +112,7 @@ class Server:
             self.tcpServer.respondClientWithErrorMessage("Device id unknown.", sock)
             return
         self.wnsClient.sendRawNotification(channelUri.channelUri, "Test push notification from your push server.")
+        self.tcpServer.respondClientWithSuccessMessage(sock)
         print("Test push notification send to: {}".format(channelUri.channelUri))
 
     # Handle all incoming messages:

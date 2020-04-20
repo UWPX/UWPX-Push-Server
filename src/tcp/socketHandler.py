@@ -52,7 +52,6 @@ class SocketHandler(Thread):
         for t in self.threads:
             if not t.isAlive():
                 t.join()
-                print("Joined {}".format(t.name))
             else:
                 newThreads.append(t)
         print("Removed {} out of {} socket threads.".format(len(self.threads) - len(newThreads), len(self.threads)))
