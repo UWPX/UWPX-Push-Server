@@ -1,5 +1,5 @@
 # UWPX-Push Server
-This is the push server for XMPP client [UWPX](https://github.com/UWPX/UWPX-Client).
+This is the push server for the XMPP client [UWPX](https://github.com/UWPX/UWPX-Client).
 I based my implementation roughly on the [Conversations Push Proxy](https://github.com/iNPUTmice/p2) by [@iNPUTmice](https://github.com/iNPUTmice).
 
 ## Terminology
