@@ -25,6 +25,7 @@ class ServerState(Enum):
     STOPPING = 3
     ERROR = 4
 
+
 class Server:
     __state: ServerState
     config: Any
@@ -35,17 +36,25 @@ class Server:
     def __init__(self, config: Any):
         self.config = config
         self.__state = ServerState.NOT_RUNNING
-        self.wnsClient = WNSClient(config["wns"]["packet_id"], config["wns"]["client_secret"])
-        self.tcpServer = TcpServer(config["tcp"]["port"], config["tcp"]["tls"]["server_cert_path"], config["tcp"]["tls"]["server_key_path"])
-        self.xmppClient: XmppClient = XmppClient(config["xmpp"]["bare_jid"], config["xmpp"]["password"], config["xmpp"]["pub_sub_jid"])
+        self.wnsClient = WNSClient(
+            config["wns"]["packet_id"], config["wns"]["client_secret"])
+        self.tcpServer = TcpServer(config["tcp"]["port"], config["tcp"]["tls"]
+                                   ["server_cert_path"], config["tcp"]["tls"]["server_key_path"])
+        self.xmppClient: XmppClient = XmppClient(
+            config["xmpp"]["bare_jid"], config["xmpp"]["password"], config["xmpp"]["pub_sub_jid"])
+
+    def isRunning(self):
+        return self.__state != ServerState.ERROR and self.__state != ServerState.NOT_RUNNING
 
     def start(self):
         if self.__state != ServerState.NOT_RUNNING and self.state != ServerState.ERROR:
-            print("Unable to start the server - already running. State: {} ".format(self.state))
+            print(
+                "Unable to start the server - already running. State: {} ".format(self.state))
             return
+        self.__state = ServerState.STARTING
         print("Starting the server...")
         # DB
-        initDb()        
+        initDb()
 
         # WNS:
         self.wnsClient.loadTokenFromDb()
@@ -60,38 +69,50 @@ class Server:
         else:
             print("No need to request a new WNS token.")
 
+        self.__state = ServerState.RUNNING
         print("Server started.")
 
         # TCP:
-        self.tcpServer.registerValidMessageReceivedCallback(self.__onValidMessageReceived)
+        self.tcpServer.registerValidMessageReceivedCallback(
+            self.__onValidMessageReceived)
         self.tcpServer.start()
 
         # XMPP client:
         self.xmppClient.start()
 
     def stop(self):
+        if self.__state != ServerState.RUNNING:
+            print("No need to stop the server - not running.")
+            return
+
+        self.__state = ServerState.STARTING
         print("Stopping the server...")
         self.tcpServer.requestStop()
-        self.tcpServer.removeValidMessageReceivedCallback(self.__onValidMessageReceived)
+        self.tcpServer.removeValidMessageReceivedCallback(
+            self.__onValidMessageReceived)
         self.tcpServer.join()
         self.xmppClient.requestStop()
         self.xmppClient.join()
         print("Server stopped.")
+        self.__state = ServerState.NOT_RUNNING
 
     def __updateChannelUri(self, deviceId: str, channelUri: str, sock: SSLSocket):
         ChannelUri.replace(deviceId=deviceId, channelUri=channelUri).execute()
         self.tcpServer.respondClientWithSuccessMessage(sock)
         print("Channel URI set for 'device' {} to: {}".format(deviceId, channelUri))
 
-    def __updatePushDevices(self, deviceId: str, accounts: List[str], sock:socket):
+    def __updatePushDevices(self, deviceId: str, accounts: List[str], sock: socket):
         try:
             channelUri = ChannelUri.get(ChannelUri.deviceId == deviceId)
         except DoesNotExist:
             print("Update push for unknown device id.")
-            self.tcpServer.respondClientWithErrorMessage("Device id unknown.", sock)
+            self.tcpServer.respondClientWithErrorMessage(
+                "Device id unknown.", sock)
             return
-        linesAffected: int = PushAccount.delete().where(PushAccount.channelUri == channelUri).execute()
-        print("Removed {} old push accounts for device '{}'.".format(linesAffected, deviceId))
+        linesAffected: int = PushAccount.delete().where(
+            PushAccount.channelUri == channelUri).execute()
+        print("Removed {} old push accounts for device '{}'.".format(
+            linesAffected, deviceId))
 
         accountsResult: List[PushAccount] = list()
         accountsResponse: List[Tuple[str, str, str]] = list()
@@ -101,17 +122,21 @@ class Server:
             accountsResponse.append((account, pAcc.node, pAcc.secret))
 
         # Send the success response:
-        self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(self.config["xmpp"]["bare_jid"], accountsResponse)), sock)
-        print("Set {} push accounts(s) for device '{}'.".format(len(accountsResult), deviceId))
+        self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(
+            self.config["xmpp"]["bare_jid"], accountsResponse)), sock)
+        print("Set {} push accounts(s) for device '{}'.".format(
+            len(accountsResult), deviceId))
 
     def __sendTestPush(self, deviceId: str, sock: SSLSocket):
         try:
             channelUri = ChannelUri.get(ChannelUri.deviceId == deviceId)
         except DoesNotExist:
             print("Test push for unknown device id.")
-            self.tcpServer.respondClientWithErrorMessage("Device id unknown.", sock)
+            self.tcpServer.respondClientWithErrorMessage(
+                "Device id unknown.", sock)
             return
-        self.wnsClient.sendRawNotification(channelUri.channelUri, "Test push notification from your push server.")
+        self.wnsClient.sendRawNotification(
+            channelUri.channelUri, "Test push notification from your push server.")
         self.tcpServer.respondClientWithSuccessMessage(sock)
         print("Test push notification send to: {}".format(channelUri.channelUri))
 
@@ -124,4 +149,15 @@ class Server:
         elif isinstance(msg, RequestTestPushMessage):
             self.__sendTestPush(msg.deviceId, sock)
         else:
-            self.tcpServer.respondClientWithErrorMessage("Unsupported message type.", sock)
+            self.tcpServer.respondClientWithErrorMessage(
+                "Unsupported message type.", sock)
+
+    def sendTestPush(self, deviceId: str):
+        try:
+            channelUri = ChannelUri.get(ChannelUri.deviceId == deviceId)
+        except DoesNotExist:
+            print("Test push for unknown device id: \"{}\"".format(deviceId))
+            return
+        self.wnsClient.sendRawNotification(
+            channelUri.channelUri, "Test push notification from your push server.")
+        print("Test push send to device id: \"{}\"".format(deviceId))
