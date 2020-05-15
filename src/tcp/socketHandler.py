@@ -16,18 +16,20 @@ class SocketThread(Thread):
         self.msg = msg
         self.conn = conn
         self.__tcpServer = tcpServer
-    
+
     def run(self):
         try:
             self.__tcpServer.processMessageInThread(self.msg, self.conn)
         except Exception as e:
-            print("Failed to close the TCP socket for '{}' wih: {}".format(self.conn[1], e))
+            print("Failed to close the TCP socket for '{}' wih: {}".format(
+                self.conn[1], e))
+
 
 class SocketHandler(Thread):
     threads: List[SocketThread]
     shouldRun: bool
     sockedAdded: bool
-    
+
     def __init__(self):
         Thread.__init__(self, name=("SocketHandlerThread"))
         self.threads: List[SocketThread] = list()
@@ -38,9 +40,9 @@ class SocketHandler(Thread):
         print("{} started.".format(self.name))
         self.shouldRun = True
         while self.shouldRun:
-            while not self.sockedAdded:
+            while not self.sockedAdded and self.shouldRun:
                 sleep(1)
-            
+
             if self.shouldRun:
                 self.sockedAdded = False
                 self.cleanupSockThreads()
@@ -54,7 +56,8 @@ class SocketHandler(Thread):
                 t.join()
             else:
                 newThreads.append(t)
-        print("Removed {} out of {} socket threads.".format(len(self.threads) - len(newThreads), len(self.threads)))
+        print("Removed {} out of {} socket threads.".format(
+            len(self.threads) - len(newThreads), len(self.threads)))
         self.threads = newThreads
 
     def requestStop(self):

@@ -7,14 +7,18 @@ from signal import signal, SIGTERM, SIGILL, SIGINT
 
 shouldRun: bool = True
 
+
 def receiveSignal(signalNumber, frame):
+    global shouldRun
     print("Shutting down...")
     shouldRun = False
+
 
 def initSignalHandler():
     signal(SIGTERM, receiveSignal)
     signal(SIGILL, receiveSignal)
     signal(SIGINT, receiveSignal)
+
 
 def main():
     initSignalHandler()
