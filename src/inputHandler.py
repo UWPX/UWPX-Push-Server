@@ -39,10 +39,9 @@ class InputHandler(Thread):
 
     def printHelp(self):
         print("-------------------HELP-------------------")
-        print("help - This help.")
-        print("test push <deviceId> - Sends a test push to the given device ID.")
-        print("q - Stop the server.")
-        print("exit - Stop the server.")
+        print("'help' - This help.")
+        print("'test push <deviceId>' - Sends a test push to the given device ID.")
+        print("'q' or 'exit' - Stop the server.")
         print("------------------------------------------")
 
     def run(self):
