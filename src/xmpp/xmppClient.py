@@ -19,7 +19,7 @@ class XmppThread(Thread):
 
     def run(self):
         print("XMPP thread started.")
-        self.__client.process(threaded=True)
+        self.__client.process(forever=False)
         print("XMPP thread stopped.")
 
 
