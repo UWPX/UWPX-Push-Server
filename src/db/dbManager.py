@@ -14,6 +14,8 @@ db: SqliteDatabase = SqliteDatabase(DB_PATH)
 
 # Required since SQLite stores datetime objects as string in a to peewee unknown format
 # in case they have an UTC offset.
+
+
 class DateTimeTZField(DateTimeField):
     def python_value(self, value):
         if value is None:
@@ -23,6 +25,7 @@ class DateTimeTZField(DateTimeField):
     def db_value(self, value):
         return value.strftime('%Y-%m-%d %H:%M:%S.%f%z') if value else None
 
+
 class BaseModel(Model):
     class Meta:
         database = db
@@ -31,11 +34,13 @@ class BaseModel(Model):
 class ChannelUri(BaseModel):
     deviceId: TextField = TextField(unique=True)
     channelUri: TextField = TextField(null=False)
-    timeStamp: DateTimeTZField = DateTimeTZField(default=datetime.now(timezone.utc), null=False)
+    timeStamp: DateTimeTZField = DateTimeTZField(
+        default=datetime.now(timezone.utc), null=False)
 
 
 class PushAccount(BaseModel):
-    channelUri: ForeignKeyField = ForeignKeyField(ChannelUri, backref="pushAccounts")
+    channelUri: ForeignKeyField = ForeignKeyField(
+        ChannelUri, backref="pushAccounts")
     bareJidHash: TextField = TextField(null=False)
     domainPart: TextField = TextField(null=False)
     node: TextField = TextField(null=False)
@@ -50,12 +55,12 @@ class PushAccount(BaseModel):
         secret = token_hex(128)
 
         return cls.create(channelUri=channelUri, bareJidHash=bareJidHash, domainPart=domainPart, node=node, secret=secret)
-    
+
     @classmethod
     def __genBareJidHash(cls, deviceId: str, bareJid: str):
         # Based on: https://gist.github.com/markito/30a9bc2afbbfd684b31986c2de305d20
         return sha256(deviceId.encode('utf-8') + bareJid.encode('utf-8')).hexdigest()
-    
+
     @classmethod
     def __getDomainPart(cls, bareJid: str):
         return JID.fromstr(bareJid).domain
@@ -64,7 +69,8 @@ class PushAccount(BaseModel):
 class WNSTokenModel(BaseModel):
     token: TextField = TextField(unique=True)
     tokenType: TextField = TextField(unique=True)
-    expires: DateTimeTZField = DateTimeTZField(default=datetime.now(timezone.utc), null=False)
+    expires: DateTimeTZField = DateTimeTZField(
+        default=datetime.now(timezone.utc), null=False)
 
 
 def initDb():

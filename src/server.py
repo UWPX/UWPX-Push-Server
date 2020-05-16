@@ -91,8 +91,7 @@ class Server:
         self.tcpServer.removeValidMessageReceivedCallback(
             self.__onValidMessageReceived)
         self.tcpServer.join()
-        self.xmppClient.requestStop()
-        self.xmppClient.join()
+        self.xmppClient.stop()
         print("Server stopped.")
         self.__state = ServerState.NOT_RUNNING
 
@@ -120,6 +119,17 @@ class Server:
             pAcc: PushAccount = PushAccount.createFrom(channelUri, account)
             accountsResult.append(pAcc)
             accountsResponse.append((account, pAcc.node, pAcc.secret))
+
+        # Create and subscribe to XMPP nodes:
+        try:
+            if not self.xmppClient.createAndSubscribeToNode(pAcc.node):
+                self.tcpServer.respondClientWithErrorMessage(
+                    "Failed to create PubSub node.", sock)
+                return
+        except Exception as e:
+            self.tcpServer.respondClientWithErrorMessage(
+                "Failed to create PubSub node with: {}".format(e), sock)
+            return
 
         # Send the success response:
         self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(

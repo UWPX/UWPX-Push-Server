@@ -30,8 +30,14 @@ class InputHandler(Thread):
             self.__server.stop()
         elif line.startswith("test push"):
             self.testPush(line)
+        elif line.startswith("test xmpp publish"):
+            self.testXmppPublishNode(line)
         else:
             print("Unknown command received.\nTry typing 'help' for a list of commands.")
+
+    def testXmppPublishNode(self, line: str):
+        node: str = line.replace("test xmpp publish", "").strip()
+        self.__server.xmppClient.createAndSubscribeToNode(node)
 
     def testPush(self, line: str):
         deviceId: str = line.replace("test push", "").strip()
@@ -41,6 +47,7 @@ class InputHandler(Thread):
         print("-------------------HELP-------------------")
         print("'help' - This help.")
         print("'test push <deviceId>' - Sends a test push to the given device ID.")
+        print("'test xmpp publish <nodeName>' - Publishes and subscribes to the given PubSub node.")
         print("'q' or 'exit' - Stop the server.")
         print("------------------------------------------")
 

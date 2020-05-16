@@ -1,73 +1,96 @@
-from threading import Thread
-from aioxmpp import PresenceManagedClient, make_security_layer, JID
-from aioxmpp import PubSubClient
-import asyncio
+from slixmpp import ClientXMPP
+from slixmpp.exceptions import XMPPError
+from typing import Optional, Any
 from asgiref.sync import async_to_sync
-from typing import Optional
+from threading import Thread
 
-class XmppClient(Thread):
-    __bareJid: JID
-    __password: str
-    __pubSubJid: JID
 
-    __client: Optional[PresenceManagedClient]
-    __pubSub: Optional[PubSubClient]
+"""
+Based on: https://github.com/poezio/slixmpp/blob/master/examples/pubsub_client.py
+"""
 
-    shouldRun: bool
 
-    def __init__(self, bareJid: str, password: str, pubSubJid: str):
+class XmppThread(Thread):
+    __client: Any
+
+    def __init__(self, client: Any):
         Thread.__init__(self, name=("XMPPClientThread"))
-        self.__bareJid: JID = JID.fromstr(bareJid)
-        self.__password: str = password
-        self.__pubSubJid: JID = JID.fromstr(pubSubJid)
-        self.__client: Optional[PresenceManagedClient] = None
-        self.__pubSub: Optional[PubSubClient] = None
-        self.shouldRun: bool = False
+        self.__client: Any = client
 
     def run(self):
-        loop: asyncio.AbstractEventLoop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.runAsync())
-        loop.close()
+        print("XMPP thread started.")
+        self.__client.process(threaded=True)
+        print("XMPP thread stopped.")
 
-    async def runAsync(self):
+
+class XmppClient(ClientXMPP):
+    __bareJid: str
+    __password: str
+    __pubSubJid: str
+    __xmppThread: XmppThread
+    __resourcePart: str = "UWPX_Push_Server"
+
+    def __init__(self, bareJid: str, password: str, pubSubJid: str):
+        ClientXMPP.__init__(self, bareJid + '/' +
+                            self.__resourcePart, password)
+        self.__bareJid: str = bareJid
+        self.__password: str = password
+        self.__pubSubJid: str = pubSubJid
+        self.__xmppThread = XmppThread(self)
+
+        # Register plugins:
+        self.register_plugin('xep_0030')  # Disco
+        self.register_plugin('xep_0059')  # Result Set Management
+        self.register_plugin('xep_0060')  # PubSub
+        self.register_plugin('xep_0199')  # XMPP Ping
+
+        self.add_event_handler('session_start', self.__onSessionStart)
+        self.add_event_handler("message", self.__onMessage)
+
+    def __onSessionStart(self, event: Any):
+        self.get_roster()
+        self.send_presence()
+
+    def __onMessage(self, msg: Any):
+        print("Message received: {}".format(msg))
+
+    def start(self):
         print("Starting the XMPP client...")
-        self.shouldRun: bool = True
+        # Connect and start processing stanzas:
+        self.connect()
+        # Process messages in a different thread:
+        self.__xmppThread.start()
+        print("Started the XMPP client.")
 
-        self.__client = PresenceManagedClient(self.__bareJid, make_security_layer(self.__password))
-        
-        async with self.__client.connected():
-            self.__setupPush()
-            while self.shouldRun:
-                await asyncio.sleep(1)
+    def stop(self):
+        print("Stopping the XMPP client...")
+        self.disconnect()
+        self.__xmppThread.join()
+        print("Stopped the XMPP client.")
 
-    def __setupPush(self):
-        self.__pubSub: PubSubClient = self.__client.summon(PubSubClient)
-        self.__pubSub.on_subscription_update.connect(self.__pubSubOnSubscriptionUpdate)
-        self.__pubSub.on_item_published.connect(self.__pubSubOnItemPublished)
-        self.__pubSub.on_node_deleted.connect(self.__pubSubOnNodeDeleted)
-    
-    def __pubSubOnSubscriptionUpdate(self):
-        pass
-
-    def __pubSubOnItemPublished(self):
-        pass
-
-    def __pubSubOnNodeDeleted(self):
-        pass
+    def createNode(self, node: str):
+        try:
+            async_to_sync(self['xep_0060'].create_node)(self.__pubSubJid, node)
+            return True
+        except XMPPError as error:
+            print("Could not create node '{}': {}".format(node, error.format()))
+        return False
 
     def subscribeToNode(self, node: str):
-        return async_to_sync(self.subscribeToNodeAsync)(node)
+        try:
+            iq: Any = async_to_sync(self['xep_0060'].subscribe)(
+                self.pubsub_server, self.node)
+            subscription = iq['pubsub']['subscription']
+            print("Subscribed {} to node '{}'".format(
+                subscription['jid'], subscription['node']))
+            return True
+        except XMPPError as error:
+            print("Could not subscribe to node '{}': {}".format(
+                node, error.format()))
+        return False
 
-    def unsubscribeFromNode(self, node: str, subId: Optional[str] = None):
-        return async_to_sync(self.unsubscribeFromNodeAsync)(node, subId)
+    def configureNode(self, node: str):
+        return True
 
-    async def subscribeToNodeAsync(self, node: str):
-        return await self.__pubSub.subscribe(self.__pubSubJid, node)
-
-    async def unsubscribeFromNodeAsync(self, node: str, subId: Optional[str] = None):
-        return await self.__pubSub.unsubscribe(self.__pubSubJid, node, subid=subId)
-
-    def requestStop(self):
-        print("Stopping the XMPP client...")
-        self.shouldRun: bool = False
+    def createAndSubscribeToNode(self, node: str):
+        return self.createNode(node) and self.configureNode() and self.subscribeToNode(node)
