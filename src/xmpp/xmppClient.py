@@ -11,11 +11,11 @@ Based on: https://github.com/poezio/slixmpp/blob/master/examples/pubsub_client.p
 
 
 class XmppThread(Thread):
-    __client: Any
+    __client: ClientXMPP
 
-    def __init__(self, client: Any):
+    def __init__(self, client: ClientXMPP):
         Thread.__init__(self, name=("XMPPClientThread"))
-        self.__client: Any = client
+        self.__client: ClientXMPP = client
 
     def run(self):
         print("XMPP thread started.")
