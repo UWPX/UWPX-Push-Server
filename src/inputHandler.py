@@ -3,6 +3,7 @@ from threading import Thread
 from typing import Optional, List, Any, Tuple
 from sys import stdin
 from select import select
+from com.task import Task
 
 
 class InputHandler(Thread):
@@ -37,7 +38,8 @@ class InputHandler(Thread):
 
     def testXmppPublishNode(self, line: str):
         node: str = line.replace("test xmpp publish", "").strip()
-        self.__server.xmppClient.createAndSubscribeToNode(node)
+        task: Task = Task(self.__server.xmppClient.subscribeToNodeAsync, node)
+        task.waitForCompletion()
 
     def testPush(self, line: str):
         deviceId: str = line.replace("test push", "").strip()
