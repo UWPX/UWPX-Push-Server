@@ -14,18 +14,18 @@ struct WnsConfiguration {
     /**
      * The UWP package ID starting with: 'ms-app://...'.
      **/
-    std::string packet_id{"The UWP package ID starting with: 'ms-app://...'"};
+    std::string packetId{"The UWP package ID starting with: 'ms-app://...'"};
     /**
      * The secret obtained from the Devcenter.
      **/
-    std::string client_secret{"The secret obtained from the Devcenter"};
+    std::string clientSecret{"The secret obtained from the Devcenter"};
 };
 
 struct XmppConfiguration {
     /**
      * The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com').
      **/
-    std::string bare_jid{"The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com')"};
+    std::string bareJid{"The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com')"};
     /**
      * The password for the push XMPP client.
      **/
@@ -36,11 +36,11 @@ struct TlsConfiguration {
     /**
      * Path to your 'domain.key' file.
      **/
-    std::string server_key_path{"Path to your 'domain.key' file"};
+    std::string serverKeyPath{"Path to your 'domain.key' file"};
     /**
      * Path to your 'domain.cert' file.
      **/
-    std::string server_cert_path{"Path to your 'domain.cert' file"};
+    std::string serverCertPath{"Path to your 'domain.cert' file"};
 };
 
 struct TcpConfiguration {
@@ -77,10 +77,10 @@ struct Configuration {
 };
 
 struct ConfigurationStorage {
-    explicit ConfigurationStorage(const std::filesystem::path& config_file);
+    explicit ConfigurationStorage(const std::filesystem::path& configFilePath);
 
  private:
-    storage::Serializer file_handl;
+    storage::Serializer fileHandle;
     Configuration config{};
 
     void write_configuration();

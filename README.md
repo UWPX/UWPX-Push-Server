@@ -63,10 +63,10 @@ This ensures, the client only receives notifications for those devices, that are
 	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
 	"accounts": [
 		{
-			"bare_jid": "someClient@xmpp.uwpx.org"
+			"bareJid": "someClient@xmpp.uwpx.org"
 		},
 		{
-			"bare_jid": "someOtherClient@xmpp.uwpx.org"
+			"bareJid": "someOtherClient@xmpp.uwpx.org"
 		}
 	]
 }
@@ -74,21 +74,21 @@ This ensures, the client only receives notifications for those devices, that are
 
 #### Success: Server -> Client
 On success the server returns a success message, including a `node` and `secret` attribute for each account.
-It also includes a `push_bare_jid` field, which represents the bare JID of the push server.
+It also includes a `push_bareJid` field, which represents the bare JID of the push server.
 ```JSON
 {
 	"version": 1,
 	"action": "response",
 	"status": 1,
-	"push_bare_jid": "push@xmpp.uwpx.org",
+	"push_bareJid": "push@xmpp.uwpx.org",
 	"accounts": [
 		{
-			"bare_jid": "someClient@xmpp.uwpx.org",
+			"bareJid": "someClient@xmpp.uwpx.org",
 			"node": "773bds9nf932",
 			"secret": "sdf/82h)=1",
 		},
 		{
-			"bare_jid": "someOtherClient@xmpp.uwpx.org",
+			"bareJid": "someOtherClient@xmpp.uwpx.org",
 			"node": "8w3rn0MB3m38z2",
 			"secret": "j$o909mN87!n/0m",
 		}
@@ -140,11 +140,11 @@ It should have the following format:
 ```JSON
 {
     "wns": {
-        "packet_id": "The UWPX package ID starting with: 'ms-app://...'",
-        "client_secret": "The secret obtained from the Devcenter"
+        "packetId": "The UWPX package ID starting with: 'ms-app://...'",
+        "clientSecret": "The secret obtained from the Devcenter"
     },
     "xmpp": {
-        "bare_jid": "pushServer@xmpp.example.com",
+        "bareJid": "pushServer@xmpp.example.com",
         "password": "I'm your super secure password"
     },
     "tcp": {

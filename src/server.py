@@ -37,11 +37,11 @@ class Server:
         self.config = config
         self.__state = ServerState.NOT_RUNNING
         self.wnsClient = WNSClient(
-            config["wns"]["packet_id"], config["wns"]["client_secret"])
+            config["wns"]["packetId"], config["wns"]["clientSecret"])
         self.tcpServer = TcpServer(config["tcp"]["port"], config["tcp"]["tls"]
-                                   ["server_cert_path"], config["tcp"]["tls"]["server_key_path"])
+                                   ["serverCertPath"], config["tcp"]["tls"]["serverKeyPath"])
         self.xmppClient: XmppClient = XmppClient(
-            config["xmpp"]["bare_jid"], config["xmpp"]["password"], config["xmpp"]["pub_sub_jid"])
+            config["xmpp"]["bareJid"], config["xmpp"]["password"], config["xmpp"]["pub_sub_jid"])
 
     def isRunning(self):
         return self.__state != ServerState.ERROR and self.__state != ServerState.NOT_RUNNING
@@ -133,7 +133,7 @@ class Server:
 
         # Send the success response:
         self.tcpServer.sendToClient(str(SuccessSetPushAccountsMessage(
-            self.config["xmpp"]["bare_jid"], accountsResponse)), sock)
+            self.config["xmpp"]["bareJid"], accountsResponse)), sock)
         print("Set {} push accounts(s) for device '{}'.".format(
             len(accountsResult), deviceId))
 

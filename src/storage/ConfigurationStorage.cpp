@@ -3,23 +3,23 @@
 
 namespace storage {
 
-ConfigurationStorage::ConfigurationStorage(const std::filesystem::path& config_file) : file_handl(config_file) {
+ConfigurationStorage::ConfigurationStorage(const std::filesystem::path& configFilePath) : fileHandle(configFilePath) {
     SPDLOG_DEBUG("Initializing ConfigurationStorage, this should only happen once per execution.");
-    if (std::filesystem::exists(config_file)) {
-        SPDLOG_INFO("Configuration file {} exists, trying to read it...", config_file.string());
-        if (file_handl.read_in()) {
-            config = file_handl.js_int.get<Configuration>();
+    if (std::filesystem::exists(configFilePath)) {
+        SPDLOG_INFO("Configuration file {} exists, trying to read it...", configFilePath.string());
+        if (fileHandle.read_in()) {
+            config = fileHandle.js_int.get<Configuration>();
             SPDLOG_DEBUG("Configuration loaded successfully.");
         }
     } else {
-        SPDLOG_ERROR("Configuration file '{}' does not exist. Creating a new, empty one.", config_file.string());
+        SPDLOG_ERROR("Configuration file '{}' does not exist. Creating a new, empty one.", configFilePath.string());
         write_configuration();
     }
 }
 
 void ConfigurationStorage::write_configuration() {
-    file_handl.js_int = config;
-    file_handl.write_out();
+    fileHandle.js_int = config;
+    fileHandle.write_out();
 }
 
 ConfigurationStorage& get_configuration_storage_instance() {

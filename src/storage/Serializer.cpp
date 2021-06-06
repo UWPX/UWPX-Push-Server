@@ -8,33 +8,33 @@
 namespace storage {
 
 void to_json(nlohmann::json& j, const WnsConfiguration& c) {
-    j = nlohmann::json{{"packet_id", c.packet_id},
-                       {"client_secret", c.client_secret}};
+    j = nlohmann::json{{"packetId", c.packetId},
+                       {"clientSecret", c.clientSecret}};
 }
 
 void from_json(const nlohmann::json& j, WnsConfiguration& c) {
-    j.at("packet_id").get_to(c.packet_id);
-    j.at("client_secret").get_to(c.client_secret);
+    j.at("packetId").get_to(c.packetId);
+    j.at("clientSecret").get_to(c.clientSecret);
 }
 
 void to_json(nlohmann::json& j, const XmppConfiguration& c) {
-    j = nlohmann::json{{"bare_jid", c.bare_jid},
+    j = nlohmann::json{{"bareJid", c.bareJid},
                        {"password", c.password}};
 }
 
 void from_json(const nlohmann::json& j, XmppConfiguration& c) {
-    j.at("bare_jid").get_to(c.bare_jid);
+    j.at("bareJid").get_to(c.bareJid);
     j.at("password").get_to(c.password);
 }
 
 void to_json(nlohmann::json& j, const TlsConfiguration& c) {
-    j = nlohmann::json{{"server_cert_path", c.server_cert_path},
-                       {"server_key_path", c.server_key_path}};
+    j = nlohmann::json{{"serverCertPath", c.serverCertPath},
+                       {"serverKeyPath", c.serverKeyPath}};
 }
 
 void from_json(const nlohmann::json& j, TlsConfiguration& c) {
-    j.at("server_cert_path").get_to(c.server_cert_path);
-    j.at("server_key_path").get_to(c.server_key_path);
+    j.at("serverCertPath").get_to(c.serverCertPath);
+    j.at("serverKeyPath").get_to(c.serverKeyPath);
 }
 
 void to_json(nlohmann::json& j, const TcpConfiguration& c) {
