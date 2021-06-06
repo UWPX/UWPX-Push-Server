@@ -1,85 +1,45 @@
-###SublimeText###
+# Prerequisites
+*.d
 
-# cache files for sublime text
-*.tmlanguage.cache
-*.tmPreferences.cache
-*.stTheme.cache
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
 
-# workspace files are user-specific
-*.sublime-workspace
+# Precompiled Headers
+*.gch
+*.pch
 
-# project files should be checked into the repository, unless a significant
-# proportion of contributors will probably not be using SublimeText
-*.sublime-project
-cert/*
-*.cert
-*.key
-# sftp configuration file
-sftp-config.json
-key.key
-test*.py
-
-###Python###
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-test.py
-# C extensions
+# Compiled Dynamic libraries
 *.so
+*.dylib
+*.dll
 
-# Distribution / packaging
-.Python
-env/
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Misc
+logs/
 build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
 
-# PyInstaller
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-#  Usually these files are written by a python script from a template
-*.manifest
-*.spec
-db/*
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+# VScode clangd stuff
+.clangd/
+compile_commands.json
+.cache/
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.cache
-nosetests.xml
-coverage.xml
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# local protoypes
-*_prot.py
-
-# ignore mypy folder
-.mypy_cache/*
 
 # Database
 *.db
