@@ -5,10 +5,15 @@
     },
     "xmpp": {
         "bare_jid": "pushServer@xmpp.example.com",
-        "password": "I'm your super secure password"
+        "password": "I'm your super secure password",
+        "pub_sub_jid": "pubsub@xmpp.example.com"
     },
     "tcp": {
-        "port": 1997
+        "port": 1997,
+        "tls": {
+            "server_key_path": "Path to your 'domain.key' file",
+            "server_cert_path": "Path to your 'domain.cert' file"
+        }
     },
     "db": {
         "path" : "pushServer.db"
