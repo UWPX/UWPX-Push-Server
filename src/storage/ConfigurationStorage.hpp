@@ -79,9 +79,11 @@ struct Configuration {
 struct ConfigurationStorage {
     explicit ConfigurationStorage(const std::filesystem::path& configFilePath);
 
+ public:
+    Configuration config{};
+
  private:
     storage::Serializer fileHandle;
-    Configuration config{};
 
     void write_configuration();
 };

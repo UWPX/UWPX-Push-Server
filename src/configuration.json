@@ -1,18 +1,18 @@
 {
     "wns": {
-        "packet_id": "The UWPX package ID starting with: 'ms-app://...'",
-        "client_secret": "The secret obtained from the Devcenter"
+        "packetId": "The UWPX package ID starting with: 'ms-app://...'",
+        "clientSecret": "The secret obtained from the Devcenter"
     },
     "xmpp": {
-        "bare_jid": "pushServer@xmpp.example.com",
+        "bareJid": "pushServer@xmpp.example.com",
         "password": "I'm your super secure password",
-        "pub_sub_jid": "pubsub@xmpp.example.com"
+        "pubSubJid": "pubsub@xmpp.example.com"
     },
     "tcp": {
         "port": 1997,
         "tls": {
-            "server_key_path": "Path to your 'domain.key' file",
-            "server_cert_path": "Path to your 'domain.cert' file"
+            "serverKeyPath": "Path to your 'domain.key' file",
+            "serverCertPath": "Path to your 'domain.cert' file"
         }
     },
     "db": {
