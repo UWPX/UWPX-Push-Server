@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WnsToken.hpp"
+#include "storage/ConfigurationStorage.hpp"
 #include <memory>
 #include <string>
 
@@ -12,7 +13,7 @@ class WnsClient {
     std::shared_ptr<WnsToken> token{nullptr};
 
  public:
-    WnsClient(std::string&& packetSid, std::string&& clientSecret);
+    explicit WnsClient(const storage::WnsConfiguration& config);
     WnsClient(WnsClient&&) = default;
     WnsClient(const WnsClient&) = default;
     WnsClient& operator=(WnsClient&&) = default;

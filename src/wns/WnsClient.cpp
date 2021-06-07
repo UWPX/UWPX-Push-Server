@@ -6,10 +6,11 @@
 #include <cpr/cprtypes.h>
 #include <cpr/payload.h>
 #include <cpr/response.h>
+#include <cpr/ssl_options.h>
 #include <spdlog/spdlog.h>
 
 namespace wns {
-WnsClient::WnsClient(std::string&& packetSid, std::string&& clientSecret) : packetSid(std::move(packetSid)), clientSecret(std::move(clientSecret)) {}
+WnsClient::WnsClient(const storage::WnsConfiguration& config) : packetSid(config.packetId), clientSecret(config.clientSecret) {}
 
 bool WnsClient::isTokenValid() {
     return token && token->isValid();
@@ -22,7 +23,7 @@ bool WnsClient::requestToken() {
         {"client_id", packetSid},
         {"client_secret", clientSecret}};
     cpr::Url url{"https://login.live.com/accesstoken.srf"};
-    cpr::Response response = cpr::Post(url, payload);
+    cpr::Response response = cpr::Post(url, payload, cpr::VerifySsl{false});  // TODO(): Remove 'cpr::VerifySsl{false}' before release
     if (response.status_code != 200) {
         if (response.error.code == cpr::ErrorCode::OK) {
             SPDLOG_ERROR("Requesting a new token failed. Status code: {}\nResponse: {}", response.status_code, response.text);

@@ -5,4 +5,4 @@ add_library(wns STATIC WnsClient.cpp
                        WnsToken.cpp
                        WnsToken.hpp)
 
-target_link_libraries(wns PRIVATE logger cpr::cpr nlohmann_json::nlohmann_json)
+target_link_libraries(wns PRIVATE logger storage cpr::cpr nlohmann_json::nlohmann_json)
