@@ -8,7 +8,7 @@ namespace server {
 PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns) {}
 
 PushServer::~PushServer() {
-    stop();
+    assert(state == PushServerState::NOT_RUNNING);
 }
 
 void PushServer::start() {
@@ -19,14 +19,16 @@ void PushServer::start() {
 }
 
 void PushServer::stop() {
-    if (state == PushServerState::STARTING || state == PushServerState::RUNNING) {
-        SPDLOG_DEBUG("Stopping the push server thread...");
-        state = PushServerState::STOP_REQUESTED;
+    if (state == PushServerState::STARTING || state == PushServerState::RUNNING || state == PushServerState::WAITING_FOR_JOIN) {
+        if (state != PushServerState::WAITING_FOR_JOIN) {
+            SPDLOG_DEBUG("Stopping the push server thread...");
+            state = PushServerState::STOP_REQUESTED;
+        }
         SPDLOG_DEBUG("Joining the push server thread...");
         serverThread->join();
         state = PushServerState::NOT_RUNNING;
         serverThread = std::nullopt;
-        SPDLOG_INFO("Push server thread stopped.");
+        SPDLOG_INFO("Push server thread joined.");
     } else {
         SPDLOG_DEBUG("No need to stop the push server thread - not running (state: {})!", state);
     }
@@ -45,7 +47,10 @@ void PushServer::threadRun() {
 
     while (state == PushServerState::RUNNING) {
         check_setup_wns();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    state = PushServerState::WAITING_FOR_JOIN;
+    SPDLOG_INFO("Push server thread ready to be joined.");
 }
 
 void PushServer::check_setup_wns() {
