@@ -17,7 +17,7 @@ class PushServer {
 
  private:
     wns::WnsClient wnsClient;
-    std::optional<std::thread> serverThread;
+    std::optional<std::thread> serverThread{std::nullopt};
     PushServerState state{PushServerState::NOT_RUNNING};
 
  public:
@@ -33,5 +33,6 @@ class PushServer {
 
  private:
     void threadRun();
+    void check_setup_wns();
 };
 }  // namespace server

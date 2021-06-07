@@ -42,17 +42,20 @@ void PushServer::threadRun() {
 
     // WNS:
     wnsClient.loadTokenFromDb();
+
+    while (state == PushServerState::RUNNING) {
+        check_setup_wns();
+    }
+}
+
+void PushServer::check_setup_wns() {
     if (!wnsClient.isTokenValid()) {
         if (!wnsClient.requestToken()) {
             SPDLOG_INFO("Retrying to request a new WNS token...");
             if (!wnsClient.requestToken()) {
                 SPDLOG_ERROR("Failed to request a new WNS token for te second time! Exiting...");
-                exit(-1);
             }
         }
-    }
-
-    while (state == PushServerState::RUNNING) {
     }
 }
 }  // namespace server
