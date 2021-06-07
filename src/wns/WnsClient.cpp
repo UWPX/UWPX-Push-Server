@@ -24,7 +24,11 @@ bool WnsClient::requestToken() {
     cpr::Url url{"https://login.live.com/accesstoken.srf"};
     cpr::Response response = cpr::Post(url, payload);
     if (response.status_code != 200) {
-        SPDLOG_ERROR("Requesting a new token failed. Status code: {}\nResponse: {}", response.status_code, response.text);
+        if (response.error.code == cpr::ErrorCode::OK) {
+            SPDLOG_ERROR("Requesting a new token failed. Status code: {}\nResponse: {}", response.status_code, response.text);
+        } else {
+            SPDLOG_ERROR("Requesting a new token failed. Status code: {}\nError: {}", response.status_code, response.error.message);
+        }
         return false;
     }
     token = WnsToken::fromResponse(response.text);

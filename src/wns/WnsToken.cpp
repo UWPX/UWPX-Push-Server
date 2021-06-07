@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <string>
 
@@ -18,7 +19,7 @@ bool WnsToken::isValid() {
 
 std::shared_ptr<WnsToken> WnsToken::fromResponse(const std::string& response) {
     try {
-        nlohmann::json js = response;
+        nlohmann::json js = nlohmann::json::parse(response);
 
         // Token type:
         if (!js.contains("token_type")) {
