@@ -87,6 +87,7 @@ endif()
 conan_cmake_run(REQUIRES nlohmann_json/3.9.1
                          spdlog/1.8.5
                          cpr/1.6.2
+                         redis-plus-plus/1.2.3
                 GENERATORS cmake_find_package
                 BUILD missing)
 
@@ -99,6 +100,7 @@ conan_cmake_install(PATH_OR_REFERENCE .
 find_package(nlohmann_json REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(cpr REQUIRED)
+find_package(redis++ REQUIRED)
 
 # FetchContent_Declare(qxmpp
 #                      GIT_REPOSITORY         https://github.com/qxmpp-project/qxmpp.git
