@@ -127,31 +127,51 @@ The `bareJidHash` column represents the bare JID (e.g. someClient@xmpp.uwpx.org 
 ## What the user's XMPP server sends to the app server
 
 ## Dependencies
-* [Peewee](https://github.com/coleifer/peewee) is a simple and small ORM. It has few (but expressive) concepts, making it easy to learn and intuitive to use. It allows the push server to interact with the sqlite3 DB from multiple threads.
+The UWPX push server depends on the following dependencies:
 
-## Installation
+### Manual
+To be able to build and run this server, you have to install the following dependencies on your own:
+* [CMake](https://cmake.org/): (`sudo dnf install cmake`)
+* [gcc](https://gcc.gnu.org/) or [clang](https://clang.llvm.org/) with support for `C++20`: `sudo dnf install gcc clang`
+* [Conan](https://conan.io/): `pip3 install conan --user`
+
+### Automatic
+The following dependencies will be installed automatically by [conan](https://conan.io/) during the CMake configuration phase.
+* [nlohmann_json](https://github.com/nlohmann/json): JSON for Modern C++
+* [spdlog](https://github.com/gabime/spdlog): Very fast, header-only/compiled, C++ logging library.
+* [cpr](https://github.com/whoshuu/cpr): C++ Requests: Curl for People, a spiritual port of Python Requests.
+* [redis-plus-plus](https://github.com/sewenew/redis-plus-plus): Redis client written in C++.
+
+## Building
 ```BASH
-$ pip3 install --user -r requirements.txt
+git clone https://github.com/UWPX/UWPX-Push-Server.git
+cd UWPX-Push-Server
+mkdir build
+cd build
+cmake ..
+cmake --build .
 ```
 
 ## Configuration
 The server expects a file called `configuration.json` to be located in the same directory, where you execute the server from.
-It should have the following format:
+If you run the server for the first time and there is no `configuration.json` present, it will create on with the following contents for you:
 ```JSON
 {
+    "db": null,
+    "tcp": {
+        "port": 1997,
+        "tls": {
+            "serverCertPath": "Path to your 'domain.cert' file",
+            "serverKeyPath": "Path to your 'domain.key' file"
+        }
+    },
     "wns": {
-        "packetId": "The UWPX package ID starting with: 'ms-app://...'",
-        "clientSecret": "The secret obtained from the Devcenter"
+        "clientSecret": "lSK4rlwn2y5P/bpqlSCxzG7YKzh9F8Uo",
+        "packetId": "ms-app://s-1-15-2-845335094-2522404720-4158276525-212115671-2234325695-1945591644-3823387573"
     },
     "xmpp": {
-        "bareJid": "pushServer@xmpp.example.com",
-        "password": "I'm your super secure password"
-    },
-    "tcp": {
-        "port": 1997
-    },
-    "db": {
-        "path" : "pushServer.db"
+        "bareJid": "The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com')",
+        "password": "The password for the push XMPP client"
     }
 }
 ```
