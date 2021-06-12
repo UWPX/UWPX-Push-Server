@@ -52,15 +52,16 @@ void PushServer::threadRun() {
 
     tcpServer.stop();
     state = PushServerState::WAITING_FOR_JOIN;
-    SPDLOG_INFO("Push server thread ready to be joined.");
+    SPDLOG_DEBUG("Push server thread ready to be joined.");
 }
 
 void PushServer::check_setup_wns() {
     if (!wnsClient.isTokenValid()) {
         if (!wnsClient.requestToken()) {
-            SPDLOG_INFO("Retrying to request a new WNS token...");
+            SPDLOG_INFO("Retrying to request a new WNS token in 10 seconds...");
+            std::this_thread::sleep_for(std::chrono::seconds(10));
             if (!wnsClient.requestToken()) {
-                SPDLOG_ERROR("Failed to request a new WNS token for te second time! Exiting...");
+                SPDLOG_ERROR("Failed to request a new WNS token for the second time! Exiting...");
             }
         }
     }

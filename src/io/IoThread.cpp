@@ -58,7 +58,7 @@ void IoThread::threadRun() {
         }
     }
     state = IoThreadState::WAITING_FOR_JOIN;
-    SPDLOG_INFO("IO thread ready to be joined.");
+    SPDLOG_DEBUG("IO thread ready to be joined.");
 }
 
 void IoThread::printHelp() {

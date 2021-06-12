@@ -13,7 +13,7 @@ class PushServer {
         STARTING,
         RUNNING,
         STOP_REQUESTED,
-        WAITING_FOR_JOIN,
+        WAITING_FOR_JOIN
     };
 
  private:
