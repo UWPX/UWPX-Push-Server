@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+add_subdirectory(redis)
+
 add_library(storage STATIC Serializer.cpp
                            Serializer.hpp
                            ConfigurationStorage.cpp
