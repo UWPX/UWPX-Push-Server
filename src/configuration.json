@@ -16,6 +16,6 @@
         }
     },
     "db": {
-        "path" : "pushServer.db"
+        "url": "Uri to connect to the Redis server"
     }
 }

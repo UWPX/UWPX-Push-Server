@@ -55,7 +55,15 @@ struct TcpConfiguration {
     TlsConfiguration tls{};
 };
 
-struct DbConfiguration {};
+struct DbConfiguration {
+    /**
+     * Uri to connect to the Redis server.
+     * e.g. 'tcp://127.0.0.1', 'tcp://127.0.0.1:6379', or 'unix://path/to/socket'.
+     * Full URI scheme: 'tcp://[[username:]password@]host[:port][/db]' or
+     * unix://[[username:]password@]path-to-unix-domain-socket[/db]
+     **/
+    std::string url;
+};
 
 struct Configuration {
     /**

@@ -47,11 +47,13 @@ void from_json(const nlohmann::json& j, TcpConfiguration& c) {
     j.at("tls").get_to(c.tls);
 }
 
-void to_json(nlohmann::json& j, const DbConfiguration& /*c*/) {
-    j = nlohmann::json{};
+void to_json(nlohmann::json& j, const DbConfiguration& c) {
+    j = nlohmann::json{{"url", c.url}};
 }
 
-void from_json(const nlohmann::json& /*j*/, DbConfiguration& /*c*/) {}
+void from_json(const nlohmann::json& j, DbConfiguration& c) {
+    j.at("url").get_to(c.url);
+}
 
 void to_json(nlohmann::json& j, const Configuration& c) {
     j = nlohmann::json{{"wns", c.wns},

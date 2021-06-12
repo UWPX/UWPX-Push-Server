@@ -10,9 +10,9 @@ class RedisClient {
  public:
     explicit RedisClient(const storage::DbConfiguration& config);
     RedisClient(RedisClient&&) = default;
-    RedisClient(const RedisClient&) = default;
+    RedisClient(const RedisClient&) = delete;
     RedisClient& operator=(RedisClient&&) = default;
-    RedisClient& operator=(const RedisClient&) = default;
+    RedisClient& operator=(const RedisClient&) = delete;
     ~RedisClient() = default;
 
  private:

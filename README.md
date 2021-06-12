@@ -157,7 +157,9 @@ The server expects a file called `configuration.json` to be located in the same 
 If you run the server for the first time and there is no `configuration.json` present, it will create on with the following contents for you:
 ```JSON
 {
-    "db": null,
+    "db": {
+		"url": "Uri to connect to the Redis server"
+	},
     "tcp": {
         "port": 1997,
         "tls": {
@@ -166,8 +168,8 @@ If you run the server for the first time and there is no `configuration.json` pr
         }
     },
     "wns": {
-        "clientSecret": "lSK4rlwn2y5P/bpqlSCxzG7YKzh9F8Uo",
-        "packetId": "ms-app://s-1-15-2-845335094-2522404720-4158276525-212115671-2234325695-1945591644-3823387573"
+		"clientSecret": "The secret obtained from the Devcenter",
+        "packetId": "The UWPX package ID starting with: 'ms-app://...'"
     },
     "xmpp": {
         "bareJid": "The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com')",
