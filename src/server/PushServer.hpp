@@ -1,5 +1,6 @@
 #pragma once
 #include "storage/ConfigurationStorage.hpp"
+#include "tcp/TcpServer.hpp"
 #include "wns/WnsClient.hpp"
 #include <optional>
 #include <thread>
@@ -17,6 +18,7 @@ class PushServer {
 
  private:
     wns::WnsClient wnsClient;
+    tcp::TcpServer tcpServer;
     std::optional<std::thread> serverThread{std::nullopt};
     PushServerState state{PushServerState::NOT_RUNNING};
 

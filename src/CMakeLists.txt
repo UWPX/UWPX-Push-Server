@@ -6,6 +6,7 @@ add_subdirectory(logger)
 add_subdirectory(storage)
 add_subdirectory(io)
 add_subdirectory(wns)
+add_subdirectory(tcp)
 add_subdirectory(server)
 
 add_executable(${MAIN_EXECUTABLE} WIN32 main.cpp)

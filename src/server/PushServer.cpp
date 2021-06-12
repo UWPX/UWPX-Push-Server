@@ -5,7 +5,7 @@
 #include <spdlog/spdlog.h>
 
 namespace server {
-PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns) {}
+PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns), tcpServer(config.tcp) {}
 
 PushServer::~PushServer() {
     assert(state == PushServerState::NOT_RUNNING);
@@ -42,13 +42,15 @@ void PushServer::threadRun() {
     state = PushServerState::RUNNING;
     SPDLOG_INFO("Push server thread started.");
 
-    // WNS:
     wnsClient.loadTokenFromDb();
+    tcpServer.start();
 
     while (state == PushServerState::RUNNING) {
         check_setup_wns();
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+
+    tcpServer.stop();
     state = PushServerState::WAITING_FOR_JOIN;
     SPDLOG_INFO("Push server thread ready to be joined.");
 }

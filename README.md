@@ -134,6 +134,15 @@ To be able to build and run this server, you have to install the following depen
 * [CMake](https://cmake.org/): (`sudo dnf install cmake`)
 * [gcc](https://gcc.gnu.org/) or [clang](https://clang.llvm.org/) with support for `C++20`: `sudo dnf install gcc clang`
 * [Conan](https://conan.io/): `pip3 install conan --user`
+* [Gil (git links) tool](https://github.com/chronoxor/gil) `pip3 install gli`
+* [GNU Binutils](https://www.gnu.org/software/binutils/) `sudo dnf install binutils-devel`
+* [libuuid](https://sourceforge.net/projects/libuuid/) `sudo dnf install libuuid-devel`
+
+#### Compressed
+```
+sudo dnf install cmake gcc clang binutils-devel libuuid-devel
+pip3 install conan gli --user 
+```
 
 ### Automatic
 The following dependencies will be installed automatically by [conan](https://conan.io/) during the CMake configuration phase.
@@ -141,6 +150,7 @@ The following dependencies will be installed automatically by [conan](https://co
 * [spdlog](https://github.com/gabime/spdlog): Very fast, header-only/compiled, C++ logging library.
 * [cpr](https://github.com/whoshuu/cpr): C++ Requests: Curl for People, a spiritual port of Python Requests.
 * [redis-plus-plus](https://github.com/sewenew/redis-plus-plus): Redis client written in C++.
+* [CppServer](https://github.com/chronoxor/CppServer#requirements): Ultra fast and low latency asynchronous socket server & client C++ library with support TCP, SSL, UDP, HTTP, HTTPS, WebSocket protocols and 10K connections problem solution.
 
 ## Building
 ```BASH
