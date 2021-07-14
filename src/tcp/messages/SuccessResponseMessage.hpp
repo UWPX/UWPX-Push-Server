@@ -6,10 +6,9 @@
 
 namespace tcp::messages {
 class SuccessResponseMessage : public AbstractResponseMessage {
- private:
+ public:
     static constexpr int STATUS = 1;
 
- public:
     explicit SuccessResponseMessage(const nlohmann::json& j);
     SuccessResponseMessage();
     SuccessResponseMessage(SuccessResponseMessage&&) = default;

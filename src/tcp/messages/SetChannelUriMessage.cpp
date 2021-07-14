@@ -2,7 +2,7 @@
 #include "logger/Logger.hpp"
 
 namespace tcp::messages {
-SetChannelUriMessage::SetChannelUriMessage(const nlohmann::json& j) : AbstractMessage(from_json(j)) {}
+SetChannelUriMessage::SetChannelUriMessage(const nlohmann::json& j) { isValid = from_json(j); }
 
 SetChannelUriMessage::SetChannelUriMessage(std::string&& channelUri, std::string&& deviceId) : AbstractMessage(std::string{ACTION}), channelUri(std::move(channelUri)), deviceId(std::move(deviceId)) {}
 
@@ -10,7 +10,7 @@ const std::string& SetChannelUriMessage::get_channel_uri() const { return channe
 
 const std::string& SetChannelUriMessage::get_device_id() const { return deviceId; }
 
-AbstractMessage::MessageType SetChannelUriMessage::get_type() const { return MessageType::SET_PUSH_ACCOUNT_MESSAGE; }
+AbstractMessage::MessageType SetChannelUriMessage::get_type() const { return MessageType::SET_CHANNEL_URI_MESSAGE; }
 
 bool SetChannelUriMessage::from_json(const nlohmann::json& j) {
     if (!AbstractMessage::from_json(j)) {
@@ -21,7 +21,7 @@ bool SetChannelUriMessage::from_json(const nlohmann::json& j) {
         SPDLOG_WARN("Missing 'channel_uri' field in message.");
         return false;
     }
-    j.at("channel_uri").get_to(channelUri);
+    channelUri = j["channel_uri"];
     if (channelUri.empty()) {
         SPDLOG_WARN("Invalid message 'channel_uri' value. Expected a non empty string, but received: {}", channelUri);
         return false;
@@ -31,7 +31,7 @@ bool SetChannelUriMessage::from_json(const nlohmann::json& j) {
         SPDLOG_WARN("Missing 'device_id' field in message.");
         return false;
     }
-    j.at("device_id").get_to(deviceId);
+    deviceId = j["device_id"];
     if (deviceId.empty()) {
         SPDLOG_WARN("Invalid message 'device_id' value. Expected a non empty string, but received: {}", deviceId);
         return false;

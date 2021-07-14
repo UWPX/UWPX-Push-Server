@@ -2,7 +2,7 @@
 #include "logger/Logger.hpp"
 
 namespace tcp::messages {
-RequestTestPushMessage::RequestTestPushMessage(const nlohmann::json& j) : AbstractMessage(from_json(j)) {}
+RequestTestPushMessage::RequestTestPushMessage(const nlohmann::json& j) { isValid = from_json(j); }
 
 RequestTestPushMessage::RequestTestPushMessage(std::string&& deviceId) : AbstractMessage(std::string{ACTION}), deviceId(std::move(deviceId)) {}
 
@@ -19,7 +19,7 @@ bool RequestTestPushMessage::from_json(const nlohmann::json& j) {
         SPDLOG_WARN("Missing 'device_id' field in message.");
         return false;
     }
-    j.at("device_id").get_to(deviceId);
+    deviceId = j["device_id"];
     if (deviceId.empty()) {
         SPDLOG_WARN("Invalid message 'device_id' value. Expected a non empty string, but received: {}", deviceId);
         return false;

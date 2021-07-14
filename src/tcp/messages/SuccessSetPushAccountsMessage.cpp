@@ -6,7 +6,7 @@
 #include <utility>
 
 namespace tcp::messages {
-SuccessSetPushAccountsMessage::SuccessSetPushAccountsMessage(const nlohmann::json& j) : SuccessResponseMessage(from_json(j)) {}
+SuccessSetPushAccountsMessage::SuccessSetPushAccountsMessage(const nlohmann::json& j) { isValid = from_json(j); }
 
 SuccessSetPushAccountsMessage::SuccessSetPushAccountsMessage(std::vector<PushAccount>&& accounts, std::string&& pushBareJid) : accounts(std::move(accounts)), pushBareJid(std::move(pushBareJid)) {}
 
@@ -43,7 +43,7 @@ bool SuccessSetPushAccountsMessage::from_json(const nlohmann::json& j) {
         SPDLOG_WARN("Missing 'push_bare_jid' field in message.");
         return false;
     }
-    j.at("push_bare_jid").get_to(pushBareJid);
+    pushBareJid = j["push_bare_jid"];
     if (pushBareJid.empty()) {
         SPDLOG_WARN("Invalid message 'push_bare_jid' value. Expected a non empty string, but received: {}", pushBareJid);
         return false;

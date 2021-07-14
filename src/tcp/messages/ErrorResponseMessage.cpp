@@ -3,7 +3,7 @@
 #include "tcp/messages/AbstractResponseMessage.hpp"
 
 namespace tcp::messages {
-ErrorResponseMessage::ErrorResponseMessage(const nlohmann::json& j) : AbstractResponseMessage(from_json(j)) {}
+ErrorResponseMessage::ErrorResponseMessage(const nlohmann::json& j) { isValid = from_json(j); }
 
 ErrorResponseMessage::ErrorResponseMessage(std::string&& error) : AbstractResponseMessage(STATUS), error(std::move(error)) {}
 
@@ -20,7 +20,7 @@ bool ErrorResponseMessage::from_json(const nlohmann::json& j) {
         SPDLOG_WARN("Missing 'error' field in message.");
         return false;
     }
-    j.at("error").get_to(error);
+    error = j["error"];
     return true;
 }
 

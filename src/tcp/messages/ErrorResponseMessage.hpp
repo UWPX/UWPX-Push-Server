@@ -6,7 +6,7 @@
 
 namespace tcp::messages {
 class ErrorResponseMessage : public AbstractResponseMessage {
- private:
+ public:
     static constexpr int STATUS = 0;
 
  protected:
@@ -26,6 +26,8 @@ class ErrorResponseMessage : public AbstractResponseMessage {
 
  protected:
     bool from_json(const nlohmann::json& j) override;
+
+ public:
     void to_json(nlohmann::json& j) const override;
 };
 }  // namespace tcp::messages

@@ -19,7 +19,7 @@ class SuccessSetPushAccountsMessage : public SuccessResponseMessage {
 
         static std::optional<PushAccount> from_json(const nlohmann::json& j);
         void to_json(nlohmann::json& j) const;
-    };
+    } __attribute__((aligned(128)));
 
  protected:
     std::vector<PushAccount> accounts;
@@ -40,6 +40,8 @@ class SuccessSetPushAccountsMessage : public SuccessResponseMessage {
 
  protected:
     bool from_json(const nlohmann::json& j) override;
+
+ public:
     void to_json(nlohmann::json& j) const override;
 };
 }  // namespace tcp::messages

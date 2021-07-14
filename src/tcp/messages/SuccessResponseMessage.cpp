@@ -3,9 +3,7 @@
 #include "tcp/messages/AbstractResponseMessage.hpp"
 
 namespace tcp::messages {
-SuccessResponseMessage::SuccessResponseMessage(const nlohmann::json& j) : AbstractResponseMessage(false) {
-    isValid = from_json(j);  // Has to be called here since it is not available in the initializer list.
-}
+SuccessResponseMessage::SuccessResponseMessage(const nlohmann::json& j) { isValid = from_json(j); }
 
 SuccessResponseMessage::SuccessResponseMessage() : AbstractResponseMessage(STATUS) {}
 

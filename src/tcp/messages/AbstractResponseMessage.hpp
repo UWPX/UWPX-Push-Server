@@ -6,7 +6,7 @@
 
 namespace tcp::messages {
 class AbstractResponseMessage : public AbstractMessage {
- private:
+ public:
     static constexpr std::string_view ACTION = "response";
 
  protected:
@@ -14,9 +14,10 @@ class AbstractResponseMessage : public AbstractMessage {
 
  public:
     /**
-     * Should be called when constructing a message after parsing it with the return value of from_json().
+     * Should be called when constructing a message form a JSON object with from_json().
+     * Don't forget to set isValid with the return value of from_json().
      **/
-    explicit AbstractResponseMessage(bool isValid);
+    AbstractResponseMessage() = default;
     /**
      * Should be called when construction a message for sending it.
      **/
@@ -32,6 +33,8 @@ class AbstractResponseMessage : public AbstractMessage {
 
  protected:
     bool from_json(const nlohmann::json& j) override;
+
+ public:
     void to_json(nlohmann::json& j) const override;
 };
 }  // namespace tcp::messages

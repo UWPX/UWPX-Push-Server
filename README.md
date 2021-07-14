@@ -85,12 +85,12 @@ It also includes a `push_bareJid` field, which represents the bare JID of the pu
 		{
 			"bareJid": "someClient@xmpp.uwpx.org",
 			"node": "773bds9nf932",
-			"secret": "sdf/82h)=1",
+			"secret": "sdf/82h)=1"
 		},
 		{
 			"bareJid": "someOtherClient@xmpp.uwpx.org",
 			"node": "8w3rn0MB3m38z2",
-			"secret": "j$o909mN87!n/0m",
+			"secret": "j$o909mN87!n/0m"
 		}
 	]
 }

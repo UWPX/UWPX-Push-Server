@@ -4,7 +4,12 @@
 #include "SetChannelUriMessage.hpp"
 #include "SetPushAccountsMessage.hpp"
 #include "logger/Logger.hpp"
+#include "tcp/messages/AbstractResponseMessage.hpp"
+#include "tcp/messages/ErrorResponseMessage.hpp"
+#include "tcp/messages/SuccessResponseMessage.hpp"
+#include "tcp/messages/SuccessSetPushAccountsMessage.hpp"
 #include <exception>
+#include <iostream>
 #include <memory>
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
@@ -12,20 +17,22 @@
 namespace tcp::messages {
 const std::shared_ptr<AbstractMessage> parse(const std::string& s) {
     try {
-        nlohmann::json j = s;
+        nlohmann::json j = nlohmann::json::parse(s);
         return parse_json(j);
-    } catch (const std::exception& e) {
+    } catch (const nlohmann::json::parse_error& e) {
         SPDLOG_ERROR("Failed to parse received message '{}' as JSON with: {}", s, e.what());
+    } catch (const std::exception& e) {
+        SPDLOG_ERROR("Failed to evaluate received JSON message '{}' with: {}", s, e.what());
     }
     return nullptr;
 }
 
 const std::shared_ptr<AbstractMessage> parse_json(const nlohmann::json& j) {
-    std::string action;
     if (!j.contains("action")) {
-        SPDLOG_WARN("Missing 'action' field in message.");
+        SPDLOG_WARN("Missing 'action' field in message. {}", j.dump());
         return nullptr;
     }
+    std::string action;
     j.at("action").get_to(action);
     if (action.empty()) {
         SPDLOG_WARN("Invalid message 'action' value. Expected a non empty string, but received: {}", action);
@@ -40,6 +47,25 @@ const std::shared_ptr<AbstractMessage> parse_json(const nlohmann::json& j) {
         result = std::make_shared<SetPushAccountsMessage>(j);
     } else if (action == RequestTestPushMessage::ACTION) {
         result = std::make_shared<RequestTestPushMessage>(j);
+    } else if (action == AbstractResponseMessage::ACTION) {
+        if (!j.contains("status")) {
+            SPDLOG_WARN("Missing 'status' field in response message. {}", j.dump());
+            return nullptr;
+        }
+        int status = -1;
+        j.at("status").get_to(status);
+        if (status == SuccessResponseMessage::STATUS) {
+            if (j.contains("accounts")) {
+                result = std::make_shared<SuccessSetPushAccountsMessage>(j);
+            } else {
+                result = std::make_shared<SuccessResponseMessage>(j);
+            }
+        } else if (status == ErrorResponseMessage::STATUS) {
+            result = std::make_shared<ErrorResponseMessage>(j);
+        } else {
+            SPDLOG_WARN("Invalid message 'action' value. Expected a non empty string, but received: {}", action);
+            return nullptr;
+        }
     }
 
     if (result) {

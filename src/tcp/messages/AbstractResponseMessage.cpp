@@ -3,7 +3,6 @@
 #include "tcp/messages/AbstractMessage.hpp"
 
 namespace tcp::messages {
-AbstractResponseMessage::AbstractResponseMessage(bool isValid) : AbstractMessage(isValid) {}
 AbstractResponseMessage::AbstractResponseMessage(int status) : AbstractMessage(std::string{ACTION}), status(status) {}
 
 int AbstractResponseMessage::get_status() const { return status; }
@@ -19,7 +18,7 @@ bool AbstractResponseMessage::from_json(const nlohmann::json& j) {
         SPDLOG_WARN("Missing 'status' field in message.");
         return false;
     }
-    j.at("status").get_to(status);
+    status = j["status"];
     if (status == -1) {
         SPDLOG_WARN("Invalid message 'status' value. Expected {}, but received: {}", -1, status);
         return false;

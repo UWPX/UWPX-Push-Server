@@ -5,9 +5,7 @@
 #include <spdlog/spdlog.h>
 
 namespace tcp::messages {
-AbstractMessage::AbstractMessage(bool isValid) : isValid(isValid) {}
-
-AbstractMessage::AbstractMessage(std::string&& action) : isValid(true), version(VERSION), action(std::move(action)) {}
+AbstractMessage::AbstractMessage(std::string&& action) : version(VERSION), action(std::move(action)) {}
 
 bool AbstractMessage::is_valid() const { return isValid; }
 
@@ -22,7 +20,7 @@ bool AbstractMessage::from_json(const nlohmann::json& j) {
         SPDLOG_WARN("Missing 'version' field in message.");
         return false;
     }
-    j.at("version").get_to(version);
+    version = j["version"];
     if (version != VERSION) {
         SPDLOG_WARN("Invalid message 'version' value. Expected {}, but received: {}", VERSION, action);
         return false;
@@ -32,7 +30,7 @@ bool AbstractMessage::from_json(const nlohmann::json& j) {
         SPDLOG_WARN("Missing 'action' field in message.");
         return false;
     }
-    j.at("action").get_to(action);
+    action = j["action"];
     if (action.empty()) {
         SPDLOG_WARN("Invalid message 'action' value. Expected a non empty string, but received: {}", action);
         return false;

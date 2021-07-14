@@ -3,7 +3,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 namespace tcp::messages {
-SetPushAccountsMessage::SetPushAccountsMessage(const nlohmann::json& j) : AbstractMessage(from_json(j)) {}
+SetPushAccountsMessage::SetPushAccountsMessage(const nlohmann::json& j) { isValid = from_json(j); }
 
 SetPushAccountsMessage::SetPushAccountsMessage(std::vector<std::string>&& accounts, std::string&& deviceId) : AbstractMessage(std::string{ACTION}), accounts(std::move(accounts)), deviceId(std::move(deviceId)) {}
 
@@ -29,7 +29,7 @@ bool SetPushAccountsMessage::from_json(const nlohmann::json& j) {
             return false;
         }
         std::string jid;
-        j.at("bare_jid").get_to(jid);
+        jid = accountJson["bare_jid"];
         if (jid.empty()) {
             SPDLOG_WARN("Invalid message 'bare_jid' value. Expected a non empty string, but received: {}", jid);
             return false;
@@ -46,7 +46,7 @@ bool SetPushAccountsMessage::from_json(const nlohmann::json& j) {
         SPDLOG_WARN("Missing 'device_id' field in message.");
         return false;
     }
-    j.at("device_id").get_to(deviceId);
+    deviceId = j["device_id"];
     if (deviceId.empty()) {
         SPDLOG_WARN("Invalid message 'device_id' value. Expected a non empty string, but received: {}", deviceId);
         return false;

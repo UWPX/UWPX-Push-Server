@@ -17,19 +17,19 @@ class AbstractMessage {
         SUCCESS_SET_PUSH_ACCOUNT_MESSAGE
     };
 
- private:
     static constexpr int VERSION = 1;
 
  protected:
-    bool isValid;
+    bool isValid{true};
     int version{-1};
     std::string action{};
 
  public:
     /**
-     * Should be called when constructing a message after parsing it with the return value of from_json().
+     * Should be called when constructing a message form a JSON object with from_json().
+     * Don't forget to set isValid with the return value of from_json().
      **/
-    explicit AbstractMessage(bool isValid);
+    AbstractMessage() = default;
     /**
      * Should be called when construction a message for sending it.
      **/
@@ -47,6 +47,8 @@ class AbstractMessage {
 
  protected:
     virtual bool from_json(const nlohmann::json& j);
+
+ public:
     virtual void to_json(nlohmann::json& j) const;
 };
 }  // namespace tcp::messages
