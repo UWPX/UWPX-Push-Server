@@ -16,7 +16,7 @@ class SuccessResponseMessage : public AbstractResponseMessage {
     SuccessResponseMessage(const SuccessResponseMessage&) = default;
     SuccessResponseMessage& operator=(SuccessResponseMessage&&) = default;
     SuccessResponseMessage& operator=(const SuccessResponseMessage&) = default;
-    ~SuccessResponseMessage() override;
+    ~SuccessResponseMessage() override = default;
 
     [[nodiscard]] MessageType get_type() const override;
 };

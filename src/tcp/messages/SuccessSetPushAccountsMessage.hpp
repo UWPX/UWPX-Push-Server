@@ -32,7 +32,7 @@ class SuccessSetPushAccountsMessage : public SuccessResponseMessage {
     SuccessSetPushAccountsMessage(const SuccessSetPushAccountsMessage&) = default;
     SuccessSetPushAccountsMessage& operator=(SuccessSetPushAccountsMessage&&) = default;
     SuccessSetPushAccountsMessage& operator=(const SuccessSetPushAccountsMessage&) = default;
-    ~SuccessSetPushAccountsMessage() override;
+    ~SuccessSetPushAccountsMessage() override = default;
 
     [[nodiscard]] const std::vector<PushAccount>& get_accounts() const;
     [[nodiscard]] const std::string& get_push_bare_jid() const;

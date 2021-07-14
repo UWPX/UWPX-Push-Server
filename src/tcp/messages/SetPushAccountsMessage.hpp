@@ -22,7 +22,7 @@ class SetPushAccountsMessage : public AbstractMessage {
     SetPushAccountsMessage(const SetPushAccountsMessage&) = default;
     SetPushAccountsMessage& operator=(SetPushAccountsMessage&&) = default;
     SetPushAccountsMessage& operator=(const SetPushAccountsMessage&) = default;
-    ~SetPushAccountsMessage() override;
+    ~SetPushAccountsMessage() override = default;
 
     [[nodiscard]] const std::vector<std::string>& get_accounts() const;
     [[nodiscard]] const std::string& get_device_id() const;

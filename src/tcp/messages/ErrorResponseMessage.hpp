@@ -19,7 +19,7 @@ class ErrorResponseMessage : public AbstractResponseMessage {
     ErrorResponseMessage(const ErrorResponseMessage&) = default;
     ErrorResponseMessage& operator=(ErrorResponseMessage&&) = default;
     ErrorResponseMessage& operator=(const ErrorResponseMessage&) = default;
-    ~ErrorResponseMessage() override;
+    ~ErrorResponseMessage() override = default;
 
     [[nodiscard]] const std::string& get_error() const;
     [[nodiscard]] MessageType get_type() const override;

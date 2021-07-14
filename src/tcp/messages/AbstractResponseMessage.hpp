@@ -25,7 +25,7 @@ class AbstractResponseMessage : public AbstractMessage {
     AbstractResponseMessage(const AbstractResponseMessage&) = default;
     AbstractResponseMessage& operator=(AbstractResponseMessage&&) = default;
     AbstractResponseMessage& operator=(const AbstractResponseMessage&) = default;
-    ~AbstractResponseMessage() override;
+    ~AbstractResponseMessage() override = default;
 
     [[nodiscard]] int get_status() const;
     [[nodiscard]] MessageType get_type() const override;

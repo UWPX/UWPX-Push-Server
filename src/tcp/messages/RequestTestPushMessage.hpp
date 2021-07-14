@@ -20,7 +20,7 @@ class RequestTestPushMessage : public AbstractMessage {
     RequestTestPushMessage(const RequestTestPushMessage&) = default;
     RequestTestPushMessage& operator=(RequestTestPushMessage&&) = default;
     RequestTestPushMessage& operator=(const RequestTestPushMessage&) = default;
-    ~RequestTestPushMessage() override;
+    ~RequestTestPushMessage() override = default;
 
     [[nodiscard]] const std::string& get_device_id() const;
     [[nodiscard]] MessageType get_type() const override;

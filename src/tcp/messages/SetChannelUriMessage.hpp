@@ -21,7 +21,7 @@ class SetChannelUriMessage : public AbstractMessage {
     SetChannelUriMessage(const SetChannelUriMessage&) = default;
     SetChannelUriMessage& operator=(SetChannelUriMessage&&) = default;
     SetChannelUriMessage& operator=(const SetChannelUriMessage&) = default;
-    ~SetChannelUriMessage() override;
+    ~SetChannelUriMessage() override = default;
 
     [[nodiscard]] const std::string& get_channel_uri() const;
     [[nodiscard]] const std::string& get_device_id() const;

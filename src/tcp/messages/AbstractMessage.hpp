@@ -38,7 +38,7 @@ class AbstractMessage {
     AbstractMessage(const AbstractMessage&) = default;
     AbstractMessage& operator=(AbstractMessage&&) = default;
     AbstractMessage& operator=(const AbstractMessage&) = default;
-    virtual ~AbstractMessage();
+    virtual ~AbstractMessage() = default;
 
     [[nodiscard]] bool is_valid() const;
     [[nodiscard]] int get_version() const;
