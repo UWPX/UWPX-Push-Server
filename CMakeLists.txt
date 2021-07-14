@@ -105,20 +105,6 @@ find_package(spdlog REQUIRED)
 find_package(cpr REQUIRED)
 find_package(redis++ REQUIRED)
 
-ExternalProject_Add(cppserver
-  GIT_REPOSITORY    https://github.com/chronoxor/CppServer.git
-  GIT_TAG           1.0.1.0
-  PATCH_COMMAND     gil update
-    COMMAND         sed -i "1 i\#include <mutex>" ${CMAKE_BINARY_DIR}/cppserver-prefix/src/cppserver/modules/CppCommon/source/cache/filecache.cpp # https://github.com/chronoxor/CppCommon/pull/18
-  CMAKE_ARGS        -DCPPSERVER_MODULE=ON
-  UPDATE_COMMAND    ""
-  INSTALL_COMMAND   ""
-)
-include_directories(${CPP_SERVER_INCLUDE_DIR})
-set(CPPSERVER_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cppserver-prefix/src/cppserver/include/server")
-set(CPPSERVER_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/cppserver-prefix/src/cppserver-build")
-set(CPPSERVER_LIBRARIES "${CPPSERVER_LIB_DIR}/libcppserver.a")
-
 # FetchContent_Declare(qxmpp
 #                      GIT_REPOSITORY         https://github.com/qxmpp-project/qxmpp.git
 #                      GIT_TAG v1.4.0
