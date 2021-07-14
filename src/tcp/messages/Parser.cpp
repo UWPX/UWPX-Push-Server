@@ -13,14 +13,14 @@ namespace tcp::messages {
 const std::shared_ptr<AbstractMessage> parse(const std::string& s) {
     try {
         nlohmann::json j = s;
-        return parseJson(j);
+        return parse_json(j);
     } catch (const std::exception& e) {
         SPDLOG_ERROR("Failed to parse received message '{}' as JSON with: {}", s, e.what());
     }
     return nullptr;
 }
 
-const std::shared_ptr<AbstractMessage> parseJson(const nlohmann::json& j) {
+const std::shared_ptr<AbstractMessage> parse_json(const nlohmann::json& j) {
     std::string action;
     if (!j.contains("action")) {
         SPDLOG_WARN("Missing 'action' field in message.");

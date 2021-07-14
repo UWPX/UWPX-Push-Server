@@ -29,6 +29,7 @@ message(STATUS "C++ UWPX Push Server Options")
 message(STATUS "=======================================================")
 uwpx_push_server_option(UWPX_PUSH_SERVER_STATIC_ANALYZE "Set to ON to enable the GCC 10 static analysis. If enabled, UWPX_PUSH_SERVER_ENABLE_LINTING has to be disabled." OFF)
 uwpx_push_server_option(UWPX_PUSH_SERVER_ENABLE_LINTING "Set to ON to enable clang linting. If enabled, UWPX_PUSH_SERVER_STATIC_ANALYZE has to be disabled." ON)
+uwpx_push_server_option(UWPX_PUSH_SERVER_BUILD_TESTS "Set to ON to enable building tests." ON)
 message(STATUS "=======================================================")
 
 option(ENABLE_LINTING "Enables linting while building" ON)
@@ -91,6 +92,7 @@ conan_cmake_run(REQUIRES nlohmann_json/3.9.1
                          spdlog/1.8.5
                          cpr/1.6.2
                          redis-plus-plus/1.2.3
+                         catch2/2.13.6
                 GENERATORS cmake_find_package
                 BUILD missing)
 
