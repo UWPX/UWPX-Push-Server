@@ -1,9 +1,14 @@
 #pragma once
 #include "storage/ConfigurationStorage.hpp"
 #include "tcp/TcpServer.hpp"
+#include "tcp/messages/AbstractMessage.hpp"
+#include "tcp/messages/SetPushAccountsMessage.hpp"
 #include "wns/WnsClient.hpp"
+#include <memory>
 #include <optional>
+#include <string>
 #include <thread>
+#include <vector>
 
 namespace server {
 class PushServer {
@@ -34,7 +39,11 @@ class PushServer {
     void stop();
 
  private:
-    void threadRun();
+    void thread_run();
     void check_setup_wns();
+    void on_message_received(const std::shared_ptr<tcp::messages::AbstractMessage>& msg);
+    void send_test_push(const std::string& deviceId);
+    void set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts);
+    void set_channel_uri(const std::string& deviceId, const std::string& channelUri);
 };
 }  // namespace server

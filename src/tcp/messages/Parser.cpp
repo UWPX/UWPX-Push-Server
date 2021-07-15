@@ -75,6 +75,7 @@ const std::shared_ptr<AbstractMessage> parse_json(const nlohmann::json& j) {
     } else {
         SPDLOG_WARN("Unknown message received: {}", j.dump());
     }
+    assert(!result || result->is_valid());
     return result;
 }
 

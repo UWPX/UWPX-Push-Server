@@ -1,5 +1,10 @@
 #include "PushServer.hpp"
 #include "logger/Logger.hpp"
+#include "tcp/TcpServer.hpp"
+#include "tcp/messages/AbstractMessage.hpp"
+#include "tcp/messages/RequestTestPushMessage.hpp"
+#include "tcp/messages/SetChannelUriMessage.hpp"
+#include "tcp/messages/SetPushAccountsMessage.hpp"
 #include "wns/WnsClient.hpp"
 #include <cassert>
 #include <spdlog/spdlog.h>
@@ -15,7 +20,7 @@ void PushServer::start() {
     assert(state == PushServerState::NOT_RUNNING);
     SPDLOG_DEBUG("Starting the push server thread...");
     state = PushServerState::STARTING;
-    serverThread = std::make_optional<std::thread>(&PushServer::threadRun, this);
+    serverThread = std::make_optional<std::thread>(&PushServer::thread_run, this);
 }
 
 void PushServer::stop() {
@@ -34,7 +39,7 @@ void PushServer::stop() {
     }
 }
 
-void PushServer::threadRun() {
+void PushServer::thread_run() {
     assert(state == PushServerState::STARTING || state == PushServerState::STOP_REQUESTED);
     if (state != PushServerState::STARTING) {
         return;
@@ -66,4 +71,40 @@ void PushServer::check_setup_wns() {
         }
     }
 }
+
+void PushServer::on_message_received(const std::shared_ptr<tcp::messages::AbstractMessage>& msg) {
+    assert(msg);
+    assert(msg->is_valid());
+
+    switch (msg->get_type()) {
+        case tcp::messages::AbstractMessage::MessageType::SET_CHANNEL_URI_MESSAGE: {
+            const tcp::messages::SetChannelUriMessage* actMsg = static_cast<tcp::messages::SetChannelUriMessage*>(msg.get());
+            set_channel_uri(actMsg->get_device_id(), actMsg->get_channel_uri());
+        } break;
+        case tcp::messages::AbstractMessage::MessageType::SET_PUSH_ACCOUNT_MESSAGE: {
+            const tcp::messages::SetPushAccountsMessage* actMsg = static_cast<tcp::messages::SetPushAccountsMessage*>(msg.get());
+            set_push_accounts(actMsg->get_device_id(), actMsg->get_accounts());
+        } break;
+        case tcp::messages::AbstractMessage::MessageType::REQUEST_TEST_PUSH_MESSAGE: {
+            const tcp::messages::RequestTestPushMessage* actMsg = static_cast<tcp::messages::RequestTestPushMessage*>(msg.get());
+            send_test_push(actMsg->get_device_id());
+        } break;
+        default:
+            // TODO: Respond with: "Unsupported message type."
+            break;
+    }
+}
+
+void PushServer::send_test_push(const std::string& deviceId) {
+    const std::string channelUri;
+    wnsClient.sendRawNotification(channelUri, "Test push notification from your push server.");
+    SPDLOG_INFO("Test push send to device id: {}", deviceId);
+}
+
+void PushServer::set_push_accounts(const std::string& /*deviceId*/, const std::vector<std::string>& /*accounts*/) {
+}
+
+void PushServer::set_channel_uri(const std::string& /*deviceId*/, const std::string& /*channelUri*/) {
+}
+
 }  // namespace server
