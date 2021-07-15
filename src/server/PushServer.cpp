@@ -7,6 +7,7 @@
 #include "tcp/messages/SetPushAccountsMessage.hpp"
 #include "wns/WnsClient.hpp"
 #include <cassert>
+#include <optional>
 #include <spdlog/spdlog.h>
 
 namespace server {
@@ -49,6 +50,7 @@ void PushServer::thread_run() {
 
     wnsClient.loadTokenFromDb();
     tcpServer.start();
+    redisClient.init();
 
     while (state == PushServerState::RUNNING) {
         check_setup_wns();
@@ -96,9 +98,13 @@ void PushServer::on_message_received(const std::shared_ptr<tcp::messages::Abstra
 }
 
 void PushServer::send_test_push(const std::string& deviceId) {
-    const std::string channelUri;
-    wnsClient.sendRawNotification(channelUri, "Test push notification from your push server.");
-    SPDLOG_INFO("Test push send to device id: {}", deviceId);
+    const std::optional<std::string> channelUri = redisClient.get_channel_uri(deviceId);
+    if (channelUri) {
+        wnsClient.sendRawNotification(channelUri, "Test push notification from your push server.");
+        SPDLOG_INFO("Test push send to device id: {}", deviceId);
+        return;
+    }
+    // TODO: Respond with: "Device id unknown."
 }
 
 void PushServer::set_push_accounts(const std::string& /*deviceId*/, const std::vector<std::string>& /*accounts*/) {

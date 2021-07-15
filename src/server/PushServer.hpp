@@ -1,5 +1,6 @@
 #pragma once
 #include "storage/ConfigurationStorage.hpp"
+#include "storage/redis/RedisClient.hpp"
 #include "tcp/TcpServer.hpp"
 #include "tcp/messages/AbstractMessage.hpp"
 #include "tcp/messages/SetPushAccountsMessage.hpp"
@@ -24,6 +25,7 @@ class PushServer {
  private:
     wns::WnsClient wnsClient;
     tcp::TcpServer tcpServer;
+    storage::redis::RedisClient redisClient;
     std::optional<std::thread> serverThread{std::nullopt};
     PushServerState state{PushServerState::NOT_RUNNING};
 
