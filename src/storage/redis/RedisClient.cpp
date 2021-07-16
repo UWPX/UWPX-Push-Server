@@ -24,4 +24,9 @@ void RedisClient::init() {
 std::optional<std::string> RedisClient::get_channel_uri(const std::string& deviceId) {
     return redis->get(deviceId);
 }
+
+void RedisClient::set_push_accounts(const std::string& channelUri, const std::vector<std::string>& accounts) {
+    redis->del(channelUri);
+    redis->rpush(channelUri, accounts.begin(), accounts.end());
+}
 }  // namespace storage::redis

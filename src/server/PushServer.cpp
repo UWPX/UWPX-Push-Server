@@ -5,9 +5,11 @@
 #include "tcp/messages/RequestTestPushMessage.hpp"
 #include "tcp/messages/SetChannelUriMessage.hpp"
 #include "tcp/messages/SetPushAccountsMessage.hpp"
+#include "tcp/messages/SuccessSetPushAccountsMessage.hpp"
 #include "wns/WnsClient.hpp"
 #include <cassert>
 #include <optional>
+#include <string>
 #include <spdlog/spdlog.h>
 
 namespace server {
@@ -99,15 +101,26 @@ void PushServer::on_message_received(const std::shared_ptr<tcp::messages::Abstra
 
 void PushServer::send_test_push(const std::string& deviceId) {
     const std::optional<std::string> channelUri = redisClient.get_channel_uri(deviceId);
-    if (channelUri) {
-        wnsClient.sendRawNotification(*channelUri, "Test push notification from your push server.");
-        SPDLOG_INFO("Test push send to device id: {}", deviceId);
-        return;
+    if (!channelUri) {
+        // TODO: Respond with: "Device id unknown."
     }
-    // TODO: Respond with: "Device id unknown."
+    wnsClient.sendRawNotification(*channelUri, "Test push notification from your push server.");
+    SPDLOG_INFO("Test push send to device id: {}", deviceId);
 }
 
-void PushServer::set_push_accounts(const std::string& /*deviceId*/, const std::vector<std::string>& /*accounts*/) {
+void PushServer::set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts) {
+    const std::optional<std::string> channelUri = redisClient.get_channel_uri(deviceId);
+    if (!channelUri) {
+        // TODO: Respond with: "Device id unknown."
+    }
+    redisClient.set_push_accounts(*channelUri, accounts);
+    std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount> pushAccounts;
+    pushAccounts.reserve(accounts.size());
+    for (const std::string& bareJid : accounts) {
+        pushAccounts.push_back(tcp::messages::SuccessSetPushAccountsMessage::PushAccount::create(deviceId, bareJid));
+    }
+
+    tcp::messages::SuccessSetPushAccountsMessage resultMsg(std::move(pushAccounts), "REPLACE WITH BARE JID FROM XMPP CONFIG");
 }
 
 void PushServer::set_channel_uri(const std::string& /*deviceId*/, const std::string& /*channelUri*/) {

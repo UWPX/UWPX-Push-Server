@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 /**
  * Forward declaration to prevent having to link public against this lib.
@@ -28,5 +29,6 @@ class RedisClient {
     void init();
 
     std::optional<std::string> get_channel_uri(const std::string& deviceId);
+    void set_push_accounts(const std::string& channelUri, const std::vector<std::string>& accounts);
 };
 }  // namespace storage::redis

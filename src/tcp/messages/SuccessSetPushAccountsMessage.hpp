@@ -19,6 +19,8 @@ class SuccessSetPushAccountsMessage : public SuccessResponseMessage {
 
         static std::optional<PushAccount> from_json(const nlohmann::json& j);
         void to_json(nlohmann::json& j) const;
+
+        static PushAccount create(const std::string& deviceId, const std::string& bareJid);
     } __attribute__((aligned(128)));
 
  protected:

@@ -1,6 +1,7 @@
 #include "SuccessSetPushAccountsMessage.hpp"
 #include "logger/Logger.hpp"
 #include "tcp/messages/SuccessResponseMessage.hpp"
+#include "utils/Utils.hpp"
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <utility>
@@ -106,6 +107,12 @@ void SuccessSetPushAccountsMessage::PushAccount::to_json(nlohmann::json& j) cons
     j["bare_jid"] = bareJid;
     j["node"] = node;
     j["secret"] = secret;
+}
+
+SuccessSetPushAccountsMessage::PushAccount SuccessSetPushAccountsMessage::PushAccount::create(const std::string& /*deviceId*/, const std::string& bareJid) {
+    std::string node = utils::url_safe_random_token(15);
+    std::string secret = utils::secure_random_password(15);
+    return PushAccount(std::string{bareJid}, std::move(node), std::move(secret));
 }
 
 }  // namespace tcp::messages

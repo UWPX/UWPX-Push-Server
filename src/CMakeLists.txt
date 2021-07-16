@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 set(MAIN_EXECUTABLE ${PROJECT_NAME})
 
 add_subdirectory(logger)
+add_subdirectory(utils)
 add_subdirectory(storage)
 add_subdirectory(io)
 add_subdirectory(wns)
