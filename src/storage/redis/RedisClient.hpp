@@ -2,22 +2,30 @@
 #include "storage/ConfigurationStorage.hpp"
 #include <memory>
 #include <optional>
-#include <sw/redis++/redis++.h>
+#include <string>
+
+/**
+ * Forward declaration to prevent having to link public against this lib.
+ **/
+namespace sw::redis {
+class Redis;
+}  // namespace sw::redis
 
 namespace storage::redis {
 class RedisClient {
  private:
+    const std::string url;
     std::unique_ptr<sw::redis::Redis> redis{nullptr};
 
  public:
-    RedisClient() = default;
-    RedisClient(RedisClient&&) = default;
+    explicit RedisClient(const storage::DbConfiguration& config);
+    RedisClient(RedisClient&&) = delete;
     RedisClient(const RedisClient&) = delete;
-    RedisClient& operator=(RedisClient&&) = default;
+    RedisClient& operator=(RedisClient&&) = delete;
     RedisClient& operator=(const RedisClient&) = delete;
-    ~RedisClient() = default;
+    ~RedisClient();
 
-    void init(const storage::DbConfiguration& config);
+    void init();
 
     std::optional<std::string> get_channel_uri(const std::string& deviceId);
 };

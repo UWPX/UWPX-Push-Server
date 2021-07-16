@@ -31,9 +31,9 @@ class PushServer {
 
  public:
     explicit PushServer(const storage::Configuration& config);
-    PushServer(PushServer&&) = default;
+    PushServer(PushServer&&) = delete;
     PushServer(const PushServer&) = delete;
-    PushServer& operator=(PushServer&&) = default;
+    PushServer& operator=(PushServer&&) = delete;
     PushServer& operator=(const PushServer&) = delete;
     ~PushServer();
 

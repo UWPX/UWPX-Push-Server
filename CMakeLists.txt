@@ -95,17 +95,18 @@ conan_cmake_run(REQUIRES nlohmann_json/3.9.1
                          catch2/2.13.6
                 GENERATORS cmake_find_package
                 BUILD missing)
-
 conan_cmake_autodetect(settings)
 conan_cmake_install(PATH_OR_REFERENCE .
+                    BUILD redis-plus-plus
                     BUILD missing
                     REMOTE conan-center
-                    SETTINGS ${settings})
+                    SETTINGS "${settings};redis-plus-plus:compiler.cppstd=17") # Workaround for now: https://github.com/conan-io/conan-center-index/pull/6349
 
 find_package(nlohmann_json REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(cpr REQUIRED)
 find_package(redis++ REQUIRED)
+find_package(hiredis REQUIRED)
 
 # FetchContent_Declare(qxmpp
 #                      GIT_REPOSITORY         https://github.com/qxmpp-project/qxmpp.git

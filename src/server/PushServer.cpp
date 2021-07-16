@@ -11,7 +11,7 @@
 #include <spdlog/spdlog.h>
 
 namespace server {
-PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns), tcpServer(config.tcp) {}
+PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns), tcpServer(config.tcp), redisClient(config.db) {}
 
 PushServer::~PushServer() {
     assert(state == PushServerState::NOT_RUNNING);
@@ -100,7 +100,7 @@ void PushServer::on_message_received(const std::shared_ptr<tcp::messages::Abstra
 void PushServer::send_test_push(const std::string& deviceId) {
     const std::optional<std::string> channelUri = redisClient.get_channel_uri(deviceId);
     if (channelUri) {
-        wnsClient.sendRawNotification(channelUri, "Test push notification from your push server.");
+        wnsClient.sendRawNotification(*channelUri, "Test push notification from your push server.");
         SPDLOG_INFO("Test push send to device id: {}", deviceId);
         return;
     }

@@ -10,18 +10,18 @@
 #include <sw/redis++/redis.h>
 
 namespace storage::redis {
-void RedisClient::init(const storage::DbConfiguration& config) {
+RedisClient::RedisClient(const storage::DbConfiguration& config) : url(config.url) {}
+
+RedisClient::~RedisClient() = default;
+
+void RedisClient::init() {
     assert(!redis);
     SPDLOG_INFO("Initializing Redis connection...");
-    redis = std::make_unique<sw::redis::Redis>(config.url);
+    redis = std::make_unique<sw::redis::Redis>(url);
     SPDLOG_INFO("Redis connection initialized...");
 }
 
 std::optional<std::string> RedisClient::get_channel_uri(const std::string& deviceId) {
-    sw::redis::OptionalString result = redis->get(deviceId);
-    if (result) {
-        return std::make_optional<std::string>(*result);
-    }
-    return std::nullopt;
+    return redis->get(deviceId);
 }
 }  // namespace storage::redis
