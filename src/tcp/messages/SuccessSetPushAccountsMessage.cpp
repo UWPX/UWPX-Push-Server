@@ -1,7 +1,7 @@
 #include "SuccessSetPushAccountsMessage.hpp"
 #include "logger/Logger.hpp"
 #include "tcp/messages/SuccessResponseMessage.hpp"
-#include "utils/Utils.hpp"
+#include "utils/CryptoUtils.hpp"
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <utility>
