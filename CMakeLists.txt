@@ -94,8 +94,7 @@ conan_cmake_run(REQUIRES nlohmann_json/3.9.1
                          redis-plus-plus/1.2.3
                          catch2/2.13.6
                          libsodium/1.0.18
-                GENERATORS cmake_find_package
-                BUILD missing)
+                GENERATORS cmake_find_package)
 conan_cmake_autodetect(settings)
 conan_cmake_install(PATH_OR_REFERENCE .
                     BUILD redis-plus-plus
