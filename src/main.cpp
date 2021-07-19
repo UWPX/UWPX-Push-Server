@@ -2,17 +2,27 @@
 #include "logger/Logger.hpp"
 #include "server/PushServer.hpp"
 #include "storage/ConfigurationStorage.hpp"
-#include <thread>
 #include <chrono>
+#include <thread>
 
-int main(int /*argc*/, char** /*argv*/) {
+int main(int argc, char** argv) {
     logger::setup_logger(spdlog::level::debug);
     SPDLOG_INFO("Launching Version: {} {}", UWPX_PUSH_SERVER_VERSION, UWPX_PUSH_SERVER_NAME);
 
-   storage::ConfigurationStorage configStorage = storage::get_configuration_storage_instance();
-   server::PushServer server(configStorage.config);
-   server.start();
+    // Custom configuration path:
+    if (argc >= 2) {
+        // NOLINTNEXTLINE (cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        storage::CONFIG_FILE_PATH = argv[1];
+    }
 
+    // Load configuration:
+    storage::ConfigurationStorage configStorage = storage::get_configuration_storage_instance();
+
+    // Start the server:
+    server::PushServer server(configStorage.config);
+    server.start();
+
+    // Start the IO handler:
     io::IoThread ioThread(&server);
     ioThread.start();
 

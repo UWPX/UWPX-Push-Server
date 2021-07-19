@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Serializer.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -7,9 +8,10 @@
 #include <string>
 #include <unordered_map>
 
-#include "Serializer.hpp"
-
 namespace storage {
+// NOLINTNEXTLINE (cppcoreguidelines-avoid-non-const-global-variables)
+static std::string CONFIG_FILE_PATH = "~/configuration.json";
+
 struct WnsConfiguration {
     /**
      * The UWP package ID starting with: 'ms-app://...'.

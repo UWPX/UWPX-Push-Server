@@ -91,6 +91,11 @@
         "-DUWPX_PUSH_SERVER_ENABLE_LINTING=OFF"
     ],
     "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+    "cmake.debugConfig": {
+        "args": [
+            "~/configuration.json"
+        ],
+    },
     "clangd.arguments": [
         "--clang-tidy",
         "--compile-commands-dir",

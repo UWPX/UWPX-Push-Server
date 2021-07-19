@@ -23,7 +23,7 @@ void ConfigurationStorage::write_configuration() {
 }
 
 ConfigurationStorage& get_configuration_storage_instance() {
-    static ConfigurationStorage storage_instance("configuration.json");
+    static ConfigurationStorage storage_instance(CONFIG_FILE_PATH);
     return storage_instance;
 }
 }  // namespace storage
