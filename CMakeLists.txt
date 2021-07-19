@@ -41,8 +41,7 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
 include(sanitizer)
 include(gcc_analyze)
-include(FetchContent)
-include(ExternalProject)
+include(clear_variable)
 
 if (${JUTTA_UI_ENABLE_LINTING})
     message(STATUS "Enabling linting")
@@ -94,6 +93,7 @@ conan_cmake_run(REQUIRES nlohmann_json/3.9.1
                          redis-plus-plus/1.2.3
                          catch2/2.13.6
                          libsodium/1.0.18
+                         qt/6.1.2 # Workaround for qxmpp so it finds it
                 GENERATORS cmake_find_package)
 conan_cmake_autodetect(settings)
 conan_cmake_install(PATH_OR_REFERENCE .
@@ -106,16 +106,9 @@ find_package(nlohmann_json REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(cpr REQUIRED)
 find_package(redis++ REQUIRED)
-find_package(hiredis REQUIRED)
 find_package(libsodium REQUIRED)
 
-# FetchContent_Declare(qxmpp
-#                      GIT_REPOSITORY         https://github.com/qxmpp-project/qxmpp.git
-#                      GIT_TAG v1.4.0
-#                      USES_TERMINAL_DOWNLOAD TRUE)   # <---- This is needed only for Ninja to show download progress
-# set(BUILD_EXAMPLES OFF)
-# set(BUILD_TESTS OFF)
-# FetchContent_MakeAvailable(qxmpp)
+include(qxmpp)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
