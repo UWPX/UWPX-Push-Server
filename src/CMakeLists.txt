@@ -8,6 +8,7 @@ add_subdirectory(storage)
 add_subdirectory(io)
 add_subdirectory(wns)
 add_subdirectory(tcp)
+add_subdirectory(xmpp)
 add_subdirectory(server)
 add_subdirectory(tests)
 

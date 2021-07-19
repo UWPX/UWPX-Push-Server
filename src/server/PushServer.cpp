@@ -13,7 +13,7 @@
 #include <spdlog/spdlog.h>
 
 namespace server {
-PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns), tcpServer(config.tcp), redisClient(config.db) {}
+PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns), tcpServer(config.tcp), redisClient(config.db), xmppClient(config.xmpp) {}
 
 PushServer::~PushServer() {
     assert(state == PushServerState::NOT_RUNNING);

@@ -5,6 +5,7 @@
 #include "tcp/messages/AbstractMessage.hpp"
 #include "tcp/messages/SetPushAccountsMessage.hpp"
 #include "wns/WnsClient.hpp"
+#include "xmpp/XmppClient.hpp"
 #include <memory>
 #include <optional>
 #include <string>
@@ -26,6 +27,7 @@ class PushServer {
     wns::WnsClient wnsClient;
     tcp::TcpServer tcpServer;
     storage::redis::RedisClient redisClient;
+    xmpp::XmppClient xmppClient;
     std::optional<std::thread> serverThread{std::nullopt};
     PushServerState state{PushServerState::NOT_RUNNING};
 
