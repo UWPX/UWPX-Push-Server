@@ -7,6 +7,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <bits/stdint-uintn.h>
 
 namespace storage {
 struct WnsConfiguration {
@@ -29,6 +30,14 @@ struct XmppConfiguration {
      * The password for the push XMPP client.
      **/
     std::string password{"The password for the push XMPP client"};
+    /**
+     * The port of the XMPP server.
+     **/
+    uint16_t port = 5222;
+    /**
+     * The hostname of the XMPP server.
+     **/
+    std::string host{"The hostname of the XMPP server."};
 };
 
 struct TlsConfiguration {

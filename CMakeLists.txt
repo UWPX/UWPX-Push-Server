@@ -107,6 +107,8 @@ find_package(cpr REQUIRED)
 find_package(redis++ REQUIRED)
 find_package(libsodium REQUIRED)
 
+include(libstrophe)
+
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 add_subdirectory(src)

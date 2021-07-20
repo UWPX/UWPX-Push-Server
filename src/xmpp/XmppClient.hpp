@@ -4,6 +4,8 @@
 #include <optional>
 #include <string>
 #include <thread>
+#include <bits/stdint-uintn.h>
+#include <strophe.h>
 
 namespace xmpp {
 class XmppClient {
@@ -20,13 +22,22 @@ class XmppClient {
     std::optional<std::thread> thread{std::nullopt};
     XmppClientState state{XmppClientState::NOT_RUNNING};
 
+    xmpp_log_t* log{nullptr};
+    xmpp_ctx_t* ctx{nullptr};
+    xmpp_conn_t* conn{nullptr};
+
+    const std::string jid;
+    const std::string password;
+    const uint16_t port;
+    const std::string host;
+
  public:
     explicit XmppClient(const storage::XmppConfiguration& config);
     XmppClient(XmppClient&&) = delete;
     XmppClient(const XmppClient&) = delete;
     XmppClient& operator=(XmppClient&&) = delete;
     XmppClient& operator=(const XmppClient&) = delete;
-    ~XmppClient() override;
+    ~XmppClient();
 
     XmppClientState getState();
 
@@ -35,5 +46,7 @@ class XmppClient {
 
  private:
     void thread_run();
+    void setup_xmpp();
+    void cleanup_xmpp();
 };
 }  // namespace xmpp

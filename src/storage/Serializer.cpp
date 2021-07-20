@@ -19,12 +19,16 @@ void from_json(const nlohmann::json& j, WnsConfiguration& c) {
 
 void to_json(nlohmann::json& j, const XmppConfiguration& c) {
     j = nlohmann::json{{"bareJid", c.bareJid},
-                       {"password", c.password}};
+                       {"password", c.password},
+                       {"port", c.port},
+                       {"host", c.host}};
 }
 
 void from_json(const nlohmann::json& j, XmppConfiguration& c) {
     j.at("bareJid").get_to(c.bareJid);
     j.at("password").get_to(c.password);
+    j.at("port").get_to(c.port);
+    j.at("host").get_to(c.host);
 }
 
 void to_json(nlohmann::json& j, const TlsConfiguration& c) {
