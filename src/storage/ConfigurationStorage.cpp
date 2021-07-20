@@ -22,8 +22,8 @@ void ConfigurationStorage::write_configuration() {
     fileHandle.write_out();
 }
 
-ConfigurationStorage& get_configuration_storage_instance() {
-    static ConfigurationStorage storage_instance(CONFIG_FILE_PATH);
+ConfigurationStorage& get_configuration_storage_instance(const std::string& path = "configuration.json") {
+    static ConfigurationStorage storage_instance(path);
     return storage_instance;
 }
 }  // namespace storage

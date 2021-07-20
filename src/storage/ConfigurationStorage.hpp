@@ -9,9 +9,6 @@
 #include <unordered_map>
 
 namespace storage {
-// NOLINTNEXTLINE (cppcoreguidelines-avoid-non-const-global-variables)
-static std::string CONFIG_FILE_PATH = "~/configuration.json";
-
 struct WnsConfiguration {
     /**
      * The UWP package ID starting with: 'ms-app://...'.
@@ -98,5 +95,5 @@ struct ConfigurationStorage {
     void write_configuration();
 };
 
-ConfigurationStorage& get_configuration_storage_instance();
+ConfigurationStorage& get_configuration_storage_instance(const std::string& path);
 }  // namespace storage

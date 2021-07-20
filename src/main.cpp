@@ -10,13 +10,14 @@ int main(int argc, char** argv) {
     SPDLOG_INFO("Launching Version: {} {}", UWPX_PUSH_SERVER_VERSION, UWPX_PUSH_SERVER_NAME);
 
     // Custom configuration path:
+    std::string configPath = "configuration.json";
     if (argc >= 2) {
         // NOLINTNEXTLINE (cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        storage::CONFIG_FILE_PATH = argv[1];
+        configPath = argv[1];
     }
 
     // Load configuration:
-    storage::ConfigurationStorage configStorage = storage::get_configuration_storage_instance();
+    storage::ConfigurationStorage configStorage = storage::get_configuration_storage_instance(configPath);
 
     // Start the server:
     server::PushServer server(configStorage.config);
