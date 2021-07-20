@@ -93,7 +93,6 @@ conan_cmake_run(REQUIRES nlohmann_json/3.9.1
                          redis-plus-plus/1.2.3
                          catch2/2.13.6
                          libsodium/1.0.18
-                         qt/6.1.2 # Workaround for qxmpp so it finds it
                 GENERATORS cmake_find_package)
 conan_cmake_autodetect(settings)
 conan_cmake_install(PATH_OR_REFERENCE .
@@ -107,8 +106,6 @@ find_package(spdlog REQUIRED)
 find_package(cpr REQUIRED)
 find_package(redis++ REQUIRED)
 find_package(libsodium REQUIRED)
-
-include(qxmpp)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 

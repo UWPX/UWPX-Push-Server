@@ -53,6 +53,7 @@ void PushServer::thread_run() {
     wnsClient.loadTokenFromDb();
     tcpServer.start();
     redisClient.init();
+    xmppClient.start();
 
     while (state == PushServerState::RUNNING) {
         check_setup_wns();
@@ -60,6 +61,7 @@ void PushServer::thread_run() {
     }
 
     tcpServer.stop();
+    xmppClient.stop();
     state = PushServerState::WAITING_FOR_JOIN;
     SPDLOG_DEBUG("Push server thread ready to be joined.");
 }
