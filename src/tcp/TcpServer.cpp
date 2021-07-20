@@ -15,7 +15,7 @@ TcpServer::TcpServerState TcpServer::getState() {
 
 void TcpServer::start() {
     assert(state == TcpServerState::NOT_RUNNING);
-    SPDLOG_DEBUG("Starting the TCP thread...");
+    LOG_DEBUG << "Starting the TCP thread...";
     state = TcpServerState::STARTING;
     thread = std::make_optional<std::thread>(&TcpServer::threadRun, this);
 }
@@ -23,16 +23,16 @@ void TcpServer::start() {
 void TcpServer::stop() {
     if (state == TcpServerState::STARTING || state == TcpServerState::RUNNING || state == TcpServerState::WAITING_FOR_JOIN) {
         if (state != TcpServerState::WAITING_FOR_JOIN) {
-            SPDLOG_DEBUG("Stopping the TCP thread...");
+            LOG_DEBUG << "Stopping the TCP thread...";
             state = TcpServerState::STOP_REQUESTED;
         }
-        SPDLOG_DEBUG("Joining the TCP thread...");
+        LOG_DEBUG << "Joining the TCP thread...";
         thread->join();
         state = TcpServerState::NOT_RUNNING;
         thread = std::nullopt;
-        SPDLOG_INFO("TCP thread joined.");
+        LOG_INFO << "TCP thread joined.";
     } else {
-        SPDLOG_DEBUG("No need to stop the TCP thread - not running (state: {})!", state);
+        LOG_DEBUG << "No need to stop the TCP thread - not running (state: " << static_cast<int>(state) << ")!";
     }
 }
 
@@ -42,13 +42,13 @@ void TcpServer::threadRun() {
         return;
     }
     state = TcpServerState::RUNNING;
-    SPDLOG_INFO("TCP thread started.");
+    LOG_INFO << "TCP thread started.";
 
     while (state == TcpServerState::RUNNING) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     state = TcpServerState::WAITING_FOR_JOIN;
-    SPDLOG_DEBUG("TCP thread ready to be joined.");
+    LOG_DEBUG << "TCP thread ready to be joined.";
 }
 
 }  // namespace tcp

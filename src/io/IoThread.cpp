@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include <spdlog/spdlog.h>
 
 namespace io {
 IoThread::IoThread(const server::PushServer* server) : server(server) {}
@@ -18,7 +17,7 @@ IoThread::IoThreadState IoThread::getState() {
 
 void IoThread::start() {
     assert(state == IoThreadState::NOT_RUNNING);
-    SPDLOG_DEBUG("Starting the IO thread...");
+    LOG_DEBUG << "Starting the IO thread...";
     state = IoThreadState::STARTING;
     thread = std::make_optional<std::thread>(&IoThread::threadRun, this);
 }
@@ -26,16 +25,16 @@ void IoThread::start() {
 void IoThread::stop() {
     if (state == IoThreadState::STARTING || state == IoThreadState::RUNNING || state == IoThreadState::WAITING_FOR_JOIN) {
         if (state != IoThreadState::WAITING_FOR_JOIN) {
-            SPDLOG_DEBUG("Stopping the IO thread...");
+            LOG_DEBUG << "Stopping the IO thread...";
             state = IoThreadState::STOP_REQUESTED;
         }
-        SPDLOG_DEBUG("Joining the IO thread...");
+        LOG_DEBUG << "Joining the IO thread...";
         thread->join();
         state = IoThreadState::NOT_RUNNING;
         thread = std::nullopt;
-        SPDLOG_INFO("IO thread joined.");
+        LOG_INFO << "IO thread joined.";
     } else {
-        SPDLOG_DEBUG("No need to stop the IO thread - not running (state: {})!", state);
+        LOG_DEBUG << "No need to stop the IO thread - not running (state: " << static_cast<int>(state) << ")!";
     }
 }
 
@@ -45,7 +44,7 @@ void IoThread::threadRun() {
         return;
     }
     state = IoThreadState::RUNNING;
-    SPDLOG_INFO("IO thread started.");
+    LOG_INFO << "IO thread started.";
 
     std::string s;
     while (state == IoThreadState::RUNNING) {
@@ -58,7 +57,7 @@ void IoThread::threadRun() {
         }
     }
     state = IoThreadState::WAITING_FOR_JOIN;
-    SPDLOG_DEBUG("IO thread ready to be joined.");
+    LOG_DEBUG << "IO thread ready to be joined.";
 }
 
 void IoThread::printHelp() {

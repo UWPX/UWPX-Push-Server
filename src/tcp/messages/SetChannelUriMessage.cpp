@@ -18,22 +18,22 @@ bool SetChannelUriMessage::from_json(const nlohmann::json& j) {
     }
 
     if (!j.contains("channel_uri")) {
-        SPDLOG_WARN("Missing 'channel_uri' field in message.");
+        LOG_WARNING << "Missing 'channel_uri' field in message.";
         return false;
     }
     channelUri = j["channel_uri"];
     if (channelUri.empty()) {
-        SPDLOG_WARN("Invalid message 'channel_uri' value. Expected a non empty string, but received: {}", channelUri);
+        LOG_WARNING << "Invalid message 'channel_uri' value. Expected a non empty string, but received: " << channelUri;
         return false;
     }
 
     if (!j.contains("device_id")) {
-        SPDLOG_WARN("Missing 'device_id' field in message.");
+        LOG_WARNING << "Missing 'device_id' field in message.";
         return false;
     }
     deviceId = j["device_id"];
     if (deviceId.empty()) {
-        SPDLOG_WARN("Invalid message 'device_id' value. Expected a non empty string, but received: {}", deviceId);
+        LOG_WARNING << "Invalid message 'device_id' value. Expected a non empty string, but received: " << deviceId;
         return false;
     }
     return true;

@@ -1,12 +1,19 @@
 #pragma once
 
-#include <filesystem>
-#include <spdlog/spdlog.h>
+#include <glog/logging.h>
+
+// NOLINTNEXTLINE (cppcoreguidelines-avoid-non-const-global-variables)
+#define LOG_DEBUG LOG_IF(INFO, VLOG_IS_ON(0))
+// NOLINTNEXTLINE (cppcoreguidelines-avoid-non-const-global-variables)
+#define LOG_INFO COMPACT_GOOGLE_LOG_##INFO.stream()
+// NOLINTNEXTLINE (cppcoreguidelines-avoid-non-const-global-variables)
+#define LOG_WARNING COMPACT_GOOGLE_LOG_##WARNING.stream()
+// NOLINTNEXTLINE (cppcoreguidelines-avoid-non-const-global-variables)
+#define LOG_ERROR COMPACT_GOOGLE_LOG_##ERROR.stream()
+// NOLINTNEXTLINE (cppcoreguidelines-avoid-non-const-global-variables)
+#define LOG_FATAL COMPACT_GOOGLE_LOG_##FATAL.stream()
 
 namespace logger {
-const std::filesystem::path log_folder("logs");
-// Setup the logger, note the loglevel can not be set below the CMAKE log level (To change this use -DLOG_LEVEL=...)
-void setup_logger(const spdlog::level::level_enum level);
-void set_log_level(const spdlog::level::level_enum level);
-void deactivate_logger();
+void init_logger(const char* applicationName);
+
 }  // namespace logger

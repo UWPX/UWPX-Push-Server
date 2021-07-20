@@ -16,12 +16,12 @@ bool RequestTestPushMessage::from_json(const nlohmann::json& j) {
     }
 
     if (!j.contains("device_id")) {
-        SPDLOG_WARN("Missing 'device_id' field in message.");
+        LOG_WARNING << "Missing 'device_id' field in message.";
         return false;
     }
     deviceId = j["device_id"];
     if (deviceId.empty()) {
-        SPDLOG_WARN("Invalid message 'device_id' value. Expected a non empty string, but received: {}", deviceId);
+        LOG_WARNING << "Invalid message 'device_id' value. Expected a non empty string, but received: " << deviceId;
         return false;
     }
     return true;

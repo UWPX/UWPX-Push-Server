@@ -54,23 +54,23 @@ class Serializer {
     bool read_in() {
         std::ifstream i(this->filename);
         if (i.fail()) {
-            SPDLOG_ERROR("Failed to read {}", this->filename.string());
+            LOG_ERROR << "Failed to read file: " << this->filename.string();
             return false;
         }
         try {
             i >> this->js_int;
         } catch (nlohmann::json::parse_error& e) {
-            SPDLOG_ERROR("Error parsing {}: {}", this->filename.string(), e.what());
+            LOG_ERROR << "Error parsing file '" << this->filename.string() << "': " << e.what();
             return false;
         }
-        spdlog::info("Read json file {}", this->filename.string());
+        LOG_INFO << "Read json file '" << this->filename.string() << "'.";
         return true;
     }
 
     void write_out() const {
         std::ofstream o(this->filename);
         if (not o.is_open()) {
-            SPDLOG_ERROR("Failed to write to {}", this->filename.string());
+            LOG_ERROR << "Failed to write to file '" << this->filename.string() << "'.";
             return;
         }
         o << std::setw(1) << this->js_int;

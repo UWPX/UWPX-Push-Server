@@ -2,12 +2,15 @@
 #include "logger/Logger.hpp"
 #include "server/PushServer.hpp"
 #include "storage/ConfigurationStorage.hpp"
+#include <cassert>
 #include <chrono>
 #include <thread>
 
 int main(int argc, char** argv) {
-    logger::setup_logger(spdlog::level::debug);
-    SPDLOG_INFO("Launching Version: {} {}", UWPX_PUSH_SERVER_VERSION, UWPX_PUSH_SERVER_NAME);
+    assert(argc >= 1);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    logger::init_logger(argv[0]);
+    LOG_INFO << "Launching Version: " << UWPX_PUSH_SERVER_VERSION << " " << UWPX_PUSH_SERVER_NAME;
 
     // Custom configuration path:
     std::string configPath = "configuration.json";

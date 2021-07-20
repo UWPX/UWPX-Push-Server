@@ -23,7 +23,7 @@ std::shared_ptr<WnsToken> WnsToken::fromResponse(const std::string& response) {
 
         // Token type:
         if (!js.contains("token_type")) {
-            SPDLOG_ERROR("Failed to parse 'token_type' from '{}'", response);
+            LOG_ERROR << "Failed to parse 'token_type' from '" << response << "'.";
             return nullptr;
         }
         std::string type;
@@ -31,7 +31,7 @@ std::shared_ptr<WnsToken> WnsToken::fromResponse(const std::string& response) {
 
         // Token:
         if (!js.contains("access_token")) {
-            SPDLOG_ERROR("Failed to parse 'access_token' from '{}'", response);
+            LOG_ERROR << "Failed to parse 'access_token' from '" << response << "'.";
             return nullptr;
         }
         std::string token;
@@ -39,7 +39,7 @@ std::shared_ptr<WnsToken> WnsToken::fromResponse(const std::string& response) {
 
         // Expires:
         if (!js.contains("expires_in")) {
-            SPDLOG_ERROR("Failed to parse 'expires_in' from '{}'", response);
+            LOG_ERROR << "Failed to parse 'expires_in' from '" << response << "'.";
             return nullptr;
         }
         size_t expiresInSeconds = 0;
@@ -48,7 +48,7 @@ std::shared_ptr<WnsToken> WnsToken::fromResponse(const std::string& response) {
         return std::make_shared<WnsToken>(std::move(type), std::move(token), expires);
 
     } catch (nlohmann::json::parse_error& e) {
-        SPDLOG_ERROR("Error parsing WNS token from '{}': {}", response, e.what());
+        LOG_ERROR << "Error parsing WNS token from '" << response << "': " << e.what();
     }
     return nullptr;
 }

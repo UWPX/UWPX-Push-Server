@@ -23,7 +23,7 @@ bool SuccessSetPushAccountsMessage::from_json(const nlohmann::json& j) {
     }
 
     if (!j.contains("accounts")) {
-        SPDLOG_WARN("Missing 'accounts' field in message.");
+        LOG_WARNING << "Missing 'accounts' field in message.";
         return false;
     }
 
@@ -36,17 +36,17 @@ bool SuccessSetPushAccountsMessage::from_json(const nlohmann::json& j) {
     }
 
     if (accounts.empty()) {
-        SPDLOG_WARN("Invalid message 'accounts' value. Expected a non empty array.");
+        LOG_WARNING << "Invalid message 'accounts' value. Expected a non empty array.";
         return false;
     }
 
     if (!j.contains("push_bare_jid")) {
-        SPDLOG_WARN("Missing 'push_bare_jid' field in message.");
+        LOG_WARNING << "Missing 'push_bare_jid' field in message.";
         return false;
     }
     pushBareJid = j["push_bare_jid"];
     if (pushBareJid.empty()) {
-        SPDLOG_WARN("Invalid message 'push_bare_jid' value. Expected a non empty string, but received: {}", pushBareJid);
+        LOG_WARNING << "Invalid message 'push_bare_jid' value. Expected a non empty string, but received: " << pushBareJid;
         return false;
     }
     return true;
@@ -70,34 +70,34 @@ SuccessSetPushAccountsMessage::PushAccount::PushAccount(std::string&& bareJid, s
 std::optional<SuccessSetPushAccountsMessage::PushAccount> SuccessSetPushAccountsMessage::PushAccount::from_json(const nlohmann::json& j) {
     std::string bareJid;
     if (!j.contains("bare_jid")) {
-        SPDLOG_WARN("Missing 'bare_jid' field in message.");
+        LOG_WARNING << "Missing 'bare_jid' field in message.";
         return std::nullopt;
     }
     j.at("bare_jid").get_to(bareJid);
     if (bareJid.empty()) {
-        SPDLOG_WARN("Invalid message 'bare_jid' value. Expected a non empty string, but received: {}", bareJid);
+        LOG_WARNING << "Invalid message 'bare_jid' value. Expected a non empty string, but received: " << bareJid;
         return std::nullopt;
     }
 
     std::string node;
     if (!j.contains("node")) {
-        SPDLOG_WARN("Missing 'node' field in message.");
+        LOG_WARNING << "Missing 'node' field in message.";
         return std::nullopt;
     }
     j.at("node").get_to(node);
     if (node.empty()) {
-        SPDLOG_WARN("Invalid message 'node' value. Expected a non empty string, but received: {}", node);
+        LOG_WARNING << "Invalid message 'node' value. Expected a non empty string, but received: " << node;
         return std::nullopt;
     }
 
     std::string secret;
     if (!j.contains("secret")) {
-        SPDLOG_WARN("Missing 'secret' field in message.");
+        LOG_WARNING << "Missing 'secret' field in message.";
         return std::nullopt;
     }
     j.at("secret").get_to(secret);
     if (secret.empty()) {
-        SPDLOG_WARN("Invalid message 'secret' value. Expected a non empty string, but received: {}", secret);
+        LOG_WARNING << "Invalid message 'secret' value. Expected a non empty string, but received: " << secret;
         return std::nullopt;
     }
     return std::make_optional<PushAccount>(std::move(bareJid), std::move(node), std::move(secret));

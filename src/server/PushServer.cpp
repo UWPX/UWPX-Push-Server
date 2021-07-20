@@ -10,7 +10,6 @@
 #include <cassert>
 #include <optional>
 #include <string>
-#include <spdlog/spdlog.h>
 
 namespace server {
 PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns), tcpServer(config.tcp), redisClient(config.db), xmppClient(config.xmpp) {}
@@ -21,7 +20,7 @@ PushServer::~PushServer() {
 
 void PushServer::start() {
     assert(state == PushServerState::NOT_RUNNING);
-    SPDLOG_DEBUG("Starting the push server thread...");
+    LOG_DEBUG << "Starting the push server thread...";
     state = PushServerState::STARTING;
     serverThread = std::make_optional<std::thread>(&PushServer::thread_run, this);
 }
@@ -29,16 +28,16 @@ void PushServer::start() {
 void PushServer::stop() {
     if (state == PushServerState::STARTING || state == PushServerState::RUNNING || state == PushServerState::WAITING_FOR_JOIN) {
         if (state != PushServerState::WAITING_FOR_JOIN) {
-            SPDLOG_DEBUG("Stopping the push server thread...");
+            LOG_DEBUG << "Stopping the push server thread...";
             state = PushServerState::STOP_REQUESTED;
         }
-        SPDLOG_DEBUG("Joining the push server thread...");
+        LOG_DEBUG << "Joining the push server thread...";
         serverThread->join();
         state = PushServerState::NOT_RUNNING;
         serverThread = std::nullopt;
-        SPDLOG_INFO("Push server thread joined.");
+        LOG_INFO << "Push server thread joined.";
     } else {
-        SPDLOG_DEBUG("No need to stop the push server thread - not running (state: {})!", state);
+        LOG_DEBUG << "No need to stop the push server thread - not running (state: " << static_cast<int>(state) << ")!";
     }
 }
 
@@ -48,7 +47,7 @@ void PushServer::thread_run() {
         return;
     }
     state = PushServerState::RUNNING;
-    SPDLOG_INFO("Push server thread started.");
+    LOG_INFO << "Push server thread started.";
 
     wnsClient.loadTokenFromDb();
     tcpServer.start();
@@ -63,16 +62,16 @@ void PushServer::thread_run() {
     tcpServer.stop();
     xmppClient.stop();
     state = PushServerState::WAITING_FOR_JOIN;
-    SPDLOG_DEBUG("Push server thread ready to be joined.");
+    LOG_DEBUG << "Push server thread ready to be joined.";
 }
 
 void PushServer::check_setup_wns() {
     if (!wnsClient.isTokenValid()) {
         if (!wnsClient.requestToken()) {
-            SPDLOG_INFO("Retrying to request a new WNS token in 10 seconds...");
+            LOG_INFO << "Retrying to request a new WNS token in 10 seconds...";
             std::this_thread::sleep_for(std::chrono::seconds(10));
             if (!wnsClient.requestToken()) {
-                SPDLOG_ERROR("Failed to request a new WNS token for the second time! Exiting...");
+                LOG_ERROR << "Failed to request a new WNS token for the second time! Exiting...";
             }
         }
     }
@@ -107,7 +106,7 @@ void PushServer::send_test_push(const std::string& deviceId) {
         // TODO: Respond with: "Device id unknown."
     }
     wnsClient.sendRawNotification(*channelUri, "Test push notification from your push server.");
-    SPDLOG_INFO("Test push send to device id: {}", deviceId);
+    LOG_INFO << "Test push send to device id: " << deviceId;
 }
 
 void PushServer::set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts) {

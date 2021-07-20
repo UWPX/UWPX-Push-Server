@@ -7,7 +7,6 @@
 #include <cpr/payload.h>
 #include <cpr/response.h>
 #include <cpr/ssl_options.h>
-#include <spdlog/spdlog.h>
 
 namespace wns {
 WnsClient::WnsClient(const storage::WnsConfiguration& config) : packetSid(config.packetId), clientSecret(config.clientSecret) {}
@@ -26,16 +25,16 @@ bool WnsClient::requestToken() {
     cpr::Response response = cpr::Post(url, payload, cpr::VerifySsl{false});  // TODO(): Remove 'cpr::VerifySsl{false}' before release
     if (response.status_code != 200) {
         if (response.error.code == cpr::ErrorCode::OK) {
-            SPDLOG_ERROR("Requesting a new token failed. Status code: {}\nResponse: {}", response.status_code, response.text);
+            LOG_ERROR << "Requesting a new token failed. Status code: " << response.status_code << "\nResponse: " << response.text;
         } else {
-            SPDLOG_ERROR("Requesting a new token failed. Status code: {}\nError: {}", response.status_code, response.error.message);
+            LOG_ERROR << "Requesting a new token failed. Status code: " << response.status_code << "\nError: " << response.error.message;
         }
         return false;
     }
     token = WnsToken::fromResponse(response.text);
     if (token) {
-        SPDLOG_INFO("Successfully requested a new WNS token.");
-        SPDLOG_DEBUG("Token: '{}', Type: '{}'", token->token, token->type);
+        LOG_INFO << "Successfully requested a new WNS token.";
+        LOG_DEBUG << "Token: '" << token->token << "', Type: '" << token->type << "'";
         return true;
     }
     return false;

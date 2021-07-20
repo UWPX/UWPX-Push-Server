@@ -2,7 +2,6 @@
 #include "logger/Logger.hpp"
 #include <cassert>
 #include <nlohmann/json_fwd.hpp>
-#include <spdlog/spdlog.h>
 
 namespace tcp::messages {
 AbstractMessage::AbstractMessage(std::string&& action) : version(VERSION), action(std::move(action)) {}
@@ -17,22 +16,22 @@ const std::string& AbstractMessage::get_action() const { return action; }
 
 bool AbstractMessage::from_json(const nlohmann::json& j) {
     if (!j.contains("version")) {
-        SPDLOG_WARN("Missing 'version' field in message.");
+        LOG_WARNING << "Missing 'version' field in message.";
         return false;
     }
     version = j["version"];
     if (version != VERSION) {
-        SPDLOG_WARN("Invalid message 'version' value. Expected {}, but received: {}", VERSION, action);
+        LOG_WARNING << "Invalid message 'version' value. Expected " << VERSION << ", but received: " << action;
         return false;
     }
 
     if (!j.contains("action")) {
-        SPDLOG_WARN("Missing 'action' field in message.");
+        LOG_WARNING << "Missing 'action' field in message.";
         return false;
     }
     action = j["action"];
     if (action.empty()) {
-        SPDLOG_WARN("Invalid message 'action' value. Expected a non empty string, but received: {}", action);
+        LOG_WARNING << "Invalid message 'action' value. Expected a non empty string, but received: " << action;
         return false;
     }
     return true;

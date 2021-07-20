@@ -15,12 +15,12 @@ bool AbstractResponseMessage::from_json(const nlohmann::json& j) {
     }
 
     if (!j.contains("status")) {
-        SPDLOG_WARN("Missing 'status' field in message.");
+        LOG_WARNING << "Missing 'status' field in message.";
         return false;
     }
     status = j["status"];
     if (status == -1) {
-        SPDLOG_WARN("Invalid message 'status' value. Expected {}, but received: {}", -1, status);
+        LOG_WARNING << "Invalid message 'status' value. Expected != -1 , but received: " << status;
         return false;
     }
     return true;

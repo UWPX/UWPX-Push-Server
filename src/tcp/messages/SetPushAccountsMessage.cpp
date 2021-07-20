@@ -19,36 +19,36 @@ bool SetPushAccountsMessage::from_json(const nlohmann::json& j) {
     }
 
     if (!j.contains("accounts")) {
-        SPDLOG_WARN("Missing 'accounts' field in message.");
+        LOG_WARNING << "Missing 'accounts' field in message.";
         return false;
     }
 
     for (const auto& accountJson : j["accounts"]) {
         if (!accountJson.contains("bare_jid")) {
-            SPDLOG_WARN("Missing 'bare_jid' field in message.");
+            LOG_WARNING << "Missing 'bare_jid' field in message.";
             return false;
         }
         std::string jid;
         jid = accountJson["bare_jid"];
         if (jid.empty()) {
-            SPDLOG_WARN("Invalid message 'bare_jid' value. Expected a non empty string, but received: {}", jid);
+            LOG_WARNING << "Invalid message 'bare_jid' value. Expected a non empty string, but received: " << jid;
             return false;
         }
         accounts.push_back(std::move(jid));
     }
 
     if (accounts.empty()) {
-        SPDLOG_WARN("Invalid message 'accounts' value. Expected a non empty array.");
+        LOG_WARNING << "Invalid message 'accounts' value. Expected a non empty array.";
         return false;
     }
 
     if (!j.contains("device_id")) {
-        SPDLOG_WARN("Missing 'device_id' field in message.");
+        LOG_WARNING << "Missing 'device_id' field in message.";
         return false;
     }
     deviceId = j["device_id"];
     if (deviceId.empty()) {
-        SPDLOG_WARN("Invalid message 'device_id' value. Expected a non empty string, but received: {}", deviceId);
+        LOG_WARNING << "Invalid message 'device_id' value. Expected a non empty string, but received: " << deviceId;
         return false;
     }
     return true;

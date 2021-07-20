@@ -17,7 +17,7 @@ bool ErrorResponseMessage::from_json(const nlohmann::json& j) {
     }
 
     if (!j.contains("error")) {
-        SPDLOG_WARN("Missing 'error' field in message.");
+        LOG_WARNING << "Missing 'error' field in message.";
         return false;
     }
     error = j["error"];

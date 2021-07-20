@@ -1,9 +1,9 @@
 #include "XmppClient.hpp"
+#include "logger/Logger.hpp"
 #include "storage/Serializer.hpp"
 #include <cassert>
 #include <chrono>
 #include <cstdint>
-#include <spdlog/spdlog.h>
 #include <strophe.h>
 
 namespace xmpp {
@@ -19,7 +19,7 @@ XmppClient::XmppClientState XmppClient::getState() {
 
 void XmppClient::start() {
     assert(state == XmppClientState::NOT_RUNNING);
-    SPDLOG_DEBUG("Starting the XMPP thread...");
+    LOG_DEBUG << "Starting the XMPP thread...";
     state = XmppClientState::STARTING;
     thread = std::make_optional<std::thread>(&XmppClient::thread_run, this);
 }
@@ -27,16 +27,16 @@ void XmppClient::start() {
 void XmppClient::stop() {
     if (state == XmppClientState::STARTING || state == XmppClientState::RUNNING || state == XmppClientState::WAITING_FOR_JOIN) {
         if (state != XmppClientState::WAITING_FOR_JOIN) {
-            SPDLOG_DEBUG("Stopping the XMPP thread...");
+            LOG_DEBUG << "Stopping the XMPP thread...";
             state = XmppClientState::STOP_REQUESTED;
         }
-        SPDLOG_DEBUG("Joining the XMPP thread...");
+        LOG_DEBUG << "Joining the XMPP thread...";
         thread->join();
         state = XmppClientState::NOT_RUNNING;
         thread = std::nullopt;
-        SPDLOG_INFO("XMPP thread joined.");
+        LOG_INFO << "XMPP thread joined.";
     } else {
-        SPDLOG_DEBUG("No need to stop the XMPP thread - not running (state: {})!", state);
+        LOG_DEBUG << "No need to stop the XMPP thread - not running (state: " << static_cast<int>(state) << ")!";
     }
 }
 
@@ -48,17 +48,17 @@ void conn_handler(xmpp_conn_t* const conn, const xmpp_conn_event_t status, const
     (void) stream_error;
 
     if (status == XMPP_CONN_CONNECT) {
-        SPDLOG_DEBUG("[XMPP]: Connected.");
+        LOG_DEBUG << "[XMPP]: Connected.";
         secured = xmpp_conn_is_secured(conn);
         if (secured) {
-            SPDLOG_DEBUG("[XMPP]: Connection is secured.");
+            LOG_DEBUG << "[XMPP]: Connection is secured.";
         } else {
-            SPDLOG_DEBUG("[XMPP]: Connection is NOT secured!");
+            LOG_DEBUG << "[XMPP]: Connection is NOT secured!";
         }
-        SPDLOG_DEBUG("[XMPP]: Connected");
+        LOG_DEBUG << "[XMPP]: Connected";
         // xmpp_disconnect(conn);
     } else {
-        SPDLOG_DEBUG("[XMPP]: Disconnected.");
+        LOG_DEBUG << "[XMPP]: Disconnected.";
         xmpp_stop(ctx);
     }
 }
@@ -69,24 +69,23 @@ void XmppClient::thread_run() {
         return;
     }
     state = XmppClientState::RUNNING;
-    SPDLOG_INFO("XMPP thread started.");
-    SPDLOG_DEBUG("Connecting the XMPP client...");
+    LOG_INFO << "XMPP thread started.";
+    LOG_DEBUG << "Connecting the XMPP client...";
     setup_xmpp();
-    SPDLOG_DEBUG("XMPP client connected.");
+    LOG_DEBUG << "XMPP client connected.";
 
     while (state == XmppClientState::RUNNING) {
         xmpp_connect_client(conn, host.c_str(), port, conn_handler, ctx);
         xmpp_run(ctx);
     }
-    SPDLOG_DEBUG("Disconnecting the XMPP client...");
+    LOG_DEBUG << "Disconnecting the XMPP client...";
     cleanup_xmpp();
-    SPDLOG_DEBUG("XMPP client disconnected.");
+    LOG_DEBUG << "XMPP client disconnected.";
     state = XmppClientState::WAITING_FOR_JOIN;
-    SPDLOG_DEBUG("XMPP thread ready to be joined.");
+    LOG_DEBUG << "XMPP thread ready to be joined.";
 }
 
 void XmppClient::setup_xmpp() {
-    SPDLOG_DEBUG("XMPP Password: {}", password.c_str());
     xmpp_initialize();
     log = xmpp_get_default_logger(XMPP_LEVEL_DEBUG);
     ctx = xmpp_ctx_new(nullptr, log);

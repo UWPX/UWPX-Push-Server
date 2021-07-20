@@ -88,12 +88,14 @@ else()
 endif()
 
 conan_cmake_run(REQUIRES nlohmann_json/3.9.1
-                         spdlog/1.8.5
+                         glog/0.4.0
                          cpr/1.6.2
                          redis-plus-plus/1.2.3
                          catch2/2.13.6
                          libsodium/1.0.18
-                GENERATORS cmake_find_package)
+                         cppserver/1.0.1.0
+                GENERATORS cmake_find_package
+                BUILD missing)
 conan_cmake_autodetect(settings)
 conan_cmake_install(PATH_OR_REFERENCE .
                     BUILD redis-plus-plus
@@ -102,10 +104,11 @@ conan_cmake_install(PATH_OR_REFERENCE .
                     SETTINGS "${settings};redis-plus-plus:compiler.cppstd=17") # Workaround for now: https://github.com/conan-io/conan-center-index/pull/6349
 
 find_package(nlohmann_json REQUIRED)
-find_package(spdlog REQUIRED)
+find_package(glog REQUIRED)
 find_package(cpr REQUIRED)
 find_package(redis++ REQUIRED)
 find_package(libsodium REQUIRED)
+find_package(cppserver REQUIRED)
 
 include(libstrophe)
 
