@@ -56,7 +56,7 @@ void conn_handler(xmpp_conn_t* const conn, const xmpp_conn_event_t status, const
             SPDLOG_DEBUG("[XMPP]: Connection is NOT secured!");
         }
         SPDLOG_DEBUG("[XMPP]: Connected");
-        xmpp_disconnect(conn);
+        // xmpp_disconnect(conn);
     } else {
         SPDLOG_DEBUG("[XMPP]: Disconnected.");
         xmpp_stop(ctx);
