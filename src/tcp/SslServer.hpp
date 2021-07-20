@@ -1,0 +1,20 @@
+#pragma once
+
+#include <memory>
+#include <bits/stdint-uintn.h>
+#include <server/asio/ssl_server.h>
+
+namespace tcp {
+class SslServer : public CppServer::Asio::SSLServer {
+ public:
+    SslServer(const std::shared_ptr<CppServer::Asio::Service>& asioService, const std::shared_ptr<CppServer::Asio::SSLContext>& sslCtx, const asio::ip::tcp::endpoint& endpoint);
+    SslServer(SslServer&&) = delete;
+    SslServer(const SslServer&) = delete;
+    SslServer& operator=(SslServer&&) = delete;
+    SslServer& operator=(const SslServer&) = delete;
+    ~SslServer() override = default;
+
+ protected:
+    void onError(int error, const std::string& category, const std::string& message) override;
+};
+}  // namespace tcp

@@ -1,8 +1,13 @@
 #pragma once
+
+#include "SslServer.hpp"
 #include "storage/ConfigurationStorage.hpp"
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <thread>
+#include <server/asio/service.h>
+#include <server/asio/ssl_server.h>
 
 namespace tcp {
 class TcpServer {
@@ -19,7 +24,9 @@ class TcpServer {
     std::optional<std::thread> thread{std::nullopt};
     TcpServerState state{TcpServerState::NOT_RUNNING};
 
-    uint16_t port;
+    std::shared_ptr<CppServer::Asio::Service> asioService = std::make_shared<CppServer::Asio::Service>();
+    std::shared_ptr<CppServer::Asio::SSLContext> sslCtx;
+    std::shared_ptr<SslServer> server;
 
  public:
     explicit TcpServer(const storage::TcpConfiguration& config);
