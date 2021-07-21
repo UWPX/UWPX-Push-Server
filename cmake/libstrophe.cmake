@@ -15,9 +15,9 @@ ExternalProject_Add(libstrophe
     BUILD_COMMAND make
     INSTALL_COMMAND make install
     BUILD_BYPRODUCTS ${LIBSTROPHE_LIBRARY_INSTALL_PATH}) # This line fixes ninja not being able to build libstrophe
-ExternalProject_Get_Property(libstrophe source_dir)
+ExternalProject_Get_Property(libstrophe SOURCE_DIR)
 add_library(strophe UNKNOWN IMPORTED)
-target_include_directories(strophe INTERFACE ${CMAKE_BINARY_DIR}/strophe/include)
+target_include_directories(strophe INTERFACE ${SOURCE_DIR})
 set_property(TARGET strophe PROPERTY IMPORTED_LOCATION ${LIBSTROPHE_LIBRARY_INSTALL_PATH})
 add_dependencies(strophe libstrophe)
 
