@@ -27,6 +27,7 @@ void XmppClient::stop() {
         if (state != XmppClientState::WAITING_FOR_JOIN) {
             LOG_DEBUG << "Stopping the XMPP thread...";
             state = XmppClientState::STOP_REQUESTED;
+            xmpp_stop(ctx);
         }
         LOG_DEBUG << "Joining the XMPP thread...";
         thread->join();
