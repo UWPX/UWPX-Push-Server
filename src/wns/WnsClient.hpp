@@ -2,6 +2,7 @@
 
 #include "WnsToken.hpp"
 #include "storage/ConfigurationStorage.hpp"
+#include "storage/redis/RedisClient.hpp"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -47,6 +48,7 @@ class WnsClient {
     std::string packetSid;
     std::string clientSecret;
     std::shared_ptr<WnsToken> token{nullptr};
+    storage::redis::RedisClient* redisClient{nullptr};
 
  public:
     explicit WnsClient(const storage::WnsConfiguration& config);
@@ -58,10 +60,12 @@ class WnsClient {
 
     bool isTokenValid();
     bool requestToken();
-    void loadTokenFromDb();
+    void load_token_from_db();
     bool sendRawNotification(const std::string& channelUri, const std::string&& content);
+    void set_redis_client(storage::redis::RedisClient* redisClient);
 
  private:
     ResponseCodeAction handle_response_code(int64_t statusCode, const std::string& text);
+    void store_token_in_db();
 };
 }  // namespace wns

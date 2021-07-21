@@ -1,6 +1,9 @@
 #include "WnsClient.hpp"
 #include "logger/Logger.hpp"
+#include <cassert>
 #include <cstdint>
+#include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <cpr/api.h>
@@ -35,6 +38,7 @@ bool WnsClient::requestToken() {
     }
     token = WnsToken::from_response(response.text);
     if (token) {
+        store_token_in_db();
         LOG_INFO << "Successfully requested a new WNS token.";
         LOG_DEBUG << "Token: '" << token->token << "', Type: '" << token->type << "'";
         return true;
@@ -42,7 +46,36 @@ bool WnsClient::requestToken() {
     return false;
 }
 
-void WnsClient::loadTokenFromDb() {
+void WnsClient::set_redis_client(storage::redis::RedisClient* redisClient) {
+    this->redisClient = redisClient;
+}
+
+void WnsClient::load_token_from_db() {
+    assert(redisClient);
+
+    std::optional<std::string> token = redisClient->get_wns_token();
+    if (!token) {
+        return;
+    }
+    std::optional<std::string> type = redisClient->get_wns_token_type();
+    if (!type) {
+        return;
+    }
+    std::optional<std::chrono::system_clock::time_point> expires = redisClient->get_wns_token_expire_date();
+    if (!expires) {
+        return;
+    }
+
+    this->token = std::make_shared<WnsToken>(std::move(*type), std::move(*token), *expires);
+    LOG_INFO << "Successfully loaded the WNS token from the DB.";
+    LOG_DEBUG << "Token: '" << this->token->token << "', Type: '" << this->token->type << "'";
+}
+
+void WnsClient::store_token_in_db() {
+    assert(redisClient);
+    redisClient->set_wns_token(token->token);
+    redisClient->set_wns_token_type(token->type);
+    redisClient->set_wns_token_expire_date(token->expires);
 }
 
 bool WnsClient::sendRawNotification(const std::string& channelUri, const std::string&& content) {

@@ -25,9 +25,9 @@ class PushServer {
     };
 
  private:
+    storage::redis::RedisClient redisClient;
     wns::WnsClient wnsClient;
     tcp::TcpServer tcpServer;
-    storage::redis::RedisClient redisClient;
     xmpp::XmppClient xmppClient;
     std::optional<std::thread> serverThread{std::nullopt};
     PushServerState state{PushServerState::NOT_RUNNING};

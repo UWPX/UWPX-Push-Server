@@ -17,9 +17,9 @@
 #include <string>
 
 namespace server {
-PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns),
+PushServer::PushServer(const storage::Configuration& config) : redisClient(config.db),
+                                                               wnsClient(config.wns),
                                                                tcpServer(config.tcp, [this](const std::string& s, tcp::ClientSslSession* session) { this->on_message_received(s, session); }),
-                                                               redisClient(config.db),
                                                                xmppClient(config.xmpp) {}
 
 PushServer::~PushServer() {
@@ -57,9 +57,10 @@ void PushServer::thread_run() {
     state = PushServerState::RUNNING;
     LOG_INFO << "Push server thread started.";
 
-    wnsClient.loadTokenFromDb();
-    tcpServer.start();
     redisClient.init();
+    wnsClient.set_redis_client(&redisClient);
+    wnsClient.load_token_from_db();
+    tcpServer.start();
     xmppClient.start();
 
     while (state == PushServerState::RUNNING) {

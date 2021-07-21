@@ -57,7 +57,7 @@ class Server:
         initDb()
 
         # WNS:
-        self.wnsClient.loadTokenFromDb()
+        self.wnsClient.load_token_from_db()
         if self.wnsClient.isTokenExpired():
             print("Requesting a new WNS token...")
             if self.wnsClient.requestToken():
