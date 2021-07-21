@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     io::IoThread ioThread(&server);
     ioThread.start();
 
-    while (ioThread.getState() != io::IoThread::IoThreadState::WAITING_FOR_JOIN) {
+    while (ioThread.get_state() != io::IoThread::IoThreadState::WAITING_FOR_JOIN) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     server.stop();

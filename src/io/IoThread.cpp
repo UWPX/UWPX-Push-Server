@@ -11,7 +11,7 @@ IoThread::~IoThread() {
     assert(state == IoThreadState::NOT_RUNNING);
 }
 
-IoThread::IoThreadState IoThread::getState() {
+IoThread::IoThreadState IoThread::get_state() {
     return state;
 }
 

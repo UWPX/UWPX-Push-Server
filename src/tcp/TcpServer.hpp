@@ -37,7 +37,7 @@ class TcpServer {
     TcpServer& operator=(const TcpServer&) = delete;
     ~TcpServer();
 
-    TcpServerState getState();
+    TcpServerState get_state();
 
     void start();
     void stop();

@@ -18,7 +18,7 @@ TcpServer::~TcpServer() {
     assert(state == TcpServerState::NOT_RUNNING);
 }
 
-TcpServer::TcpServerState TcpServer::getState() {
+TcpServer::TcpServerState TcpServer::get_state() {
     return state;
 }
 

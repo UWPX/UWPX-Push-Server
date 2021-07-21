@@ -27,7 +27,7 @@ class IoThread {
     IoThread& operator=(const IoThread&) = delete;
     ~IoThread();
 
-    IoThreadState getState();
+    IoThreadState get_state();
 
     void start();
     void stop();

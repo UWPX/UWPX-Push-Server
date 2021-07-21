@@ -37,7 +37,7 @@ class XmppClient {
     XmppClient& operator=(const XmppClient&) = delete;
     ~XmppClient();
 
-    XmppClientState getState();
+    XmppClientState get_state();
     const std::string& get_jid();
 
     void start();

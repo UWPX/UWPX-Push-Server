@@ -11,7 +11,7 @@ XmppClient::XmppClient(const storage::XmppConfiguration& config) : jid(config.ba
 
 XmppClient::~XmppClient() { assert(state == XmppClientState::NOT_RUNNING); }
 
-XmppClient::XmppClientState XmppClient::getState() { return state; }
+XmppClient::XmppClientState XmppClient::get_state() { return state; }
 
 const std::string& XmppClient::get_jid() { return jid; }
 
