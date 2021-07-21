@@ -19,11 +19,12 @@ class WnsToken {
     WnsToken& operator=(const WnsToken&) = delete;
     ~WnsToken() = default;
 
-    bool isValid();
+    bool is_valid();
 
-    static std::shared_ptr<WnsToken> fromResponse(const std::string& response);
+    static std::shared_ptr<WnsToken> from_response(const std::string& response);
+    [[nodiscard]] const std::string to_auth_string() const;
 
  private:
-    static std::chrono::system_clock::time_point getExpiresDate(size_t expiresInSeconds);
+    static std::chrono::system_clock::time_point get_expires_date(size_t expiresInSeconds);
 };
 }  // namespace wns

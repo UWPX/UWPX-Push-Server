@@ -12,12 +12,16 @@
 namespace wns {
 WnsToken::WnsToken(std::string&& type, std::string&& token, std::chrono::system_clock::time_point expires) : type(std::move(type)), token(std::move(token)), expires(expires) {}
 
-bool WnsToken::isValid() {
+bool WnsToken::is_valid() {
     // NOLINTNEXTLINE (modernize-use-nullptr)
     return std::chrono::system_clock::now() < expires;
 }
 
-std::shared_ptr<WnsToken> WnsToken::fromResponse(const std::string& response) {
+const std::string WnsToken::to_auth_string() const {
+    return type + " " + token;
+}
+
+std::shared_ptr<WnsToken> WnsToken::from_response(const std::string& response) {
     try {
         nlohmann::json js = nlohmann::json::parse(response);
 
@@ -44,7 +48,7 @@ std::shared_ptr<WnsToken> WnsToken::fromResponse(const std::string& response) {
         }
         size_t expiresInSeconds = 0;
         js.at("expires_in").get_to(expiresInSeconds);
-        std::chrono::system_clock::time_point expires = getExpiresDate(expiresInSeconds);
+        std::chrono::system_clock::time_point expires = get_expires_date(expiresInSeconds);
         return std::make_shared<WnsToken>(std::move(type), std::move(token), expires);
 
     } catch (nlohmann::json::parse_error& e) {
@@ -53,7 +57,7 @@ std::shared_ptr<WnsToken> WnsToken::fromResponse(const std::string& response) {
     return nullptr;
 }
 
-std::chrono::system_clock::time_point WnsToken::getExpiresDate(size_t expiresInSeconds) {
+std::chrono::system_clock::time_point WnsToken::get_expires_date(size_t expiresInSeconds) {
     return std::chrono::system_clock::now() + std::chrono::seconds(expiresInSeconds);
 }
 }  // namespace wns
