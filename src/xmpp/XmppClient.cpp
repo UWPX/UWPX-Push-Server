@@ -4,6 +4,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
+#include <strophe.h>
 
 namespace xmpp {
 XmppClient::XmppClient(const storage::XmppConfiguration& config) : jid(config.bareJid), password(config.password), port(config.port), host(config.host) {}
@@ -86,7 +87,7 @@ void XmppClient::thread_run() {
 
 void XmppClient::setup_xmpp() {
     xmpp_initialize();
-    log = xmpp_get_default_logger(XMPP_LEVEL_DEBUG);
+    log = xmpp_get_default_logger(XMPP_LEVEL_INFO);
     ctx = xmpp_ctx_new(nullptr, log);
     conn = xmpp_conn_new(ctx);
     xmpp_conn_set_flags(conn, XMPP_CONN_FLAG_MANDATORY_TLS | XMPP_CONN_FLAG_TRUST_TLS);
