@@ -1,4 +1,5 @@
 #include "SslServer.hpp"
+#include "ClientSslSession.hpp"
 #include "logger/Logger.hpp"
 #include <server/asio/ssl_server.h>
 
@@ -7,5 +8,9 @@ SslServer::SslServer(const std::shared_ptr<CppServer::Asio::Service>& asioServic
 
 void SslServer::onError(int error, const std::string& category, const std::string& message) {
     LOG_ERROR << "[" << id().string() << "] SSL session caught an error (code " << error << ") with category " << category << " and message: " << message;
+}
+
+std::shared_ptr<CppServer::Asio::SSLSession> SslServer::CreateSession(const std::shared_ptr<CppServer::Asio::SSLServer>& server) {
+    return std::make_shared<ClientSslSession>(server);
 }
 }  // namespace tcp

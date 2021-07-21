@@ -6,7 +6,7 @@
 namespace tcp {
 class ClientSslSession : public CppServer::Asio::SSLSession {
  public:
-    ClientSslSession();
+    explicit ClientSslSession(const std::shared_ptr<CppServer::Asio::SSLServer>& server);
     ClientSslSession(ClientSslSession&&) = delete;
     ClientSslSession(const ClientSslSession&) = delete;
     ClientSslSession& operator=(ClientSslSession&&) = delete;

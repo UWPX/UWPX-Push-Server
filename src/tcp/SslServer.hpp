@@ -15,5 +15,6 @@ class SslServer : public CppServer::Asio::SSLServer {
 
  protected:
     void onError(int error, const std::string& category, const std::string& message) override;
+    std::shared_ptr<CppServer::Asio::SSLSession> CreateSession(const std::shared_ptr<CppServer::Asio::SSLServer>& server) override;
 };
 }  // namespace tcp
