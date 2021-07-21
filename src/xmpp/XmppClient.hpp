@@ -38,6 +38,7 @@ class XmppClient {
     ~XmppClient();
 
     XmppClientState getState();
+    const std::string& get_jid();
 
     void start();
     void stop();

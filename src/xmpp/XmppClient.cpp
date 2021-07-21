@@ -9,13 +9,11 @@
 namespace xmpp {
 XmppClient::XmppClient(const storage::XmppConfiguration& config) : jid(config.bareJid), password(config.password), port(config.port), host(config.host) {}
 
-XmppClient::~XmppClient() {
-    assert(state == XmppClientState::NOT_RUNNING);
-}
+XmppClient::~XmppClient() { assert(state == XmppClientState::NOT_RUNNING); }
 
-XmppClient::XmppClientState XmppClient::getState() {
-    return state;
-}
+XmppClient::XmppClientState XmppClient::getState() { return state; }
+
+const std::string& XmppClient::get_jid() { return jid; }
 
 void XmppClient::start() {
     assert(state == XmppClientState::NOT_RUNNING);

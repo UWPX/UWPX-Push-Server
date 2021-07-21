@@ -1,18 +1,26 @@
 #include "PushServer.hpp"
 #include "logger/Logger.hpp"
+#include "tcp/ClientSslSession.hpp"
 #include "tcp/TcpServer.hpp"
 #include "tcp/messages/AbstractMessage.hpp"
+#include "tcp/messages/ErrorResponseMessage.hpp"
+#include "tcp/messages/Parser.hpp"
 #include "tcp/messages/RequestTestPushMessage.hpp"
 #include "tcp/messages/SetChannelUriMessage.hpp"
 #include "tcp/messages/SetPushAccountsMessage.hpp"
 #include "tcp/messages/SuccessSetPushAccountsMessage.hpp"
 #include "wns/WnsClient.hpp"
 #include <cassert>
+#include <functional>
+#include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <string>
 
 namespace server {
-PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns), tcpServer(config.tcp), redisClient(config.db), xmppClient(config.xmpp) {}
+PushServer::PushServer(const storage::Configuration& config) : wnsClient(config.wns),
+                                                               tcpServer(config.tcp, [this](const std::string& s, tcp::ClientSslSession* session) { this->on_message_received(s, session); }),
+                                                               redisClient(config.db),
+                                                               xmppClient(config.xmpp) {}
 
 PushServer::~PushServer() {
     assert(state == PushServerState::NOT_RUNNING);
@@ -77,42 +85,57 @@ void PushServer::check_setup_wns() {
     }
 }
 
-void PushServer::on_message_received(const std::shared_ptr<tcp::messages::AbstractMessage>& msg) {
+void PushServer::on_message_received(const std::string& s, tcp::ClientSslSession* session) {
+    try {
+        std::shared_ptr<tcp::messages::AbstractMessage> msg = tcp::messages::parse(s);
+        if (!msg) {
+            session->respond_with_error("Malformed JSON.");
+        }
+        if (!msg->is_valid()) {
+            session->respond_with_error("Invalid JSON message.");
+        }
+        on_message_received(msg, session);
+    } catch (const std::exception& e) {
+        LOG_ERROR << "Failed to process received JSON message '" << s << "' with: " << e.what();
+    }
+}
+
+void PushServer::on_message_received(const std::shared_ptr<tcp::messages::AbstractMessage>& msg, tcp::ClientSslSession* session) {
     assert(msg);
     assert(msg->is_valid());
 
     switch (msg->get_type()) {
         case tcp::messages::AbstractMessage::MessageType::SET_CHANNEL_URI_MESSAGE: {
             const tcp::messages::SetChannelUriMessage* actMsg = static_cast<tcp::messages::SetChannelUriMessage*>(msg.get());
-            set_channel_uri(actMsg->get_device_id(), actMsg->get_channel_uri());
+            set_channel_uri(actMsg->get_device_id(), actMsg->get_channel_uri(), session);
         } break;
         case tcp::messages::AbstractMessage::MessageType::SET_PUSH_ACCOUNT_MESSAGE: {
             const tcp::messages::SetPushAccountsMessage* actMsg = static_cast<tcp::messages::SetPushAccountsMessage*>(msg.get());
-            set_push_accounts(actMsg->get_device_id(), actMsg->get_accounts());
+            set_push_accounts(actMsg->get_device_id(), actMsg->get_accounts(), session);
         } break;
         case tcp::messages::AbstractMessage::MessageType::REQUEST_TEST_PUSH_MESSAGE: {
             const tcp::messages::RequestTestPushMessage* actMsg = static_cast<tcp::messages::RequestTestPushMessage*>(msg.get());
-            send_test_push(actMsg->get_device_id());
+            send_test_push(actMsg->get_device_id(), session);
         } break;
         default:
-            // TODO: Respond with: "Unsupported message type."
+            session->respond_with_error("Unsupported message type.");
             break;
     }
 }
 
-void PushServer::send_test_push(const std::string& deviceId) {
+void PushServer::send_test_push(const std::string& deviceId, tcp::ClientSslSession* session) {
     const std::optional<std::string> channelUri = redisClient.get_channel_uri(deviceId);
     if (!channelUri) {
-        // TODO: Respond with: "Device id unknown."
+        session->respond_with_error("Device id unknown.");
     }
     wnsClient.sendRawNotification(*channelUri, "Test push notification from your push server.");
     LOG_INFO << "Test push send to device id: " << deviceId;
 }
 
-void PushServer::set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts) {
+void PushServer::set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts, tcp::ClientSslSession* session) {
     const std::optional<std::string> channelUri = redisClient.get_channel_uri(deviceId);
     if (!channelUri) {
-        // TODO: Respond with: "Device id unknown."
+        session->respond_with_error("Device id unknown.");
     }
     redisClient.set_push_accounts(*channelUri, accounts);
     std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount> pushAccounts;
@@ -121,10 +144,12 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
         pushAccounts.push_back(tcp::messages::SuccessSetPushAccountsMessage::PushAccount::create(deviceId, bareJid));
     }
 
-    tcp::messages::SuccessSetPushAccountsMessage resultMsg(std::move(pushAccounts), "REPLACE WITH BARE JID FROM XMPP CONFIG");
+    tcp::messages::SuccessSetPushAccountsMessage resultMsg(std::move(pushAccounts), std::string{xmppClient.get_jid()});
+    nlohmann::json j;
+    resultMsg.to_json(j);
+    session->send(std::move(j));
 }
 
-void PushServer::set_channel_uri(const std::string& /*deviceId*/, const std::string& /*channelUri*/) {
-}
+void PushServer::set_channel_uri(const std::string& /*deviceId*/, const std::string& /*channelUri*/, tcp::ClientSslSession* /*session*/) {}
 
 }  // namespace server

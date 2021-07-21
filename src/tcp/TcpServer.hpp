@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ClientSslSession.hpp"
 #include "SslServer.hpp"
 #include "storage/ConfigurationStorage.hpp"
 #include <cstdint>
@@ -29,7 +30,7 @@ class TcpServer {
     std::shared_ptr<SslServer> server;
 
  public:
-    explicit TcpServer(const storage::TcpConfiguration& config);
+    TcpServer(const storage::TcpConfiguration& config, ClientSslSession::messageHandlerFunc&& messageHandler);
     TcpServer(TcpServer&&) = default;
     TcpServer(const TcpServer&) = delete;
     TcpServer& operator=(TcpServer&&) = default;

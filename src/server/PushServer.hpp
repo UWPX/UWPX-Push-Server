@@ -1,6 +1,7 @@
 #pragma once
 #include "storage/ConfigurationStorage.hpp"
 #include "storage/redis/RedisClient.hpp"
+#include "tcp/ClientSslSession.hpp"
 #include "tcp/TcpServer.hpp"
 #include "tcp/messages/AbstractMessage.hpp"
 #include "tcp/messages/SetPushAccountsMessage.hpp"
@@ -45,9 +46,10 @@ class PushServer {
  private:
     void thread_run();
     void check_setup_wns();
-    void on_message_received(const std::shared_ptr<tcp::messages::AbstractMessage>& msg);
-    void send_test_push(const std::string& deviceId);
-    void set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts);
-    void set_channel_uri(const std::string& deviceId, const std::string& channelUri);
+    void on_message_received(const std::string& s, tcp::ClientSslSession* session);
+    void on_message_received(const std::shared_ptr<tcp::messages::AbstractMessage>& msg, tcp::ClientSslSession* session);
+    void send_test_push(const std::string& deviceId, tcp::ClientSslSession* session);
+    void set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts, tcp::ClientSslSession* session);
+    void set_channel_uri(const std::string& deviceId, const std::string& channelUri, tcp::ClientSslSession* session);
 };
 }  // namespace server
