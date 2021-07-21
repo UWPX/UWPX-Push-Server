@@ -1,6 +1,8 @@
 #include "ClientSslSession.hpp"
 #include "logger/Logger.hpp"
 #include "messages/ErrorResponseMessage.hpp"
+#include "messages/SuccessResponseMessage.hpp"
+#include "tcp/messages/SuccessResponseMessage.hpp"
 #include <algorithm>
 #include <cassert>
 #include <nlohmann/json_fwd.hpp>
@@ -32,6 +34,13 @@ void ClientSslSession::onReceived(const void* buffer, size_t size) {
 
 void ClientSslSession::onError(int error, const std::string& category, const std::string& message) {
     LOG_ERROR << '[' << id().string() << "] SSL session caught an error (code " << error << ") with category " << category << " and message: " << message;
+}
+
+void ClientSslSession::respond_with_success() {
+    messages::SuccessResponseMessage msg;
+    nlohmann::json j;
+    msg.to_json(j);
+    send(std::move(j));
 }
 
 void ClientSslSession::respond_with_error(std::string&& msg) {

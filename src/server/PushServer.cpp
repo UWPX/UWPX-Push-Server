@@ -129,6 +129,7 @@ void PushServer::send_test_push(const std::string& deviceId, tcp::ClientSslSessi
         session->respond_with_error("Device id unknown.");
     }
     wnsClient.sendRawNotification(*channelUri, "Test push notification from your push server.");
+    session->respond_with_success();
     LOG_INFO << "Test push send to device id: " << deviceId;
 }
 
@@ -150,6 +151,10 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
     session->send(std::move(j));
 }
 
-void PushServer::set_channel_uri(const std::string& /*deviceId*/, const std::string& /*channelUri*/, tcp::ClientSslSession* /*session*/) {}
+void PushServer::set_channel_uri(const std::string& deviceId, const std::string& channelUri, tcp::ClientSslSession* session) {
+    redisClient.set_channel_uri(deviceId, channelUri);
+    session->respond_with_success();
+    LOG_INFO << "Channel URI set for 'device' " << deviceId << " to: " << channelUri;
+}
 
 }  // namespace server

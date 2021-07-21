@@ -30,5 +30,6 @@ class RedisClient {
 
     std::optional<std::string> get_channel_uri(const std::string& deviceId);
     void set_push_accounts(const std::string& channelUri, const std::vector<std::string>& accounts);
+    void set_channel_uri(const std::string& deviceId, const std::string& channelUri);
 };
 }  // namespace storage::redis

@@ -24,6 +24,7 @@ class ClientSslSession : public CppServer::Asio::SSLSession {
     ~ClientSslSession() override = default;
 
     void respond_with_error(std::string&& msg);
+    void respond_with_success();
     void send(std::string&& msg);
     void send(nlohmann::json&& j);
 

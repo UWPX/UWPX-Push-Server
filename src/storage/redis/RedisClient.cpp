@@ -28,4 +28,8 @@ void RedisClient::set_push_accounts(const std::string& channelUri, const std::ve
     redis->del(channelUri);
     redis->rpush(channelUri, accounts.begin(), accounts.end());
 }
+
+void RedisClient::set_channel_uri(const std::string& deviceId, const std::string& channelUri) {
+    redis->set(deviceId, channelUri);
+}
 }  // namespace storage::redis
