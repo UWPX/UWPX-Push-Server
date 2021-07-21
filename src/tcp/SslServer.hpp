@@ -7,7 +7,7 @@
 namespace tcp {
 class SslServer : public CppServer::Asio::SSLServer {
  public:
-    SslServer(const std::shared_ptr<CppServer::Asio::Service>& asioService, const std::shared_ptr<CppServer::Asio::SSLContext>& sslCtx, const asio::ip::tcp::endpoint& endpoint);
+    SslServer(const std::shared_ptr<CppServer::Asio::Service>& asioService, const std::shared_ptr<CppServer::Asio::SSLContext>& sslCtx, CppServer::Asio::InternetProtocol protocol, uint16_t port);
     SslServer(SslServer&&) = delete;
     SslServer(const SslServer&) = delete;
     SslServer& operator=(SslServer&&) = delete;

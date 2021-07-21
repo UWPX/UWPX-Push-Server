@@ -4,13 +4,14 @@
 #include <asio/ssl/context.hpp>
 #include <chrono>
 #include <memory>
+#include <server/asio/asio.h>
 
 namespace tcp {
 TcpServer::TcpServer(const storage::TcpConfiguration& config) {
     sslCtx = std::make_shared<CppServer::Asio::SSLContext>(asio::ssl::context::tlsv12);
     sslCtx->use_certificate_file(config.tls.serverCertPath, asio::ssl::context::pem);
     sslCtx->use_private_key_file(config.tls.serverKeyPath, asio::ssl::context::pem);
-    server = std::make_shared<SslServer>(asioService, sslCtx, config.port);
+    server = std::make_shared<SslServer>(asioService, sslCtx, CppServer::Asio::InternetProtocol::IPv4, config.port);
 }
 
 TcpServer::~TcpServer() {
