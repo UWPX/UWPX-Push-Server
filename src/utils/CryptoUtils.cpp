@@ -1,5 +1,6 @@
 #include "CryptoUtils.hpp"
 #include <cassert>
+#include <cstddef>
 #include <random>
 #include <string>
 #include <sodium/crypto_hash_sha256.h>
@@ -26,12 +27,13 @@ std::string url_safe_random_token(size_t length) {
 
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    static std::uniform_int_distribution<> distr(static_cast<int>(alphanum.length()));
+    static std::uniform_int_distribution<> distr(0, static_cast<int>(alphanum.length()));
 
     std::string result;
     result.resize(length);
     for (size_t i = 0; i < length; i++) {
-        result[i] = alphanum[distr(gen)];
+        int e = distr(gen);
+        result[i] = alphanum[e];
     }
     return result;
 }
