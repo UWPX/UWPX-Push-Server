@@ -1,5 +1,6 @@
 #include "SslServer.hpp"
 #include "logger/Logger.hpp"
+#include <server/asio/ssl_server.h>
 
 namespace tcp {
 SslServer::SslServer(const std::shared_ptr<CppServer::Asio::Service>& asioService, const std::shared_ptr<CppServer::Asio::SSLContext>& sslCtx, CppServer::Asio::InternetProtocol protocol, uint16_t port) : CppServer::Asio::SSLServer(asioService, sslCtx, port, protocol) {}

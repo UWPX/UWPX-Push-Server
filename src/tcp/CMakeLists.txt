@@ -9,4 +9,5 @@ add_library(tcp STATIC TcpServer.cpp
                        SslServer.cpp
                        SslServer.hpp)
 
-target_link_libraries(tcp PRIVATE logger storage cppserver::cppserver)
+target_link_libraries(tcp PRIVATE logger storage
+                          PUBLIC cppserver::cppserver)

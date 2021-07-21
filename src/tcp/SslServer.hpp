@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <bits/stdint-uintn.h>
 #include <server/asio/ssl_server.h>
 
 namespace tcp {
