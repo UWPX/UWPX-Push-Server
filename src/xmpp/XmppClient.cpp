@@ -4,7 +4,6 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
-#include <strophe.h>
 
 namespace xmpp {
 XmppClient::XmppClient(const storage::XmppConfiguration& config) : jid(config.bareJid), password(config.password), port(config.port), host(config.host) {}

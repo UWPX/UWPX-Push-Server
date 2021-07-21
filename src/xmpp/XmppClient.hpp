@@ -4,9 +4,7 @@
 #include <optional>
 #include <string>
 #include <thread>
-#include <bits/stdint-uintn.h>
 #include <strophe.h>
-
 namespace xmpp {
 class XmppClient {
  public:
