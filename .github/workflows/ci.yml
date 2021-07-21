@@ -1,0 +1,49 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  ubuntu-20:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.2.0
+      with:
+        submodules: false
+    - name: "[Release g++] Build & Test"
+      uses: ashutoshvarma/action-cmake-build@master
+      with:
+        build-dir: ${{github.workspace}}/build
+        source-dir: ${{github.workspace}}
+        cc: gcc
+        cxx: g++
+        build-type: Release
+        run-test: true
+        ctest-options: -V
+        configure-options: -DUWPX_PUSH_SERVER_ENABLE_LINTING=OFF -DUWPX_PUSH_SERVER_STATIC_ANALYZE=OFF -DUWPX_PUSH_SERVER_BUILD_TESTS=ON
+  
+  clang-tidy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.2.0
+      with:
+        submodules: true
+    - name: Install libssl-dev
+      run: sudo apt install libssl-dev
+    - name: Install clang-tidy
+      run: sudo apt install clang-tidy
+    - name: "[Release g++] Build & Test"
+      uses: ashutoshvarma/action-cmake-build@master
+      with:
+        build-dir: ${{github.workspace}}/build
+        source-dir: ${{github.workspace}}
+        cc: clang
+        cxx: clang++
+        build-type: Release
+        run-test: true
+        ctest-options: -V
+        configure-options: -DUWPX_PUSH_SERVER_ENABLE_LINTING=ON -DUWPX_PUSH_SERVER_STATIC_ANALYZE=OFF -DUWPX_PUSH_SERVER_BUILD_TESTS=ON
