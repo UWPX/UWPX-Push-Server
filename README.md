@@ -134,9 +134,6 @@ To be able to build and run this server, you have to install the following depen
 * [CMake](https://cmake.org/): (`sudo dnf install cmake`)
 * [gcc](https://gcc.gnu.org/) or [clang](https://clang.llvm.org/) with support for `C++20`: `sudo dnf install gcc clang`
 * [Conan](https://conan.io/): `pip3 install conan --user`
-* [Gil (git links) tool](https://github.com/chronoxor/gil) `pip3 install gli`
-* [GNU Binutils](https://www.gnu.org/software/binutils/) `sudo dnf install binutils-devel`
-* [libuuid](https://sourceforge.net/projects/libuuid/) `sudo dnf install libuuid-devel`
 
 #### Compressed
 ```
@@ -147,10 +144,13 @@ pip3 install conan gli --user
 ### Automatic
 The following dependencies will be installed automatically by [conan](https://conan.io/) during the CMake configuration phase.
 * [nlohmann_json](https://github.com/nlohmann/json): JSON for Modern C++
-* [spdlog](https://github.com/gabime/spdlog): Very fast, header-only/compiled, C++ logging library.
+* [glog](https://github.com/google/glog): The library provides logging APIs based on C++-style streams and various helper macros.
 * [cpr](https://github.com/whoshuu/cpr): C++ Requests: Curl for People, a spiritual port of Python Requests.
 * [redis-plus-plus](https://github.com/sewenew/redis-plus-plus): Redis client written in C++.
+* [catch2](https://github.com/catchorg/Catch2): Catch2 is mainly a unit testing framework for C++, but it also provides basic micro-benchmarking features, and simple BDD macros.
 * [CppServer](https://github.com/chronoxor/CppServer#requirements): Ultra fast and low latency asynchronous socket server & client C++ library with support TCP, SSL, UDP, HTTP, HTTPS, WebSocket protocols and 10K connections problem solution.
+* [libsodium](https://libsodium.gitbook.io/doc/) Sodium is a modern, easy-to-use software library for encryption, decryption, signatures, password hashing and more.
+* [libstrophe](https://strophe.im/libstrophe/) ibstrophe is a minimal XMPP library written in C. 
 
 ## Building
 ```BASH
@@ -183,7 +183,9 @@ If you run the server for the first time and there is no `configuration.json` pr
     },
     "xmpp": {
         "bareJid": "The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com')",
-        "password": "The password for the push XMPP client"
+        "password": "The password for the push XMPP client",
+		"port": 5222,
+		"host": "The hostname of the XMPP server."
     }
 }
 ```
