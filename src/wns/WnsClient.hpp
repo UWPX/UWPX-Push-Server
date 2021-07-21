@@ -58,10 +58,13 @@ class WnsClient {
     WnsClient& operator=(const WnsClient&) = default;
     ~WnsClient() = default;
 
-    bool isTokenValid();
-    bool requestToken();
+    /**
+     * Returns true, in case a token exists and has not expired yet.
+     **/
+    bool is_token_valid();
+    bool request_new_token();
     void load_token_from_db();
-    bool sendRawNotification(const std::string& channelUri, const std::string&& content);
+    bool send_raw_notification(const std::string& channelUri, const std::string&& content);
     void set_redis_client(storage::redis::RedisClient* redisClient);
 
  private:

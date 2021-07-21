@@ -75,11 +75,11 @@ void PushServer::thread_run() {
 }
 
 void PushServer::check_setup_wns() {
-    if (!wnsClient.isTokenValid()) {
-        if (!wnsClient.requestToken()) {
+    if (!wnsClient.is_token_valid()) {
+        if (!wnsClient.request_new_token()) {
             LOG_INFO << "Retrying to request a new WNS token in 10 seconds...";
             std::this_thread::sleep_for(std::chrono::seconds(10));
-            if (!wnsClient.requestToken()) {
+            if (!wnsClient.request_new_token()) {
                 LOG_ERROR << "Failed to request a new WNS token for the second time! Exiting...";
             }
         }
@@ -129,7 +129,7 @@ void PushServer::send_test_push(const std::string& deviceId, tcp::ClientSslSessi
     if (!channelUri) {
         session->respond_with_error("Device id unknown.");
     }
-    wnsClient.sendRawNotification(*channelUri, "Test push notification from your push server.");
+    wnsClient.send_raw_notification(*channelUri, "Test push notification from your push server.");
     session->respond_with_success();
     LOG_INFO << "Test push send to device id: " << deviceId;
 }

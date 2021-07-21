@@ -16,11 +16,11 @@
 namespace wns {
 WnsClient::WnsClient(const storage::WnsConfiguration& config) : packetSid(config.packetId), clientSecret(config.clientSecret) {}
 
-bool WnsClient::isTokenValid() {
+bool WnsClient::is_token_valid() {
     return token && token->is_valid();
 }
 
-bool WnsClient::requestToken() {
+bool WnsClient::request_new_token() {
     cpr::Payload payload{
         {"grant_type", "client_credentials"},
         {"scope", "notify.windows.com"},
@@ -78,11 +78,11 @@ void WnsClient::store_token_in_db() {
     redisClient->set_wns_token_expire_date(token->expires);
 }
 
-bool WnsClient::sendRawNotification(const std::string& channelUri, const std::string&& content) {
+bool WnsClient::send_raw_notification(const std::string& channelUri, const std::string&& content) {
     LOG_DEBUG << "Sending raw notification...";
-    if (isTokenValid()) {
+    if (is_token_valid()) {
         LOG_INFO << "WNS token expired. requesting a new one...";
-        if (!requestToken()) {
+        if (!request_new_token()) {
             LOG_ERROR << "Failed to send raw notification. Requesting a new WNS token failed.";
             return false;
         }
@@ -127,7 +127,7 @@ WnsClient::ResponseCodeAction WnsClient::handle_response_code(int64_t statusCode
         case StatusCodes::STATUS_CODE_UNAUTHORIZED:
             LOG_ERROR << "Sending a raw notification failed. WNS token invalid.";
             LOG_INFO << "Requesting a new WNS token...";
-            if (requestToken()) {
+            if (request_new_token()) {
                 return ResponseCodeAction::RETRY;
             }
             return ResponseCodeAction::ERROR;

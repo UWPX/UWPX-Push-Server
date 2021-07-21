@@ -60,7 +60,7 @@ class Server:
         self.wnsClient.load_token_from_db()
         if self.wnsClient.isTokenExpired():
             print("Requesting a new WNS token...")
-            if self.wnsClient.requestToken():
+            if self.wnsClient.request_new_token():
                 WNSTokenModel.truncate_table()
                 self.wnsClient.token.toWNSTokenModel().save()
                 print("WNS token requested successfully.")
@@ -145,7 +145,7 @@ class Server:
             self.tcpServer.respondClientWithErrorMessage(
                 "Device id unknown.", sock)
             return
-        self.wnsClient.sendRawNotification(
+        self.wnsClient.send_raw_notification(
             channelUri.channelUri, "Test push notification from your push server.")
         self.tcpServer.respondClientWithSuccessMessage(sock)
         print("Test push notification send to: {}".format(channelUri.channelUri))
@@ -168,6 +168,6 @@ class Server:
         except DoesNotExist:
             print("Test push for unknown device id: \"{}\"".format(deviceId))
             return
-        self.wnsClient.sendRawNotification(
+        self.wnsClient.send_raw_notification(
             channelUri.channelUri, "Test push notification from your push server.")
         print("Test push send to device id: \"{}\"".format(deviceId))
