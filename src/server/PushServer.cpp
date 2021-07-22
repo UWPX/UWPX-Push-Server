@@ -144,11 +144,20 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
     if (!channelUri) {
         session->respond_with_error("Device id unknown.");
     }
-    redisClient.set_push_accounts(*channelUri, accounts);
+
+    // Delete all existing XMPP PubSub nodes:
+    std::vector<std::string> oldPushNodes = redisClient.get_push_nodes(deviceId);
+    for (const std::string& node : oldPushNodes) {
+        xmppClient.delete_push_node(node);
+        LOG_DEBUG << "Deleted node '" << node << "' for device: " << deviceId;
+    }
+
+    // Store the new accounts:
     std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount> pushAccounts;
     pushAccounts.reserve(accounts.size());
     for (const std::string& bareJid : accounts) {
         pushAccounts.push_back(tcp::messages::SuccessSetPushAccountsMessage::PushAccount::create(bareJid));
+        LOG_DEBUG << "New Push account with node '" << pushAccounts[pushAccounts.size() - 1].node << "' for device: " << deviceId;
     }
 
     // Create and subscribe to XMPP PubSub nodes:
@@ -156,6 +165,7 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
         account.success = xmppClient.setup_push_node(account.node);
     }
 
+    redisClient.set_push_accounts(deviceId, *channelUri, pushAccounts);
     tcp::messages::SuccessSetPushAccountsMessage resultMsg(std::move(pushAccounts), std::string{xmppClient.get_jid()});
     nlohmann::json j;
     resultMsg.to_json(j);

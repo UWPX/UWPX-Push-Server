@@ -1,5 +1,6 @@
 #pragma once
 #include "storage/ConfigurationStorage.hpp"
+#include "tcp/messages/SuccessSetPushAccountsMessage.hpp"
 #include <chrono>
 #include <memory>
 #include <optional>
@@ -33,13 +34,18 @@ class RedisClient {
     void init();
 
     std::optional<std::string> get_channel_uri(const std::string& deviceId);
-    void set_push_accounts(const std::string& channelUri, const std::vector<std::string>& accounts);
-    void set_channel_uri(const std::string& deviceId, const std::string& channelUri);
-    void set_wns_token(const std::string& token);
+    std::vector<std::string> get_push_nodes(const std::string& deviceId);
+    std::optional<std::string> get_node_secret(const std::string& node);
+
     std::optional<std::string> get_wns_token();
-    void set_wns_token_type(const std::string& type);
     std::optional<std::string> get_wns_token_type();
-    void set_wns_token_expire_date(std::chrono::system_clock::time_point expires);
     std::optional<std::chrono::system_clock::time_point> get_wns_token_expire_date();
+
+    void set_channel_uri(const std::string& deviceId, const std::string& channelUri);
+    void set_push_accounts(const std::string& deviceId, const std::string& channelUri, const std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount>& accounts);
+
+    void set_wns_token(const std::string& token);
+    void set_wns_token_type(const std::string& type);
+    void set_wns_token_expire_date(std::chrono::system_clock::time_point expires);
 };
 }  // namespace storage::redis
