@@ -18,20 +18,25 @@ struct WnsConfiguration {
     /**
      * The secret obtained from the Devcenter.
      **/
-    std::string clientSecret{"The secret obtained from the Devcenter"};
+    std::string clientSecret{"The secret obtained from the Devcenter."};
 };
 
 struct XmppConfiguration {
     /**
      * The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com').
      **/
-    std::string bareJid{"The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com')"};
+    std::string bareJid{"The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com')."};
     /**
      * The password for the push XMPP client.
      **/
-    std::string password{"The password for the push XMPP client"};
+    std::string password{"The password for the push XMPP client."};
+    /**
+     * The JID of the PubSub server where nodes should be published to.
+     **/
+    std::string pubSubServerJid{"The JID of the PubSub server where nodes should be published to."};
     /**
      * The port of the XMPP server.
+     * Default: 5222
      **/
     uint16_t port = 5222;
     /**
@@ -44,11 +49,11 @@ struct TlsConfiguration {
     /**
      * Path to your 'domain.key' file.
      **/
-    std::string serverKeyPath{"Path to your 'domain.key' file"};
+    std::string serverKeyPath{"Path to your 'domain.key' file."};
     /**
      * Path to your 'domain.cert' file.
      **/
-    std::string serverCertPath{"Path to your 'domain.cert' file"};
+    std::string serverCertPath{"Path to your 'domain.cert' file."};
 };
 
 struct TcpConfiguration {

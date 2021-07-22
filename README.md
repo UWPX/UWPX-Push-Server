@@ -75,6 +75,7 @@ This ensures, the client only receives notifications for those devices, that are
 #### Success: Server -> Client
 On success the server returns a success message, including a `node` and `secret` attribute for each account.
 It also includes a `push_bareJid` field, which represents the bare JID of the push server.
+The `success` attribute indicates if creating a PubSub node was successful for the client.
 ```JSON
 {
 	"version": 1,
@@ -85,12 +86,14 @@ It also includes a `push_bareJid` field, which represents the bare JID of the pu
 		{
 			"bareJid": "someClient@xmpp.uwpx.org",
 			"node": "773bds9nf932",
-			"secret": "sdf/82h)=1"
+			"secret": "sdf/82h)=1",
+			"success": true
 		},
 		{
 			"bareJid": "someOtherClient@xmpp.uwpx.org",
 			"node": "8w3rn0MB3m38z2",
-			"secret": "j$o909mN87!n/0m"
+			"secret": "j$o909mN87!n/0m",
+			"success": true
 		}
 	]
 }

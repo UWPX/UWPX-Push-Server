@@ -14,13 +14,14 @@ class SuccessSetPushAccountsMessage : public SuccessResponseMessage {
         std::string bareJid;
         std::string node;
         std::string secret;
+        bool success;
 
-        PushAccount(std::string&& bareJid, std::string&& node, std::string&& secret);
+        PushAccount(std::string&& bareJid, std::string&& node, std::string&& secret, bool success);
 
         static std::optional<PushAccount> from_json(const nlohmann::json& j);
         void to_json(nlohmann::json& j) const;
 
-        static PushAccount create(const std::string& deviceId, const std::string& bareJid);
+        static PushAccount create(const std::string& bareJid);
     } __attribute__((aligned(128)));
 
  protected:

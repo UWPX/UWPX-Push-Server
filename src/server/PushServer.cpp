@@ -148,7 +148,12 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
     std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount> pushAccounts;
     pushAccounts.reserve(accounts.size());
     for (const std::string& bareJid : accounts) {
-        pushAccounts.push_back(tcp::messages::SuccessSetPushAccountsMessage::PushAccount::create(deviceId, bareJid));
+        pushAccounts.push_back(tcp::messages::SuccessSetPushAccountsMessage::PushAccount::create(bareJid));
+    }
+
+    // Create and subscribe to XMPP PubSub nodes:
+    for (tcp::messages::SuccessSetPushAccountsMessage::PushAccount& account : pushAccounts) {
+        account.success = xmppClient.setup_push_node(account.node);
     }
 
     tcp::messages::SuccessSetPushAccountsMessage resultMsg(std::move(pushAccounts), std::string{xmppClient.get_jid()});
