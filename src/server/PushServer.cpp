@@ -129,9 +129,14 @@ void PushServer::send_test_push(const std::string& deviceId, tcp::ClientSslSessi
     if (!channelUri) {
         session->respond_with_error("Device id unknown.");
     }
-    wnsClient.send_raw_notification(*channelUri, "Test push notification from your push server.");
-    session->respond_with_success();
-    LOG_INFO << "Test push send to device id: " << deviceId;
+    bool result = wnsClient.send_raw_notification(*channelUri, "Test push notification from your push server.");
+    if (result) {
+        session->respond_with_success();
+        LOG_INFO << "Test push send to device id: " << deviceId;
+    } else {
+        session->respond_with_error("Failed to send test push. Something went wrong...");
+        LOG_WARNING << "Failed to send test push for device: " << deviceId;
+    }
 }
 
 void PushServer::set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts, tcp::ClientSslSession* session) {
