@@ -55,13 +55,17 @@ class XmppClient {
      * Returns true on success.
      **/
     bool setup_push_node(const std::string& node);
+    void delete_push_node(const std::string& node);
 
  private:
     void thread_run();
     void setup_xmpp();
     void cleanup_xmpp();
 
+    xmpp_stanza_t* xmpp_pub_sub_delete_new(const char* node, const char* id);
     xmpp_stanza_t* xmpp_pub_sub_create_new(const char* node, const char* id);
+    xmpp_stanza_t* xmpp_pub_sub_subscribe_new(const char* node, const char* id);
+    xmpp_stanza_t* xmpp_pub_sub_unsubscribe_new(const char* node, const char* id);
     xmpp_stanza_t* xmpp_pub_sub_create_config_new();
     xmpp_stanza_t* xmpp_field_new(const char* var, const char* type, const char* value);
 };
