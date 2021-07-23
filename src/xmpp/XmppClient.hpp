@@ -60,6 +60,7 @@ class XmppClient {
     void delete_push_node(const std::string& node);
     void send_presence_online();
     void on_node_message(const std::string& node, const std::string& msg);
+    static const char* get_message_body(xmpp_stanza_t* itemsNode);
 
  private:
     void thread_run();

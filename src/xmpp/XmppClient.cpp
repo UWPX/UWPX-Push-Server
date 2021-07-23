@@ -71,15 +71,18 @@ int message_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, vo
                 xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(event, "items");
                 if (items) {
                     const char* node = xmpp_stanza_get_attribute(items, "node");
-                    std::string nodeStr(node);
-                    std::string msg = "New message!";
-                    LOG_DEBUG << "Received event for node: " << nodeStr;
+                    LOG_DEBUG << "Received event for node: " << node;
 
-                    // TODO: Parse message
-                    // TODO: Check secret
+                    const char* msg = XmppClient::get_message_body(items);
+                    if (msg) {
+                        // TODO: Parse message
+                        // TODO: Check secret
 
-                    // Trigger the new mesage for node event:
-                    client->on_node_message(nodeStr, msg);
+                        // Trigger the new mesage for node event:
+                        client->on_node_message(node, msg);
+                    } else {
+                        LOG_WARNING << "Received event without a body! Discarding...";
+                    }
                 }
             }
         }
@@ -370,5 +373,34 @@ xmpp_stanza_t* XmppClient::xmpp_pep_unsubscribe_new(const char* node, const char
     // We can release the stanza since it belongs to iq now.
     xmpp_stanza_release(pubSub);
     return iq;
+}
+
+const char* XmppClient::get_message_body(xmpp_stanza_t* itemsNode) {
+    xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(itemsNode, "item");
+    if (item) {
+        xmpp_stanza_t* notification = xmpp_stanza_get_child_by_name(item, "notification");
+        if (notification) {
+            const char* notificationNs = xmpp_stanza_get_ns(notification);
+            if (std::strcmp(notificationNs, "urn:xmpp:push:0") == 0) {
+                xmpp_stanza_t* x = xmpp_stanza_get_child_by_name(notification, "x");
+                if (x) {
+                    const char* xNs = xmpp_stanza_get_ns(x);
+                    if (std::strcmp(xNs, "jabber:x:data") == 0) {
+                        for (xmpp_stanza_t* child = xmpp_stanza_get_children(x); child; child = xmpp_stanza_get_next(child)) {
+                            const char* name = xmpp_stanza_get_name(child);
+                            const char* var = xmpp_stanza_get_attribute(child, "var");
+                            if ((std::strcmp(name, "field") == 0) && (std::strcmp(var, "last-message-body") == 0)) {
+                                xmpp_stanza_t* value = xmpp_stanza_get_child_by_name(child, "value");
+                                if (value) {
+                                    return xmpp_stanza_get_text(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return nullptr;
 }
 }  // namespace xmpp
