@@ -53,6 +53,7 @@ void ClientSslSession::respond_with_error(std::string&& msg) {
 void ClientSslSession::send(std::string&& msg) {
     // Send the '\0' as well to indicate the end of a message:
     Send(msg.c_str(), msg.size() + 1);
+    LOG_DEBUG << '[' << id().string() << "] SSL session send " << msg.length() + 1 << " bytes: " << msg;
 }
 
 void ClientSslSession::send(nlohmann::json&& j) {
