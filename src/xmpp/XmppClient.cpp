@@ -4,10 +4,11 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include <strophe.h>
 
 namespace xmpp {
-XmppClient::XmppClient(const storage::XmppConfiguration& config) : jid(config.bareJid), password(config.password), pubSubServerJid(config.pubSubServerJid), port(config.port), host(config.host) {}
+XmppClient::XmppClient(const storage::XmppConfiguration& config) : jid(config.bareJid), password(config.password), port(config.port), host(config.host) {}
 
 XmppClient::~XmppClient() { assert(state == XmppClientState::NOT_RUNNING); }
 
@@ -56,6 +57,23 @@ int iq_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, void* c
 
 int message_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, void* const userdata) {
     XmppClient* const client = static_cast<XmppClient*>(userdata);
+
+    const char* from = xmpp_stanza_get_attribute(stanza, "from");
+    if (std::strcmp(from, client->get_jid().c_str()) == 0) {
+        xmpp_stanza_t* event = xmpp_stanza_get_child_by_name(stanza, "event");
+        if (event) {
+            const char* eventNs = xmpp_stanza_get_ns(stanza);
+            if (std::strcmp(eventNs, "http://jabber.org/protocol/pubsub#event") == 0) {
+                xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(event, "items");
+                if (items) {
+                    const char* node = xmpp_stanza_get_attribute(items, "node");
+                    std::string nodeStr(node);
+                    LOG_DEBUG << "Received event for node: " << nodeStr;
+                }
+            }
+        }
+    }
+
     char* buf = nullptr;
     size_t len = 0;
     if (xmpp_stanza_to_text(stanza, &buf, &len) == 0) {
@@ -76,10 +94,17 @@ void conn_handler(xmpp_conn_t* const conn, const xmpp_conn_event_t status, const
         } else {
             LOG_DEBUG << "XMPP connection is NOT secured!";
         }
+        client->send_presence_online();
         // xmpp_disconnect(conn);
     } else {
         xmpp_stop(client->get_ctx());
     }
+}
+
+void XmppClient::send_presence_online() {
+    xmpp_stanza_t* presence = xmpp_presence_new(ctx);
+    xmpp_stanza_set_from(presence, xmpp_conn_get_bound_jid(conn));
+    xmpp_send(conn, presence);
 }
 
 void XmppClient::thread_run() {
@@ -156,16 +181,130 @@ xmpp_stanza_t* XmppClient::xmpp_field_new(const char* var, const char* type, con
     return field;
 }
 
-xmpp_stanza_t* XmppClient::xmpp_pub_sub_create_config_new() {
-    xmpp_stanza_t* configure = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(configure, "configure");
+xmpp_stanza_t* XmppClient::xmpp_pep_delete_new(const char* node, const char* id) {
+    assert(ctx);
+
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, "set", id);
+    xmpp_stanza_set_from(iq, xmpp_conn_get_bound_jid(conn));
+
+    xmpp_stanza_t* pubSub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubSub, "pubsub");
+    xmpp_stanza_set_ns(pubSub, "http://jabber.org/protocol/pubsub");
+
+    xmpp_stanza_t* deleteNode = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(deleteNode, "delete");
+    xmpp_stanza_set_attribute(deleteNode, "node", node);
+    xmpp_stanza_add_child(pubSub, deleteNode);
+    xmpp_stanza_release(deleteNode);
+
+    xmpp_stanza_add_child(iq, pubSub);
+
+    // We can release the stanza since it belongs to iq now.
+    xmpp_stanza_release(pubSub);
+    return iq;
+}
+
+bool XmppClient::setup_push_node(const std::string& node) {
+    assert(conn);
+    if (!xmpp_conn_is_connected(conn)) {
+        return false;
+    }
+
+    // Create:
+    xmpp_stanza_t* iq = xmpp_pep_publish_empty_new(node.c_str(), "somePepCreateId");
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+
+    // Subscribe:
+    iq = xmpp_pep_subscribe_new(node.c_str(), "someSubscribeId");
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+    return true;
+}
+
+void XmppClient::delete_push_node(const std::string& node) {
+    assert(conn);
+    if (!xmpp_conn_is_connected(conn)) {
+        return;
+    }
+
+    // Unsubscribe:
+    xmpp_stanza_t* iq = xmpp_pep_unsubscribe_new(node.c_str(), "someUnsubscribeId");
+    xmpp_send(conn, iq);
+
+    // Delete:
+    iq = xmpp_pep_delete_new(node.c_str(), "someDeleteId");
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+xmpp_stanza_t* XmppClient::xmpp_pep_subscribe_new(const char* node, const char* id) {
+    assert(ctx);
+
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, "set", id);
+    xmpp_stanza_set_from(iq, xmpp_conn_get_bound_jid(conn));
+
+    xmpp_stanza_t* pubSub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubSub, "pubsub");
+    xmpp_stanza_set_ns(pubSub, "http://jabber.org/protocol/pubsub");
+
+    xmpp_stanza_t* subscribe = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(subscribe, "subscribe");
+    xmpp_stanza_set_attribute(subscribe, "node", node);
+    xmpp_stanza_set_attribute(subscribe, "jid", jid.c_str());
+    xmpp_stanza_add_child(pubSub, subscribe);
+    xmpp_stanza_release(subscribe);
+
+    xmpp_stanza_add_child(iq, pubSub);
+
+    // We can release the stanza since it belongs to iq now.
+    xmpp_stanza_release(pubSub);
+    return iq;
+}
+
+xmpp_stanza_t* XmppClient::xmpp_pep_publish_empty_new(const char* node, const char* id) {
+    assert(ctx);
+
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, "set", id);
+    xmpp_stanza_set_from(iq, xmpp_conn_get_bound_jid(conn));
+
+    xmpp_stanza_t* pubSub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubSub, "pubsub");
+    xmpp_stanza_set_ns(pubSub, "http://jabber.org/protocol/pubsub");
+
+    xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, "publish");
+    xmpp_stanza_set_attribute(publish, "node", node);
+    xmpp_stanza_t* item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, "item");
+    xmpp_stanza_t* notification = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(notification, "notification");
+    xmpp_stanza_set_ns(notification, "urn:xmpp:push:0");
+    xmpp_stanza_add_child(item, notification);
+    xmpp_stanza_add_child(publish, item);
+    xmpp_stanza_add_child(pubSub, publish);
+    xmpp_stanza_release(publish);
+
+    xmpp_stanza_t* options = xmpp_pep_publish_options_new();
+    xmpp_stanza_add_child(pubSub, options);
+    xmpp_stanza_release(options);
+
+    xmpp_stanza_add_child(iq, pubSub);
+
+    xmpp_stanza_release(pubSub);
+    return iq;
+}
+
+xmpp_stanza_t* XmppClient::xmpp_pep_publish_options_new() {
+    xmpp_stanza_t* options = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(options, "publish-options");
 
     xmpp_stanza_t* x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, "x");
     xmpp_stanza_set_ns(x, "jabber:x:data");
     xmpp_stanza_set_attribute(x, "type", "submit");
 
-    xmpp_stanza_t* field = xmpp_field_new("FORM_TYPE", "hidden", "http://jabber.org/protocol/pubsub#node_config");
+    xmpp_stanza_t* field = xmpp_field_new("FORM_TYPE", "hidden", "http://jabber.org/protocol/pubsub#publish-options");
     xmpp_stanza_add_child(x, field);
     xmpp_stanza_release(field);
 
@@ -194,123 +333,16 @@ xmpp_stanza_t* XmppClient::xmpp_pub_sub_create_config_new() {
     xmpp_stanza_add_child(x, field);
     xmpp_stanza_release(field);
 
-    xmpp_stanza_add_child(configure, x);
+    xmpp_stanza_add_child(options, x);
     xmpp_stanza_release(x);
 
-    return configure;
+    return options;
 }
 
-xmpp_stanza_t* XmppClient::xmpp_pub_sub_create_new(const char* node, const char* id) {
+xmpp_stanza_t* XmppClient::xmpp_pep_unsubscribe_new(const char* node, const char* id) {
     assert(ctx);
 
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, "set", id);
-    xmpp_stanza_set_to(iq, pubSubServerJid.c_str());
-    xmpp_stanza_set_from(iq, xmpp_conn_get_bound_jid(conn));
-
-    xmpp_stanza_t* pubSub = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(pubSub, "pubsub");
-    xmpp_stanza_set_ns(pubSub, "http://jabber.org/protocol/pubsub");
-
-    xmpp_stanza_t* create = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(create, "create");
-    xmpp_stanza_set_attribute(create, "node", node);
-    xmpp_stanza_add_child(pubSub, create);
-    xmpp_stanza_release(create);
-
-    xmpp_stanza_t* config = xmpp_pub_sub_create_config_new();
-    xmpp_stanza_add_child(pubSub, config);
-    xmpp_stanza_release(config);
-
-    xmpp_stanza_add_child(iq, pubSub);
-
-    // We can release the stanza since it belongs to iq now.
-    xmpp_stanza_release(pubSub);
-    return iq;
-}
-
-xmpp_stanza_t* XmppClient::xmpp_pub_sub_delete_new(const char* node, const char* id) {
-    assert(ctx);
-
-    xmpp_stanza_t* iq = xmpp_iq_new(ctx, "set", id);
-    xmpp_stanza_set_to(iq, pubSubServerJid.c_str());
-    xmpp_stanza_set_from(iq, xmpp_conn_get_bound_jid(conn));
-
-    xmpp_stanza_t* pubSub = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(pubSub, "pubsub");
-    xmpp_stanza_set_ns(pubSub, "http://jabber.org/protocol/pubsub");
-
-    xmpp_stanza_t* deleteNode = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(deleteNode, "delete");
-    xmpp_stanza_set_attribute(deleteNode, "node", node);
-    xmpp_stanza_add_child(pubSub, deleteNode);
-    xmpp_stanza_release(deleteNode);
-
-    xmpp_stanza_add_child(iq, pubSub);
-
-    // We can release the stanza since it belongs to iq now.
-    xmpp_stanza_release(pubSub);
-    return iq;
-}
-
-bool XmppClient::setup_push_node(const std::string& node) {
-    assert(conn);
-    if (!xmpp_conn_is_connected(conn)) {
-        return false;
-    }
-    // Create:
-    xmpp_stanza_t* iq = xmpp_pub_sub_create_new(node.c_str(), "someCreateId");
-    xmpp_send(conn, iq);
-    // Subscribe:
-    iq = xmpp_pub_sub_subscribe_new(node.c_str(), "someSubscribeId");
-    xmpp_send(conn, iq);
-    xmpp_stanza_release(iq);
-    return true;
-}
-
-void XmppClient::delete_push_node(const std::string& node) {
-    assert(conn);
-    if (!xmpp_conn_is_connected(conn)) {
-        return;
-    }
-    // Unsubscribe:
-    xmpp_stanza_t* iq = xmpp_pub_sub_unsubscribe_new(node.c_str(), "someUnsubscribeId");
-    xmpp_send(conn, iq);
-    // Delete:
-    iq = xmpp_pub_sub_delete_new(node.c_str(), "someDeleteId");
-    xmpp_send(conn, iq);
-    xmpp_stanza_release(iq);
-}
-
-xmpp_stanza_t* XmppClient::xmpp_pub_sub_subscribe_new(const char* node, const char* id) {
-    assert(ctx);
-
-    xmpp_stanza_t* iq = xmpp_iq_new(ctx, "set", id);
-    xmpp_stanza_set_to(iq, pubSubServerJid.c_str());
-    xmpp_stanza_set_from(iq, xmpp_conn_get_bound_jid(conn));
-
-    xmpp_stanza_t* pubSub = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(pubSub, "pubsub");
-    xmpp_stanza_set_ns(pubSub, "http://jabber.org/protocol/pubsub");
-
-    xmpp_stanza_t* subscribe = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(subscribe, "subscribe");
-    xmpp_stanza_set_attribute(subscribe, "node", node);
-    xmpp_stanza_set_attribute(subscribe, "jid", jid.c_str());
-    xmpp_stanza_add_child(pubSub, subscribe);
-    xmpp_stanza_release(subscribe);
-
-    xmpp_stanza_add_child(iq, pubSub);
-
-    // We can release the stanza since it belongs to iq now.
-    xmpp_stanza_release(pubSub);
-    return iq;
-}
-
-xmpp_stanza_t* XmppClient::xmpp_pub_sub_unsubscribe_new(const char* node, const char* id) {
-    assert(ctx);
-
-    xmpp_stanza_t* iq = xmpp_iq_new(ctx, "set", id);
-    xmpp_stanza_set_to(iq, pubSubServerJid.c_str());
     xmpp_stanza_set_from(iq, xmpp_conn_get_bound_jid(conn));
 
     xmpp_stanza_t* pubSub = xmpp_stanza_new(ctx);

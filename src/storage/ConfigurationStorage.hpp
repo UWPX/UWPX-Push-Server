@@ -31,10 +31,6 @@ struct XmppConfiguration {
      **/
     std::string password{"The password for the push XMPP client."};
     /**
-     * The JID of the PubSub server where nodes should be published to.
-     **/
-    std::string pubSubServerJid{"The JID of the PubSub server where nodes should be published to."};
-    /**
      * The port of the XMPP server.
      * Default: 5222
      **/
