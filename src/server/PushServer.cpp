@@ -87,17 +87,22 @@ void PushServer::check_setup_wns() {
 }
 
 void PushServer::on_message_received(const std::string& s, tcp::ClientSslSession* session) {
+    std::shared_ptr<tcp::messages::AbstractMessage> msg = tcp::messages::parse(s);
+    if (!msg) {
+        session->respond_with_error("Malformed JSON.");
+        return;
+    }
+    if (!msg->is_valid()) {
+        session->respond_with_error("Invalid JSON message.");
+        return;
+    }
+
     try {
-        std::shared_ptr<tcp::messages::AbstractMessage> msg = tcp::messages::parse(s);
-        if (!msg) {
-            session->respond_with_error("Malformed JSON.");
-        }
-        if (!msg->is_valid()) {
-            session->respond_with_error("Invalid JSON message.");
-        }
         on_message_received(msg, session);
     } catch (const std::exception& e) {
         LOG_ERROR << "Failed to process received JSON message '" << s << "' with: " << e.what();
+        session->respond_with_error("Internal server error... Failed to process received JSON message.");
+        return;
     }
 }
 
