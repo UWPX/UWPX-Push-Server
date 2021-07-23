@@ -20,7 +20,7 @@ namespace server {
 PushServer::PushServer(const storage::Configuration& config) : redisClient(config.db),
                                                                wnsClient(config.wns),
                                                                tcpServer(config.tcp, [this](const std::string& s, tcp::ClientSslSession* session) { this->on_message_received(s, session); }),
-                                                               xmppClient(config.xmpp) {}
+                                                               xmppClient(config.xmpp, [this](const std::string& node, const std::string& msg) { this->on_message_for_node(node, msg); }) {}
 
 PushServer::~PushServer() {
     assert(state == PushServerState::NOT_RUNNING);
@@ -133,6 +133,7 @@ void PushServer::send_test_push(const std::string& deviceId, tcp::ClientSslSessi
     const std::optional<std::string> channelUri = redisClient.get_channel_uri(deviceId);
     if (!channelUri) {
         session->respond_with_error("Device id unknown.");
+        return;
     }
     bool result = wnsClient.send_raw_notification(*channelUri, "Test push notification from your push server.");
     if (result) {
@@ -148,6 +149,7 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
     const std::optional<std::string> channelUri = redisClient.get_channel_uri(deviceId);
     if (!channelUri) {
         session->respond_with_error("Device id unknown.");
+        return;
     }
 
     // Delete all existing XMPP PubSub nodes:
@@ -181,6 +183,25 @@ void PushServer::set_channel_uri(const std::string& deviceId, const std::string&
     redisClient.set_channel_uri(deviceId, channelUri);
     session->respond_with_success();
     LOG_INFO << "Channel URI set for 'device' " << deviceId << " to: " << channelUri;
+}
+
+void PushServer::on_message_for_node(const std::string& node, const std::string& msg) {
+    const std::optional<std::string> deviceId = redisClient.get_device_id(node);
+    if (!deviceId) {
+        LOG_WARNING << "Received message for an unknown node '" << node << "'. 'deviceId' not found. Dropping it...";
+        return;
+    }
+    const std::optional<std::string> channelUri = redisClient.get_channel_uri(*deviceId);
+    if (!channelUri) {
+        LOG_WARNING << "Received message for an unknown node '" << node << "'. 'channelUri' not found. Dropping it...";
+        return;
+    }
+    bool result = wnsClient.send_raw_notification(*channelUri, std::string{msg});
+    if (result) {
+        LOG_INFO << "Push send to node: " << node;
+    } else {
+        LOG_WARNING << "Failed to send push for node: " << node;
+    }
 }
 
 }  // namespace server

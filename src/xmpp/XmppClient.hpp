@@ -16,6 +16,8 @@ class XmppClient {
         WAITING_FOR_JOIN,
     };
 
+    using nodeMessageHandlerFunc = std::function<void(const std::string& node, const std::string& msg)>;
+
  private:
     std::optional<std::thread> thread{std::nullopt};
     XmppClientState state{XmppClientState::NOT_RUNNING};
@@ -28,9 +30,10 @@ class XmppClient {
     const std::string password;
     const uint16_t port;
     const std::string host;
+    nodeMessageHandlerFunc nodeMessageHandler;
 
  public:
-    explicit XmppClient(const storage::XmppConfiguration& config);
+    explicit XmppClient(const storage::XmppConfiguration& config, nodeMessageHandlerFunc&& nodeMessageHandler);
     XmppClient(XmppClient&&) = delete;
     XmppClient(const XmppClient&) = delete;
     XmppClient& operator=(XmppClient&&) = delete;
@@ -56,6 +59,7 @@ class XmppClient {
     bool setup_push_node(const std::string& node);
     void delete_push_node(const std::string& node);
     void send_presence_online();
+    void on_node_message(const std::string& node, const std::string& msg);
 
  private:
     void thread_run();

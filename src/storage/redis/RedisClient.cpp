@@ -40,7 +40,23 @@ std::optional<std::string> RedisClient::get_channel_uri(const std::string& devic
     return keys[0];
 }
 
-std::optional<std::string> RedisClient::get_node_secret(const std::string& node) { return redis->get(node); }
+std::optional<std::string> RedisClient::get_device_id(const std::string& node) {
+    std::vector<std::string> keys;
+    redis->lrange(node, 0, -1, std::back_inserter(keys));
+    if (keys.size() < 2) {
+        return std::nullopt;
+    }
+    return keys[1];
+}
+
+std::optional<std::string> RedisClient::get_node_secret(const std::string& node) {
+    std::vector<std::string> keys;
+    redis->lrange(node, 0, -1, std::back_inserter(keys));
+    if (keys.empty()) {
+        return std::nullopt;
+    }
+    return keys[0];
+}
 
 std::vector<std::string> RedisClient::get_push_nodes(const std::string& deviceId) {
     std::vector<std::string> nodes;
@@ -72,7 +88,7 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
         std::string accountId = deviceId + "_" + account.bareJid;  // TODO: hash the bare JID here
         keys.push_back(accountId);
         redis->set(accountId, account.node);
-        redis->set(account.node, account.secret);
+        redis->rpush(account.node, {account.secret, deviceId});
     }
     redis->del(deviceId);
     redis->rpush(deviceId, keys.begin(), keys.end());

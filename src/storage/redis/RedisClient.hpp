@@ -34,6 +34,7 @@ class RedisClient {
     void init();
 
     std::optional<std::string> get_channel_uri(const std::string& deviceId);
+    std::optional<std::string> get_device_id(const std::string& node);
     std::vector<std::string> get_push_nodes(const std::string& deviceId);
     std::optional<std::string> get_node_secret(const std::string& node);
 

@@ -80,7 +80,7 @@ void WnsClient::store_token_in_db() {
 
 bool WnsClient::send_raw_notification(const std::string& channelUri, const std::string&& content) {
     LOG_DEBUG << "Sending raw notification...";
-    if (is_token_valid()) {
+    if (!is_token_valid()) {
         LOG_INFO << "WNS token expired. requesting a new one...";
         if (!request_new_token()) {
             LOG_ERROR << "Failed to send raw notification. Requesting a new WNS token failed.";

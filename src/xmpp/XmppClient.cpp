@@ -8,7 +8,11 @@
 #include <strophe.h>
 
 namespace xmpp {
-XmppClient::XmppClient(const storage::XmppConfiguration& config) : jid(config.bareJid), password(config.password), port(config.port), host(config.host) {}
+XmppClient::XmppClient(const storage::XmppConfiguration& config, nodeMessageHandlerFunc&& nodeMessageHandler) : jid(config.bareJid),
+                                                                                                                password(config.password),
+                                                                                                                port(config.port),
+                                                                                                                host(config.host),
+                                                                                                                nodeMessageHandler(std::move(nodeMessageHandler)) {}
 
 XmppClient::~XmppClient() { assert(state == XmppClientState::NOT_RUNNING); }
 
@@ -62,27 +66,32 @@ int message_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, vo
     if (std::strcmp(from, client->get_jid().c_str()) == 0) {
         xmpp_stanza_t* event = xmpp_stanza_get_child_by_name(stanza, "event");
         if (event) {
-            const char* eventNs = xmpp_stanza_get_ns(stanza);
+            const char* eventNs = xmpp_stanza_get_ns(event);
             if (std::strcmp(eventNs, "http://jabber.org/protocol/pubsub#event") == 0) {
                 xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(event, "items");
                 if (items) {
                     const char* node = xmpp_stanza_get_attribute(items, "node");
                     std::string nodeStr(node);
+                    std::string msg = "New message!";
                     LOG_DEBUG << "Received event for node: " << nodeStr;
+
+                    // TODO: Parse message
+                    // TODO: Check secret
+
+                    // Trigger the new mesage for node event:
+                    client->on_node_message(nodeStr, msg);
                 }
             }
         }
     }
 
-    char* buf = nullptr;
-    size_t len = 0;
-    if (xmpp_stanza_to_text(stanza, &buf, &len) == 0) {
-        LOG_DEBUG << "Received: " << buf;
-        xmpp_free(client->get_ctx(), buf);
-    }
-
     // Return 0 to be removed:
     return 1;
+}
+
+void XmppClient::on_node_message(const std::string& node, const std::string& msg) {
+    assert(nodeMessageHandler);
+    nodeMessageHandler(node, msg);
 }
 
 void conn_handler(xmpp_conn_t* const conn, const xmpp_conn_event_t status, const int /*error*/, xmpp_stream_error_t* const /*stream_error*/, void* const userdata) {

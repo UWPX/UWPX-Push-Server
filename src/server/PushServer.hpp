@@ -51,5 +51,6 @@ class PushServer {
     void send_test_push(const std::string& deviceId, tcp::ClientSslSession* session);
     void set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts, tcp::ClientSslSession* session);
     void set_channel_uri(const std::string& deviceId, const std::string& channelUri, tcp::ClientSslSession* session);
+    void on_message_for_node(const std::string& node, const std::string& msg);
 };
 }  // namespace server
