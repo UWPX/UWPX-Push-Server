@@ -126,8 +126,14 @@ This allows the server to invalidate and remove outdated entries.
 The `bareJidHash` column represents the bare JID (e.g. someClient@xmpp.uwpx.org ) hashed using SHA-256 with the `deviceId` (e.g. 5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b) as salt.
 
 ## What the app server sends via the WNS to the client
+```
+TODO
+```
 
 ## What the user's XMPP server sends to the app server
+```
+TODO
+```
 
 ## Dependencies
 The UWPX push server depends on the following dependencies:
@@ -154,6 +160,33 @@ The following dependencies will be installed automatically by [conan](https://co
 * [CppServer](https://github.com/chronoxor/CppServer#requirements): Ultra fast and low latency asynchronous socket server & client C++ library with support TCP, SSL, UDP, HTTP, HTTPS, WebSocket protocols and 10K connections problem solution.
 * [libsodium](https://libsodium.gitbook.io/doc/) Sodium is a modern, easy-to-use software library for encryption, decryption, signatures, password hashing and more.
 * [libstrophe](https://strophe.im/libstrophe/) ibstrophe is a minimal XMPP library written in C. 
+
+### Prosody
+The server currently only supports running in combination with a [Prosody](https://hg.prosody.im/) server.
+To be able to use the server, the following configuration as to be performed:
+* [mod_pubsub](https://prosody.im/doc/modules/mod_pubsub) has to be enabled.
+* [mod_pep](https://prosody.im/doc/modules/mod_pep) has to be enabled.
+* [mod_cloud_notify](https://modules.prosody.im/mod_cloud_notify) has to be installed and enabled.
+
+#### Patching mod_pep
+Since currently [mod_pep](https://prosody.im/doc/modules/mod_pep) does not play nicely with [mod_cloud_notify](https://modules.prosody.im/mod_cloud_notify) on prosody, you have to patch it:
+```bash
+nano /usr/lib/prosody/modules/mod_pep.lua # Or where you have installed prosody
+```
+Now replace the following lines. These are usually around line 53.
+```lua
+function is_item_stanza(item)
+	return st.is_stanza(item) and item.attr.xmlns == xmlns_pubsub and item.name == "item" and #item.tags == 1;
+end
+```
+with:
+```lua
+function is_item_stanza(item)
+	-- return st.is_stanza(item) and item.attr.xmlns == xmlns_pubsub and item.name == "item" and #item.tags == 1;
+	return true;
+end
+```
+Now restart your prosody server and you should be ready to go.
 
 ## Building
 ```BASH
