@@ -65,7 +65,7 @@ void SuccessSetPushAccountsMessage::to_json(nlohmann::json& j) const {
     j["accounts"] = std::move(accountsJson);
 }
 
-SuccessSetPushAccountsMessage::PushAccount::PushAccount(std::string&& bareJid, std::string&& node, std::string&& secret) : bareJid(std::move(bareJid)), node(std::move(node)), secret(std::move(secret)) {}
+SuccessSetPushAccountsMessage::PushAccount::PushAccount(std::string&& bareJid, std::string&& node, std::string&& secret, bool success = false) : bareJid(std::move(bareJid)), node(std::move(node)), secret(std::move(secret)), success(success) {}
 
 std::optional<SuccessSetPushAccountsMessage::PushAccount> SuccessSetPushAccountsMessage::PushAccount::from_json(const nlohmann::json& j) {
     std::string bareJid;
@@ -100,16 +100,27 @@ std::optional<SuccessSetPushAccountsMessage::PushAccount> SuccessSetPushAccounts
         LOG_WARNING << "Invalid message 'secret' value. Expected a non empty string, but received: " << secret;
         return std::nullopt;
     }
-    return std::make_optional<PushAccount>(std::move(bareJid), std::move(node), std::move(secret));
+
+    bool success = false;
+    if (!j.contains("success")) {
+        LOG_WARNING << "Missing 'success' field in message.";
+        return std::nullopt;
+    }
+    if (!j.at("success").is_boolean()) {
+        LOG_WARNING << "Invalid message 'success' value. Expected a bool.";
+    }
+    j.at("success").get_to(success);
+    return std::make_optional<PushAccount>(std::move(bareJid), std::move(node), std::move(secret), success);
 }
 
 void SuccessSetPushAccountsMessage::PushAccount::to_json(nlohmann::json& j) const {
     j["bare_jid"] = bareJid;
     j["node"] = node;
     j["secret"] = secret;
+    j["success"] = success;
 }
 
-SuccessSetPushAccountsMessage::PushAccount SuccessSetPushAccountsMessage::PushAccount::create(const std::string& /*deviceId*/, const std::string& bareJid) {
+SuccessSetPushAccountsMessage::PushAccount SuccessSetPushAccountsMessage::PushAccount::create(const std::string& bareJid) {
     std::string node = utils::url_safe_random_token(15);
     std::string secret = utils::secure_random_password(15);
     return PushAccount(std::string{bareJid}, std::move(node), std::move(secret));
