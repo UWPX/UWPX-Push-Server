@@ -195,10 +195,11 @@ If you run the server for the first time and there is no `configuration.json` pr
 
 ## Execution
 ### Start
+From the build direct you can execute the server as follows:
 ```BASH
-$ cd src/
-$ python3 main.py
+./src/UWPX_Push_Server <PATH TO THE 'configuration.json' FILE>
 ```
+In case no `configuration.json` file exist at the given location, the server will create an empty one, like described above.
 
 ### Stop
-`Ctrl + C`
+`q`
