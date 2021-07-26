@@ -1,5 +1,6 @@
 #include "RedisClient.hpp"
 #include "logger/Logger.hpp"
+#include "utils/CryptoUtils.hpp"
 #include <cassert>
 #include <cstdint>
 #include <ctime>
@@ -85,7 +86,7 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
     keys.clear();
     keys.push_back(channelUri);
     for (const tcp::messages::SuccessSetPushAccountsMessage::PushAccount& account : accounts) {
-        std::string accountId = deviceId + "_" + account.bareJid;  // TODO: hash the bare JID here
+        std::string accountId = deviceId + "_" + utils::hash_sah256(account.bareJid);
         keys.push_back(accountId);
         redis->set(accountId, account.node);
         redis->rpush(account.node, {account.secret, deviceId});
