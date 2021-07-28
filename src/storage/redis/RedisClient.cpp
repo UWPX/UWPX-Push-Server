@@ -15,11 +15,7 @@
 namespace storage::redis {
 
 // NOLINTNEXTLINE (cert-err58-cpp)
-const std::string RedisClient::WNS_TOKEN_KEY = "WNS_TOKEN";
-// NOLINTNEXTLINE (cert-err58-cpp)
-const std::string RedisClient::WNS_TOKEN_TYPE_KEY = "WNS_TOKEN_TYPE";
-// NOLINTNEXTLINE (cert-err58-cpp)
-const std::string RedisClient::WNS_TOKEN_EXPIRES_KEY = "WNS_TOKEN_EXPIRES";
+const std::string RedisClient::WNS_TOKEN_KEY = "WNS";
 
 RedisClient::RedisClient(const storage::DbConfiguration& config) : url(config.url) {}
 
@@ -86,7 +82,7 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
     keys.clear();
     keys.push_back(channelUri);
     for (const tcp::messages::SuccessSetPushAccountsMessage::PushAccount& account : accounts) {
-        std::string accountId = deviceId + "_" + utils::hash_sah256(account.bareJid);
+        std::string accountId = deviceId + "_" + utils::hash_sah256(account.accountId);
         keys.push_back(accountId);
         redis->set(accountId, account.node);
         redis->rpush(account.node, {account.secret, deviceId});
@@ -107,25 +103,40 @@ void RedisClient::set_channel_uri(const std::string& deviceId, const std::string
     redis->rpush(deviceId, keys.begin(), keys.end());
 }
 
-void RedisClient::set_wns_token(const std::string& token) { redis->set(WNS_TOKEN_KEY, token); }
-
-std::optional<std::string> RedisClient::get_wns_token() { return redis->get(WNS_TOKEN_KEY); }
-
-void RedisClient::set_wns_token_type(const std::string& type) { redis->set(WNS_TOKEN_TYPE_KEY, type); }
-
-std::optional<std::string> RedisClient::get_wns_token_type() { return redis->get(WNS_TOKEN_TYPE_KEY); }
-
-void RedisClient::set_wns_token_expire_date(std::chrono::system_clock::time_point expires) {
+void RedisClient::set_wns_token(const std::string& token, const std::string& type, std::chrono::system_clock::time_point expires) {
     std::time_t tt = std::chrono::system_clock::to_time_t(expires);
-    redis->set(WNS_TOKEN_EXPIRES_KEY, std::to_string(tt));
+    redis->set(WNS_TOKEN_KEY, token);
+
+    redis->del(WNS_TOKEN_KEY);
+    redis->rpush(WNS_TOKEN_KEY, {token, type, std::to_string(tt)});
+}
+
+std::optional<std::string> RedisClient::get_wns_token() {
+    std::vector<std::string> keys;
+    redis->lrange(WNS_TOKEN_KEY, 0, -1, std::back_inserter(keys));
+    if (keys.size() != 3) {
+        return std::nullopt;
+    }
+    return keys[0];
+}
+
+std::optional<std::string> RedisClient::get_wns_token_type() {
+    std::vector<std::string> keys;
+    redis->lrange(WNS_TOKEN_KEY, 0, -1, std::back_inserter(keys));
+    if (keys.size() != 3) {
+        return std::nullopt;
+    }
+    return keys[1];
 }
 
 std::optional<std::chrono::system_clock::time_point> RedisClient::get_wns_token_expire_date() {
-    std::optional<std::string> tmp = redis->get(WNS_TOKEN_EXPIRES_KEY);
-    if (!tmp) {
+    std::vector<std::string> keys;
+    redis->lrange(WNS_TOKEN_KEY, 0, -1, std::back_inserter(keys));
+    if (keys.size() != 3) {
         return std::nullopt;
     }
-    time_t tt = std::strtoll(tmp->c_str(), nullptr, 10);
+
+    time_t tt = std::strtoll(keys[2].c_str(), nullptr, 10);
     return std::make_optional<std::chrono::system_clock::time_point>(std::chrono::system_clock::from_time_t(tt));
 }
 

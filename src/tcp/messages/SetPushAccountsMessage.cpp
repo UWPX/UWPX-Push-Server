@@ -24,14 +24,14 @@ bool SetPushAccountsMessage::from_json(const nlohmann::json& j) {
     }
 
     for (const auto& accountJson : j["accounts"]) {
-        if (!accountJson.contains("bare_jid")) {
-            LOG_WARNING << "Missing 'bare_jid' field in message.";
+        if (!accountJson.contains("accountId")) {
+            LOG_WARNING << "Missing 'accountId' field in message.";
             return false;
         }
         std::string jid;
-        jid = accountJson["bare_jid"];
+        jid = accountJson["accountId"];
         if (jid.empty()) {
-            LOG_WARNING << "Invalid message 'bare_jid' value. Expected a non empty string, but received: " << jid;
+            LOG_WARNING << "Invalid message 'accountId' value. Expected a non empty string, but received: " << jid;
             return false;
         }
         accounts.push_back(std::move(jid));
@@ -60,7 +60,7 @@ void SetPushAccountsMessage::to_json(nlohmann::json& j) const {
 
     nlohmann::json accountsJson = nlohmann::json::array();
     for (const std::string& account : accounts) {
-        accountsJson.push_back({{"bare_jid", account}});
+        accountsJson.push_back({{"accountId", account}});
     }
     j["accounts"] = std::move(accountsJson);
 }

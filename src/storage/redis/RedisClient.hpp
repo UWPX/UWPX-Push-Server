@@ -18,8 +18,6 @@ namespace storage::redis {
 class RedisClient {
  private:
     static const std::string WNS_TOKEN_KEY;
-    static const std::string WNS_TOKEN_TYPE_KEY;
-    static const std::string WNS_TOKEN_EXPIRES_KEY;
     const std::string url;
     std::unique_ptr<sw::redis::Redis> redis{nullptr};
 
@@ -45,8 +43,6 @@ class RedisClient {
     void set_channel_uri(const std::string& deviceId, const std::string& channelUri);
     void set_push_accounts(const std::string& deviceId, const std::string& channelUri, const std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount>& accounts);
 
-    void set_wns_token(const std::string& token);
-    void set_wns_token_type(const std::string& type);
-    void set_wns_token_expire_date(std::chrono::system_clock::time_point expires);
+    void set_wns_token(const std::string& token, const std::string& type, std::chrono::system_clock::time_point expires);
 };
 }  // namespace storage::redis

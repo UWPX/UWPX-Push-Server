@@ -162,8 +162,8 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
     // Store the new accounts:
     std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount> pushAccounts;
     pushAccounts.reserve(accounts.size());
-    for (const std::string& bareJid : accounts) {
-        pushAccounts.push_back(tcp::messages::SuccessSetPushAccountsMessage::PushAccount::create(bareJid));
+    for (const std::string& accountId : accounts) {
+        pushAccounts.push_back(tcp::messages::SuccessSetPushAccountsMessage::PushAccount::create(accountId));
         LOG_DEBUG << "New Push account with node '" << pushAccounts[pushAccounts.size() - 1].node << "' for device: " << deviceId;
     }
 

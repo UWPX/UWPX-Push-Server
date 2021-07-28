@@ -215,11 +215,11 @@ TEST_CASE("Parsing SuccessSetPushAccountsMessage", TEST_TAG.data()) {
 	\"action\": \"response\",\
 	\"status\": 1,\
 	\"push_bare_jid\": \"push@xmpp.uwpx.org\",\
-	\"accounts\": [{\"bare_jid\": \"someClient@xmpp.uwpx.org\",\
+	\"accounts\": [{\"accountId\": \"DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90\",\
 			\"node\": \"773bds9nf932\",\
 			\"secret\": \"sdf/82h)=1\",\
 			\"success\": false},\
-		{\"bare_jid\": \"someOtherClient@xmpp.uwpx.org\",\
+		{\"accountId\": \"16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D\",\
 			\"node\": \"8w3rn0MB3m38z2\",\
 			\"secret\": \"j$o909mN87!n/0m\",\
             \"success\": true}]}";
@@ -235,11 +235,11 @@ TEST_CASE("Parsing SuccessSetPushAccountsMessage", TEST_TAG.data()) {
     REQUIRE(actMsg);
     REQUIRE(actMsg->get_push_bare_jid() == "push@xmpp.uwpx.org");
     REQUIRE(actMsg->get_accounts().size() == 2);
-    REQUIRE(actMsg->get_accounts()[0].bareJid == "someClient@xmpp.uwpx.org");
+    REQUIRE(actMsg->get_accounts()[0].accountId == "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90");
     REQUIRE(actMsg->get_accounts()[0].node == "773bds9nf932");
     REQUIRE(actMsg->get_accounts()[0].secret == "sdf/82h)=1");
     REQUIRE(actMsg->get_accounts()[0].success == false);
-    REQUIRE(actMsg->get_accounts()[1].bareJid == "someOtherClient@xmpp.uwpx.org");
+    REQUIRE(actMsg->get_accounts()[1].accountId == "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D");
     REQUIRE(actMsg->get_accounts()[1].node == "8w3rn0MB3m38z2");
     REQUIRE(actMsg->get_accounts()[1].secret == "j$o909mN87!n/0m");
     REQUIRE(actMsg->get_accounts()[1].success == true);
@@ -263,7 +263,7 @@ TEST_CASE("Serializing & Parsing SuccessSetPushAccountsMessage", TEST_TAG.data()
     REQUIRE(actMsg);
     REQUIRE(actMsg->get_push_bare_jid() == "adawdafsefse");
     REQUIRE(actMsg->get_accounts().size() == 1);
-    REQUIRE(actMsg->get_accounts()[0].bareJid == "1");
+    REQUIRE(actMsg->get_accounts()[0].accountId == "1");
     REQUIRE(actMsg->get_accounts()[0].node == "2");
     REQUIRE(actMsg->get_accounts()[0].secret == "3");
     REQUIRE(actMsg->get_accounts()[0].success == true);

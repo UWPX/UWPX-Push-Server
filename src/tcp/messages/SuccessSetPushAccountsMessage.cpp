@@ -65,17 +65,17 @@ void SuccessSetPushAccountsMessage::to_json(nlohmann::json& j) const {
     j["accounts"] = std::move(accountsJson);
 }
 
-SuccessSetPushAccountsMessage::PushAccount::PushAccount(std::string&& bareJid, std::string&& node, std::string&& secret, bool success = false) : bareJid(std::move(bareJid)), node(std::move(node)), secret(std::move(secret)), success(success) {}
+SuccessSetPushAccountsMessage::PushAccount::PushAccount(std::string&& accountId, std::string&& node, std::string&& secret, bool success = false) : accountId(std::move(accountId)), node(std::move(node)), secret(std::move(secret)), success(success) {}
 
 std::optional<SuccessSetPushAccountsMessage::PushAccount> SuccessSetPushAccountsMessage::PushAccount::from_json(const nlohmann::json& j) {
     std::string bareJid;
-    if (!j.contains("bare_jid")) {
-        LOG_WARNING << "Missing 'bare_jid' field in message.";
+    if (!j.contains("accountId")) {
+        LOG_WARNING << "Missing 'accountId' field in message.";
         return std::nullopt;
     }
-    j.at("bare_jid").get_to(bareJid);
+    j.at("accountId").get_to(bareJid);
     if (bareJid.empty()) {
-        LOG_WARNING << "Invalid message 'bare_jid' value. Expected a non empty string, but received: " << bareJid;
+        LOG_WARNING << "Invalid message 'accountId' value. Expected a non empty string, but received: " << bareJid;
         return std::nullopt;
     }
 
@@ -114,16 +114,16 @@ std::optional<SuccessSetPushAccountsMessage::PushAccount> SuccessSetPushAccounts
 }
 
 void SuccessSetPushAccountsMessage::PushAccount::to_json(nlohmann::json& j) const {
-    j["bare_jid"] = bareJid;
+    j["accountId"] = accountId;
     j["node"] = node;
     j["secret"] = secret;
     j["success"] = success;
 }
 
-SuccessSetPushAccountsMessage::PushAccount SuccessSetPushAccountsMessage::PushAccount::create(const std::string& bareJid) {
+SuccessSetPushAccountsMessage::PushAccount SuccessSetPushAccountsMessage::PushAccount::create(const std::string& accountId) {
     std::string node = utils::url_safe_random_token(15);
     std::string secret = utils::secure_random_password(15);
-    return PushAccount(std::string{bareJid}, std::move(node), std::move(secret));
+    return PushAccount(std::string{accountId}, std::move(node), std::move(secret));
 }
 
 }  // namespace tcp::messages

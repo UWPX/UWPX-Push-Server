@@ -73,9 +73,7 @@ void WnsClient::load_token_from_db() {
 
 void WnsClient::store_token_in_db() {
     assert(redisClient);
-    redisClient->set_wns_token(token->token);
-    redisClient->set_wns_token_type(token->type);
-    redisClient->set_wns_token_expire_date(token->expires);
+    redisClient->set_wns_token(token->token, token->type, token->expires);
 }
 
 bool WnsClient::send_raw_notification(const std::string& channelUri, const std::string&& content) {
