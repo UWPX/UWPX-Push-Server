@@ -51,9 +51,12 @@ Without this identifier, it wouldn't be possible to update/remove push channels 
 ```
 
 ### Update push accounts
-The message has to include **all** accounts (Bare JIDs) for those, that should receive push notifications.
-Once received by the server, it will remove all other accounts (Bare JIDs) that are not being included in the received `accounts` array.
-This ensures, the client only receives notifications for those devices, that are still active.
+The message has to include **all** account IDs for those, that should receive push notifications.
+Once received by the server, it will replace all existing accounts with those.
+This ensures, the client only receives notifications for those accounts, that are still active.  
+Here the `accountId` should be a persistent per device unique value representing an account.
+For privacy reasons, this `accountId` should **NOT** just simply be the bare JID of the account.
+It's suggested to use the SHA256 hash of the bare JID with the `deviceId` as salt here.
 
 #### Client -> Server
 ```JSON
@@ -63,10 +66,10 @@ This ensures, the client only receives notifications for those devices, that are
 	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
 	"accounts": [
 		{
-			"bareJid": "someClient@xmpp.uwpx.org"
+			"accountId": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90"
 		},
 		{
-			"bareJid": "someOtherClient@xmpp.uwpx.org"
+			"accountId": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D"
 		}
 	]
 }
@@ -75,7 +78,7 @@ This ensures, the client only receives notifications for those devices, that are
 #### Success: Server -> Client
 On success the server returns a success message, including a `node` and `secret` attribute for each account.
 It also includes a `push_bareJid` field, which represents the bare JID of the push server.
-The `success` attribute indicates if creating a PubSub node was successful for the client.
+The `success` attribute indicates if creating a PubSub node was successful for the account.
 ```JSON
 {
 	"version": 1,
@@ -84,13 +87,13 @@ The `success` attribute indicates if creating a PubSub node was successful for t
 	"push_bareJid": "push@xmpp.uwpx.org",
 	"accounts": [
 		{
-			"bareJid": "someClient@xmpp.uwpx.org",
+			"accountId": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
 			"node": "773bds9nf932",
 			"secret": "sdf/82h)=1",
 			"success": true
 		},
 		{
-			"bareJid": "someOtherClient@xmpp.uwpx.org",
+			"accountId": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D",
 			"node": "8w3rn0MB3m38z2",
 			"secret": "j$o909mN87!n/0m",
 			"success": true
@@ -109,28 +112,49 @@ The `success` attribute indicates if creating a PubSub node was successful for t
 }
 ```
 
+### Request a Test Push
+Once an account has been registerd, the client can request a test push message.
+On success the server sends a test push message to the WNS, which then forwards it to the client.
+
+#### Client -> Server
+```JSON
+{
+	"version": 1,
+	"action": "request_test_push",
+	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b"
+}
+```
+
+#### Success: Server -> Client
+```JSON
+{
+	"version": 1,
+	"action": "response",
+	"status": 1
+}
+```
+
+#### Error: Server -> Client
+```JSON
+{
+	"version": 1,
+	"action": "response",
+	"status": 0,
+	"error": "Some error message e.g. `device_id` not found."
+}
+```
+
 ## What the push server stores
-The push server stores the following information persistentend.
+The push server stores the following data persistent in a [Redis](https://redis.io/) key value store.
 
-| `deviceId` | `channelUri` | `timeStamp` |
-|:-:|:-:|:-:|
-| 5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b | ms-app://s-1-15-2-3598129719-3378870262-4208132049-182512184-2493220926-1891298429-4035237700 | 2020-03-31T02:51:53Z |
+![Redis Layout](./docs/Redis-Layout.svg)
 
-The `timeStamp` column represents a UTC timestamp when the entry last has been updated.
-This allows the server to invalidate and remove outdated entries.
+Here the `deviceId` maps to the `channelUri` and all `Account`s related to this device.
+An `Account` is defined as a `SHA-256` hash of the `accountId` with the `deviceId` as salt.
 
-| `deviceId` | `bareJidHash` | `domainPart` | `node` | `secret` |
-|:-:|:-:|:-:|:-:|:-:|
-| 5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b | e5397e96c6ff4d629ab9f203eec3ff17c777b2127cf1b41005e54877487ba982 | xmpp.uwpx.org | 773bds9nf932 | sdf/82h)=1 |
-
-The `bareJidHash` column represents the bare JID (e.g. someClient@xmpp.uwpx.org ) hashed using SHA-256 with the `deviceId` (e.g. 5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b) as salt.
+Independent of that, the push server also maps the string `WNS` to the WNS related information like the token, its type and when it expires.
 
 ## What the app server sends via the WNS to the client
-```
-TODO
-```
-
-## What the user's XMPP server sends to the app server
 ```
 TODO
 ```
@@ -140,14 +164,16 @@ The UWPX push server depends on the following dependencies:
 
 ### Manual
 To be able to build and run this server, you have to install the following dependencies on your own:
-* [CMake](https://cmake.org/): (`sudo dnf install cmake`)
+* [CMake](https://cmake.org/): `sudo dnf install cmake`
 * [gcc](https://gcc.gnu.org/) or [clang](https://clang.llvm.org/) with support for `C++20`: `sudo dnf install gcc clang`
 * [Conan](https://conan.io/): `pip3 install conan --user`
+* [libstrophe dependencies](https://github.com/strophe/libstrophe#requirements): `sudo dnf install libxml2 openssl-devel expat autoconf automake libtool pkg-config`
 
 #### Compressed
 ```
 sudo dnf install cmake gcc clang binutils-devel libuuid-devel
-pip3 install conan gli --user 
+sudo dnf install libxml2 openssl-devel expat autoconf automake libtool pkg-config
+pip3 install conan --user 
 ```
 
 ### Automatic
