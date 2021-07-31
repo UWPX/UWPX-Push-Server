@@ -76,7 +76,14 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
     redis->lrange(deviceId, 0, -1, std::back_inserter(keys));
     if (!keys.empty()) {
         for (size_t i = 1; i < keys.size(); i++) {
-            redis->del(keys[i]);
+            // Delete account:
+            const std::string& account = keys[i];
+            redis->del(account);
+            // Delete node:
+            std::optional<std::string> node = redis->get(account);
+            if (node) {
+                redis->del(*node);
+            }
         }
         redis->del(deviceId);
     }
@@ -85,7 +92,7 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
     keys.clear();
     keys.push_back(channelUri);
     for (const tcp::messages::SuccessSetPushAccountsMessage::PushAccount& account : accounts) {
-        std::string accountId = deviceId + "_" + utils::hash_sah256(account.accountId);
+        std::string accountId = utils::hash_sah256(deviceId + "_" + account.accountId);
         keys.push_back(accountId);
         redis->set(accountId, account.node);
         redis->expire(accountId, DEFAULT_ENTRY_TIMEOUT);
