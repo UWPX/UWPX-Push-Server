@@ -2,6 +2,7 @@
 #include "logger/Logger.hpp"
 #include "utils/CryptoUtils.hpp"
 #include <cassert>
+#include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <memory>
@@ -16,6 +17,8 @@ namespace storage::redis {
 
 // NOLINTNEXTLINE (cert-err58-cpp)
 const std::string RedisClient::WNS_TOKEN_KEY = "WNS";
+// NOLINTNEXTLINE (cert-err58-cpp)
+const std::chrono::days RedisClient::DEFAULT_ENTRY_TIMEOUT = std::chrono::days(7);
 
 RedisClient::RedisClient(const storage::DbConfiguration& config) : url(config.url) {}
 
@@ -85,10 +88,13 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
         std::string accountId = deviceId + "_" + utils::hash_sah256(account.accountId);
         keys.push_back(accountId);
         redis->set(accountId, account.node);
+        redis->expire(accountId, DEFAULT_ENTRY_TIMEOUT);
         redis->rpush(account.node, {account.secret, deviceId});
+        redis->expire(account.node, DEFAULT_ENTRY_TIMEOUT);
     }
     redis->del(deviceId);
     redis->rpush(deviceId, keys.begin(), keys.end());
+    redis->expire(deviceId, DEFAULT_ENTRY_TIMEOUT);
 }
 
 void RedisClient::set_channel_uri(const std::string& deviceId, const std::string& channelUri) {
@@ -101,6 +107,7 @@ void RedisClient::set_channel_uri(const std::string& deviceId, const std::string
         redis->del(deviceId);
     }
     redis->rpush(deviceId, keys.begin(), keys.end());
+    redis->expire(deviceId, DEFAULT_ENTRY_TIMEOUT);
 }
 
 void RedisClient::set_wns_token(const std::string& token, const std::string& type, std::chrono::system_clock::time_point expires) {
@@ -109,6 +116,7 @@ void RedisClient::set_wns_token(const std::string& token, const std::string& typ
 
     redis->del(WNS_TOKEN_KEY);
     redis->rpush(WNS_TOKEN_KEY, {token, type, std::to_string(tt)});
+    redis->expireat(WNS_TOKEN_KEY, tt);
 }
 
 std::optional<std::string> RedisClient::get_wns_token() {
