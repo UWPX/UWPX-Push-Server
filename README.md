@@ -54,8 +54,8 @@ Without this identifier, it wouldn't be possible to update/remove push channels 
 The message has to include **all** account IDs for those, that should receive push notifications.
 Once received by the server, it will replace all existing accounts with those.
 This ensures, the client only receives notifications for those accounts, that are still active.  
-Here the `accountId` should be a persistent per device unique value representing an account.
-For privacy reasons, this `accountId` should **NOT** just simply be the bare JID of the account.
+Here the `account_id` should be a persistent per device unique value representing an account.
+For privacy reasons, this `account_id` should **NOT** just simply be the bare JID of the account.
 It's suggested to use the SHA256 hash of the bare JID with the `deviceId` as salt here.
 
 #### Client -> Server
@@ -66,10 +66,10 @@ It's suggested to use the SHA256 hash of the bare JID with the `deviceId` as sal
 	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
 	"accounts": [
 		{
-			"accountId": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90"
+			"account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90"
 		},
 		{
-			"accountId": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D"
+			"account_id": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D"
 		}
 	]
 }
@@ -77,23 +77,23 @@ It's suggested to use the SHA256 hash of the bare JID with the `deviceId` as sal
 
 #### Success: Server -> Client
 On success the server returns a success message, including a `node` and `secret` attribute for each account.
-It also includes a `push_bareJid` field, which represents the bare JID of the push server.
+It also includes a `push_bare_jid` field, which represents the bare JID of the push server.
 The `success` attribute indicates if creating a PubSub node was successful for the account.
 ```JSON
 {
 	"version": 1,
 	"action": "response",
 	"status": 1,
-	"push_bareJid": "push@xmpp.uwpx.org",
+	"push_bare_jid": "push@xmpp.uwpx.org",
 	"accounts": [
 		{
-			"accountId": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
+			"account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
 			"node": "773bds9nf932",
 			"secret": "sdf/82h)=1",
 			"success": true
 		},
 		{
-			"accountId": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D",
+			"account_id": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D",
 			"node": "8w3rn0MB3m38z2",
 			"secret": "j$o909mN87!n/0m",
 			"success": true
@@ -150,7 +150,7 @@ The push server stores the following data persistent in a [Redis](https://redis.
 ![Redis Layout](./docs/Redis-Layout.svg)
 
 Here the `deviceId` maps to the `channelUri` and all `Account`s related to this device.
-An `Account` is defined as the `deviceId` concatenated with `_` and the `SHA-256` hash of the `accountId`.
+An `Account` is defined as the `deviceId` concatenated with `_` and the `SHA-256` hash of the `account_id`.
 
 Independent of that, the push server also maps the string `WNS` to the WNS related information like the token, its type and when it expires.
 

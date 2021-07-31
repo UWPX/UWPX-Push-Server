@@ -69,11 +69,11 @@ SuccessSetPushAccountsMessage::PushAccount::PushAccount(std::string&& accountId,
 
 std::optional<SuccessSetPushAccountsMessage::PushAccount> SuccessSetPushAccountsMessage::PushAccount::from_json(const nlohmann::json& j) {
     std::string bareJid;
-    if (!j.contains("accountId")) {
+    if (!j.contains("account_id")) {
         LOG_WARNING << "Missing 'accountId' field in message.";
         return std::nullopt;
     }
-    j.at("accountId").get_to(bareJid);
+    j.at("account_id").get_to(bareJid);
     if (bareJid.empty()) {
         LOG_WARNING << "Invalid message 'accountId' value. Expected a non empty string, but received: " << bareJid;
         return std::nullopt;
@@ -114,7 +114,7 @@ std::optional<SuccessSetPushAccountsMessage::PushAccount> SuccessSetPushAccounts
 }
 
 void SuccessSetPushAccountsMessage::PushAccount::to_json(nlohmann::json& j) const {
-    j["accountId"] = accountId;
+    j["account_id"] = accountId;
     j["node"] = node;
     j["secret"] = secret;
     j["success"] = success;
