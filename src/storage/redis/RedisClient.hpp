@@ -45,5 +45,10 @@ class RedisClient {
     void set_push_accounts(const std::string& deviceId, const std::string& channelUri, const std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount>& accounts);
 
     void set_wns_token(const std::string& token, const std::string& type, std::chrono::system_clock::time_point expires);
+
+    void load_push_account(const std::string& deviceId, tcp::messages::SuccessSetPushAccountsMessage::PushAccount* account);
+
+ private:
+    static std::string gen_account(const std::string& deviceId, const std::string& accountId);
 };
 }  // namespace storage::redis

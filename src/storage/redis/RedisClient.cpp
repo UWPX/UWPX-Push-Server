@@ -92,7 +92,7 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
     keys.clear();
     keys.push_back(channelUri);
     for (const tcp::messages::SuccessSetPushAccountsMessage::PushAccount& account : accounts) {
-        std::string accountId = utils::hash_sah256(deviceId + '_' + account.accountId);
+        std::string accountId = gen_account(deviceId, account.accountId);
         keys.push_back(accountId);
         // Add account:
         redis->set(accountId, account.node);
@@ -155,6 +155,26 @@ std::optional<std::chrono::system_clock::time_point> RedisClient::get_wns_token_
 
     time_t tt = std::strtoll(keys[2].c_str(), nullptr, 10);
     return std::make_optional<std::chrono::system_clock::time_point>(std::chrono::system_clock::from_time_t(tt));
+}
+
+void RedisClient::load_push_account(const std::string& deviceId, tcp::messages::SuccessSetPushAccountsMessage::PushAccount* account) {
+    const std::string accountId = gen_account(deviceId, account->accountId);
+    std::optional<std::string> node = redis->get(accountId);
+    if (!node) {
+        return;
+    }
+
+    std::optional<std::string> secret = get_node_secret(*node);
+    if (!secret) {
+        return;
+    }
+    account->node = *node;
+    account->secret = *secret;
+    LOG_DEBUG << "Loaded existing push node and secret.";
+}
+
+std::string RedisClient::gen_account(const std::string& deviceId, const std::string& accountId) {
+    return utils::hash_sah256(deviceId + '_' + accountId);
 }
 
 }  // namespace storage::redis

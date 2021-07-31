@@ -15,6 +15,8 @@
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace server {
 PushServer::PushServer(const storage::Configuration& config) : redisClient(config.db),
@@ -152,24 +154,37 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
         return;
     }
 
-    // Delete all existing XMPP PubSub nodes:
+    std::unordered_set<std::string> deleteNodes;
+    std::unordered_map<std::string, tcp::messages::SuccessSetPushAccountsMessage::PushAccount*> addNodes;
+
     std::vector<std::string> oldPushNodes = redisClient.get_push_nodes(deviceId);
-    for (const std::string& node : oldPushNodes) {
-        xmppClient.delete_push_node(node);
-        LOG_DEBUG << "Deleted node '" << node << "' for device: " << deviceId;
-    }
+    deleteNodes.insert(oldPushNodes.begin(), oldPushNodes.end());
 
     // Store the new accounts:
     std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount> pushAccounts;
     pushAccounts.reserve(accounts.size());
     for (const std::string& accountId : accounts) {
         pushAccounts.push_back(tcp::messages::SuccessSetPushAccountsMessage::PushAccount::create(accountId));
+        tcp::messages::SuccessSetPushAccountsMessage::PushAccount* account = &(pushAccounts[pushAccounts.size() - 1]);
+        // Try to reuse an existing node and secret:
+        redisClient.load_push_account(deviceId, account);
+        if (deleteNodes.contains(account->node)) {
+            deleteNodes.erase(account->node);
+        } else {
+            addNodes[account->node] = account;
+        }
         LOG_DEBUG << "New Push account with node '" << pushAccounts[pushAccounts.size() - 1].node << "' for device: " << deviceId;
     }
 
+    // Delete all existing XMPP PubSub nodes:
+    for (const std::string& node : deleteNodes) {
+        xmppClient.delete_push_node(node);
+        LOG_DEBUG << "Deleted node '" << node << "' for device: " << deviceId;
+    }
+
     // Create and subscribe to XMPP PubSub nodes:
-    for (tcp::messages::SuccessSetPushAccountsMessage::PushAccount& account : pushAccounts) {
-        account.success = xmppClient.setup_push_node(account.node);
+    for (const auto& node : addNodes) {
+        std::get<1>(node)->success = xmppClient.setup_push_node(std::get<0>(node));
     }
 
     redisClient.set_push_accounts(deviceId, *channelUri, pushAccounts);
