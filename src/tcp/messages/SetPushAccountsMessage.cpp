@@ -37,11 +37,6 @@ bool SetPushAccountsMessage::from_json(const nlohmann::json& j) {
         accounts.push_back(std::move(jid));
     }
 
-    if (accounts.empty()) {
-        LOG_WARNING << "Invalid message 'accounts' value. Expected a non empty array.";
-        return false;
-    }
-
     if (!j.contains("device_id")) {
         LOG_WARNING << "Missing 'device_id' field in message.";
         return false;
