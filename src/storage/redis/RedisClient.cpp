@@ -92,10 +92,12 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
     keys.clear();
     keys.push_back(channelUri);
     for (const tcp::messages::SuccessSetPushAccountsMessage::PushAccount& account : accounts) {
-        std::string accountId = utils::hash_sah256(deviceId + "_" + account.accountId);
+        std::string accountId = utils::hash_sah256(deviceId + '_' + account.accountId);
         keys.push_back(accountId);
+        // Add account:
         redis->set(accountId, account.node);
         redis->expire(accountId, DEFAULT_ENTRY_TIMEOUT);
+        // Add node:
         redis->rpush(account.node, {account.secret, deviceId});
         redis->expire(account.node, DEFAULT_ENTRY_TIMEOUT);
     }
