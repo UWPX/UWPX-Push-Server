@@ -63,7 +63,7 @@ void IoThread::threadRun() {
 void IoThread::printHelp() {
     std::cout << "-------------------HELP-------------------\n";
     std::cout << "'help' - This help.\n";
-    std::cout << "'test push <deviceId>' - Sends a test push to the given device ID.\n";
+    std::cout << "'test push <device_id>' - Sends a test push to the given device ID.\n";
     std::cout << "'test xmpp publish <nodeName>' - Publishes and subscribes to the given PubSub node.\n";
     std::cout << "'q' or 'exit' - Stop the server.\n";
     std::cout << "------------------------------------------\n";
