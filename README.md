@@ -56,7 +56,7 @@ Once received by the server, it will replace all existing accounts with those.
 This ensures, the client only receives notifications for those accounts, that are still active.  
 Here the `account_id` should be a persistent per device unique value representing an account.
 For privacy reasons, this `account_id` should **NOT** just simply be the bare JID of the account.
-It's suggested to use the SHA256 hash of the bare JID with the `deviceId` as salt here.
+It's suggested to use the SHA256 hash of the `deviceId` concatenated with the bare JID.
 
 #### Client -> Server
 ```JSON
