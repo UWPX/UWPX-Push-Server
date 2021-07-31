@@ -145,7 +145,7 @@ On success the server sends a test push message to the WNS, which then forwards 
 ```
 
 ## What the push server stores
-The push server stores the following data persistent in a [Redis](https://redis.io/) key value store.
+The push server stores the following data persistent for up to seven days in a [Redis](https://redis.io/) key value store.
 
 ![Redis Layout](./docs/Redis-Layout.svg)
 
