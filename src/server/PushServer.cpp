@@ -52,6 +52,10 @@ void PushServer::stop() {
     }
 }
 
+PushServer::PushServerState PushServer::get_state() const {
+    return state;
+}
+
 void PushServer::thread_run() {
     assert(state == PushServerState::STARTING || state == PushServerState::STOP_REQUESTED);
     if (state != PushServerState::STARTING) {

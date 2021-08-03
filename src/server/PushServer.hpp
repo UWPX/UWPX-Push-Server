@@ -42,6 +42,7 @@ class PushServer {
 
     void start();
     void stop();
+    [[nodiscard]] PushServerState get_state() const;
 
  private:
     void thread_run();
