@@ -1,0 +1,13 @@
+[Unit]
+Description=UWPX push server
+After=redis.service
+
+[Service]
+Type=exec
+User=push
+WorkingDirectory=/home/push
+ExecStart=/home/push/UWPX-Push-Server/build/src/UWPX_Push_Server --noInput /home/push/configuration.json
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

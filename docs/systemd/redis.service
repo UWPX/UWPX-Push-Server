@@ -1,0 +1,13 @@
+[Unit]
+Description=redis-server
+After=network.target
+
+[Service]
+Type=exec
+User=redis
+WorkingDirectory=/home/redis
+ExecStart=/usr/local/bin/redis-server /home/redis/redis.conf
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
