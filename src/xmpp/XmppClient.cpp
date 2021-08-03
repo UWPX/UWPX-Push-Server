@@ -64,32 +64,68 @@ int message_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, vo
 
     const char* from = xmpp_stanza_get_attribute(stanza, "from");
     if (std::strcmp(from, client->get_jid().c_str()) == 0) {
-        xmpp_stanza_t* event = xmpp_stanza_get_child_by_name(stanza, "event");
-        if (event) {
-            const char* eventNs = xmpp_stanza_get_ns(event);
-            if (std::strcmp(eventNs, "http://jabber.org/protocol/pubsub#event") == 0) {
-                xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(event, "items");
-                if (items) {
-                    const char* node = xmpp_stanza_get_attribute(items, "node");
-                    LOG_DEBUG << "Received event for node: " << node;
+        xmpp_stanza_t* itemsNode = XmppClient::get_items_node(stanza);
+        if (itemsNode) {
+            xmpp_stanza_t* notificationNode = XmppClient::get_notification_node(itemsNode);
+            if (notificationNode) {
+                const char* node = xmpp_stanza_get_attribute(itemsNode, "node");
+                LOG_DEBUG << "Received valid event for node: " << node;
 
-                    const char* msg = XmppClient::get_message_body(items);
-                    if (msg) {
-                        // TODO: Parse message
-                        // TODO: Check secret
-
-                        // Trigger the new mesage for node event:
-                        client->on_node_message(node, msg);
-                    } else {
-                        LOG_WARNING << "Received event without a body! Discarding...";
-                    }
+                // Convert the 'notification' node to a string:
+                char* msg = nullptr;
+                size_t len = 0;
+                if (xmpp_stanza_to_text(notificationNode, &msg, &len) != 0) {
+                    LOG_WARNING << "Failed to convert the 'notification' node to a string...";
                 }
+                /**
+                 * Raw notifications can have only a size of less than 5 KB.
+                 * Reference: https://docs.microsoft.com/en-us/previous-versions/windows/apps/jj676791(v=win.10)#creating-a-raw-notification
+                 **/
+                else if (len > 4096) {
+                    client->on_node_message(node, "New message received!");
+                } else {
+                    // Trigger the new message for node event:
+                    client->on_node_message(node, msg);
+                }
+                xmpp_free(client->get_ctx(), msg);
+            } else {
+                LOG_WARNING << "Invalid message node. 'notification' node not found!";
             }
+        } else {
+            LOG_WARNING << "Invalid message node. 'items' node not found!";
         }
+    } else {
+        LOG_WARNING << "Invalid message node. 'from' does not match!";
+        LOG_DEBUG << "Expected '" << client->get_jid() << "', but received '" << from << "'.";
     }
 
     // Return 0 to be removed:
     return 1;
+}
+
+xmpp_stanza_t* XmppClient::get_notification_node(xmpp_stanza_t* itemsNode) {
+    xmpp_stanza_t* itemNode = xmpp_stanza_get_child_by_name(itemsNode, "item");
+    if (itemNode) {
+        xmpp_stanza_t* notificationNode = xmpp_stanza_get_child_by_name(itemNode, "notification");
+        if (notificationNode) {
+            const char* notificationNs = xmpp_stanza_get_ns(notificationNode);
+            if (std::strcmp(notificationNs, "urn:xmpp:push:0") == 0) {
+                return notificationNode;
+            }
+        }
+    }
+    return nullptr;
+}
+
+xmpp_stanza_t* XmppClient::get_items_node(xmpp_stanza_t* stanza) {
+    xmpp_stanza_t* event = xmpp_stanza_get_child_by_name(stanza, "event");
+    if (event) {
+        const char* eventNs = xmpp_stanza_get_ns(event);
+        if (std::strcmp(eventNs, "http://jabber.org/protocol/pubsub#event") == 0) {
+            return xmpp_stanza_get_child_by_name(event, "items");
+        }
+    }
+    return nullptr;
 }
 
 void XmppClient::on_node_message(const std::string& node, const std::string& msg) {
@@ -375,32 +411,4 @@ xmpp_stanza_t* XmppClient::xmpp_pep_unsubscribe_new(const char* node, const char
     return iq;
 }
 
-const char* XmppClient::get_message_body(xmpp_stanza_t* itemsNode) {
-    xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(itemsNode, "item");
-    if (item) {
-        xmpp_stanza_t* notification = xmpp_stanza_get_child_by_name(item, "notification");
-        if (notification) {
-            const char* notificationNs = xmpp_stanza_get_ns(notification);
-            if (std::strcmp(notificationNs, "urn:xmpp:push:0") == 0) {
-                xmpp_stanza_t* x = xmpp_stanza_get_child_by_name(notification, "x");
-                if (x) {
-                    const char* xNs = xmpp_stanza_get_ns(x);
-                    if (std::strcmp(xNs, "jabber:x:data") == 0) {
-                        for (xmpp_stanza_t* child = xmpp_stanza_get_children(x); child; child = xmpp_stanza_get_next(child)) {
-                            const char* name = xmpp_stanza_get_name(child);
-                            const char* var = xmpp_stanza_get_attribute(child, "var");
-                            if ((std::strcmp(name, "field") == 0) && (std::strcmp(var, "last-message-body") == 0)) {
-                                xmpp_stanza_t* value = xmpp_stanza_get_child_by_name(child, "value");
-                                if (value) {
-                                    return xmpp_stanza_get_text(value);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return nullptr;
-}
 }  // namespace xmpp
