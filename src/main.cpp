@@ -24,9 +24,9 @@ void signal_handler(int signal) {
 }
 
 void print_help(const char* prog) {
-    std::cout << prog << " [--noInput] [--help] configuration.json\n";
+    std::cout << prog << " [--noInput] [--help] <PATH TO THE 'configuration.json' FILE>\n";
     std::cout << "--help - Display this help.\n";
-    std::cout << "--noInput - Do not accept input. Exit via Ctrl+C." << std::endl;
+    std::cout << "--noInput - Do not accept input. Exit via Ctrl+C. Useful when running headless." << std::endl;
 }
 
 int main(int argc, char** argv) {

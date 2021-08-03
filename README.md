@@ -257,7 +257,9 @@ If you run the server for the first time and there is no `configuration.json` pr
 ### Start
 From the build direct you can execute the server as follows:
 ```BASH
-./src/UWPX_Push_Server <PATH TO THE 'configuration.json' FILE>
+./src/UWPX_Push_Server [--noInput] [--help] <PATH TO THE 'configuration.json' FILE>
+--help - Display this help.
+--noInput - Do not accept input. Exit via Ctrl+C. Useful when running headless.
 ```
 In case no `configuration.json` file exist at the given location, the server will create an empty one, like described above.
 
