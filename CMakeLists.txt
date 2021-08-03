@@ -94,6 +94,7 @@ conan_cmake_run(REQUIRES nlohmann_json/3.9.1
                          catch2/2.13.6
                          libsodium/1.0.18
                          cppserver/1.0.1.0
+                         ctre/3.4.1
                 GENERATORS cmake_find_package
                 BUILD missing)
 conan_cmake_autodetect(settings)
@@ -109,6 +110,7 @@ find_package(cpr REQUIRED)
 find_package(redis++ REQUIRED)
 find_package(libsodium REQUIRED)
 find_package(cppserver REQUIRED)
+find_package(ctre REQUIRED)
 
 include(libstrophe)
 

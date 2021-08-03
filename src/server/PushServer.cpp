@@ -11,6 +11,7 @@
 #include "tcp/messages/SuccessSetPushAccountsMessage.hpp"
 #include "wns/WnsClient.hpp"
 #include <cassert>
+#include <ctre.hpp>
 #include <functional>
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
@@ -195,6 +196,12 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
 }
 
 void PushServer::set_channel_uri(const std::string& deviceId, const std::string& channelUri, tcp::ClientSslSession* session) {
+    if (!is_valid_channel_uri(channelUri)) {
+        session->respond_with_error("Invalid channel URI. Has to use the domain 'notify.windows.com'.");
+        LOG_WARNING << "Invalid channel URI from 'device' " << deviceId << " received: " << channelUri;
+        return;
+    }
+
     redisClient.set_channel_uri(deviceId, channelUri);
     session->respond_with_success();
     LOG_INFO << "Channel URI set for 'device' " << deviceId << " to: " << channelUri;
@@ -219,4 +226,7 @@ void PushServer::on_message_for_node(const std::string& node, const std::string&
     }
 }
 
+constexpr bool PushServer::is_valid_channel_uri(const std::string& uri) {
+    return ctre::match<R"(https://[\w]+\.notify\.windows\.com/\?token=[\w%]+)">(uri);
+}
 }  // namespace server

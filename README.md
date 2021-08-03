@@ -186,6 +186,7 @@ The following dependencies will be installed automatically by [conan](https://co
 * [CppServer](https://github.com/chronoxor/CppServer#requirements): Ultra fast and low latency asynchronous socket server & client C++ library with support TCP, SSL, UDP, HTTP, HTTPS, WebSocket protocols and 10K connections problem solution.
 * [libsodium](https://libsodium.gitbook.io/doc/) Sodium is a modern, easy-to-use software library for encryption, decryption, signatures, password hashing and more.
 * [libstrophe](https://strophe.im/libstrophe/) ibstrophe is a minimal XMPP library written in C. 
+* [ctre](https://github.com/hanickadot/compile-time-regular-expressions) Fast compile-time regular expressions with support for matching/searching/capturing during compile-time or runtime.
 
 ### Prosody
 The server currently only supports running in combination with a [Prosody](https://hg.prosody.im/) server.
