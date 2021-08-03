@@ -64,12 +64,6 @@ int main(int argc, char** argv) {
         LOG_INFO << "Enter 'q' to exit.";
     }
 
-    // Custom configuration path:
-    if (argc >= 2) {
-        // NOLINTNEXTLINE (cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        configPath = argv[1];
-    }
-
     // Load configuration:
     storage::ConfigurationStorage configStorage = storage::get_configuration_storage_instance(configPath);
 
