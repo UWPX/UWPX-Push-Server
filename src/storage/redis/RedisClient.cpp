@@ -170,6 +170,7 @@ void RedisClient::load_push_account(const std::string& deviceId, tcp::messages::
     }
     account->node = *node;
     account->secret = *secret;
+    account->success = true;
     LOG_DEBUG << "Loaded existing push node and secret.";
 }
 
