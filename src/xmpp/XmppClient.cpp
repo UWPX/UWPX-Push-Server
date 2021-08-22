@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <optional>
 #include <strophe.h>
 
 namespace xmpp {
@@ -15,6 +16,12 @@ XmppClient::XmppClient(const storage::XmppConfiguration& config, nodeMessageHand
                                                                                                                 nodeMessageHandler(std::move(nodeMessageHandler)) {}
 
 XmppClient::~XmppClient() { assert(state == XmppClientState::NOT_RUNNING); }
+
+void XmppClient::set_redis_client(storage::redis::RedisClient* redisClient) {
+    this->redisClient = redisClient;
+}
+
+storage::redis::RedisClient* XmppClient::get_redis_client() const { return redisClient; }
 
 XmppClient::XmppClientState XmppClient::get_state() const { return state; }
 
@@ -71,23 +78,37 @@ int message_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, vo
                 const char* node = xmpp_stanza_get_attribute(itemsNode, "node");
                 LOG_DEBUG << "Received valid event for node: " << node;
 
-                // Convert the 'notification' node to a string:
-                char* msg = nullptr;
-                size_t len = 0;
-                if (xmpp_stanza_to_text(notificationNode, &msg, &len) != 0) {
-                    LOG_WARNING << "Failed to convert the 'notification' node to a string...";
-                }
-                /**
-                 * Raw notifications can have only a size of less than 5 KB.
-                 * Reference: https://docs.microsoft.com/en-us/previous-versions/windows/apps/jj676791(v=win.10)#creating-a-raw-notification
-                 **/
-                else if (len > 4096) {
-                    client->on_node_message(node, "New message received!");
+                // Get the accountId:
+                storage::redis::RedisClient* redisClient = client->get_redis_client();
+                assert(redisClient);
+                std::optional<std::string> accountId = redisClient->get_account_id(node);
+                if (accountId) {
+                    // Add the 'account' attribute node:
+                    xmpp_stanza_t* accountNode = xmpp_stanza_new(client->get_ctx());
+                    xmpp_stanza_set_name(accountNode, "account");
+                    xmpp_stanza_set_attribute(accountNode, "id", accountId->c_str());
+                    xmpp_stanza_add_child(notificationNode, accountNode);
+
+                    // Convert the 'notification' node to a string:
+                    char* msg = nullptr;
+                    size_t len = 0;
+                    if (xmpp_stanza_to_text(notificationNode, &msg, &len) != 0) {
+                        LOG_WARNING << "Failed to convert the 'notification' node to a string...";
+                    }
+                    /**
+                     * Raw notifications can have only a size of less than 5 KB.
+                     * Reference: https://docs.microsoft.com/en-us/previous-versions/windows/apps/jj676791(v=win.10)#creating-a-raw-notification
+                     **/
+                    else if (len > 4096) {
+                        client->on_node_message(node, "New message received!");
+                    } else {
+                        // Trigger the new message for node event:
+                        client->on_node_message(node, msg);
+                    }
+                    xmpp_free(client->get_ctx(), msg);
                 } else {
-                    // Trigger the new message for node event:
-                    client->on_node_message(node, msg);
+                    LOG_WARNING << "Account for node not found!";
                 }
-                xmpp_free(client->get_ctx(), msg);
             } else {
                 LOG_WARNING << "Invalid message node. 'notification' node not found!";
             }

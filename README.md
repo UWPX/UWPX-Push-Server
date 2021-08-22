@@ -149,8 +149,9 @@ The push server stores the following data persistent for up to seven days in a [
 
 ![Redis Layout](./docs/Redis-Layout.svg)
 
-Here the `device_id` maps to the `channelUri` and all `Account`s related to this device.
-An `Account` is defined as the `SHA-256` hash of `device_id` concatenated with `_` and the `account_id`.
+Here the `device_id` maps to the `channelUri` and all `account`s related to this device.
+An `account` is defined as the `SHA-256` hash of `device_id` concatenated with `_` and the `account_id`.
+The `account` then maps to the corresponding `node` which then maps to the `account_id` received from the client, the `device_id` and the node `secret`.
 
 Independent of that, the push server also maps the string `WNS` to the WNS related information like the token, its type and when it expires.
 

@@ -2,6 +2,7 @@
 
 #include "storage/ConfigurationStorage.hpp"
 #include <optional>
+#include <storage/redis/RedisClient.hpp>
 #include <string>
 #include <thread>
 #include <strophe.h>
@@ -32,6 +33,8 @@ class XmppClient {
     const std::string host;
     nodeMessageHandlerFunc nodeMessageHandler;
 
+    storage::redis::RedisClient* redisClient{nullptr};
+
  public:
     explicit XmppClient(const storage::XmppConfiguration& config, nodeMessageHandlerFunc&& nodeMessageHandler);
     XmppClient(XmppClient&&) = delete;
@@ -43,6 +46,8 @@ class XmppClient {
     [[nodiscard]] XmppClientState get_state() const;
     [[nodiscard]] const std::string& get_jid() const;
     [[nodiscard]] xmpp_ctx_t* get_ctx() const;
+    [[nodiscard]] storage::redis::RedisClient* get_redis_client() const;
+    void set_redis_client(storage::redis::RedisClient* redisClient);
 
     void start();
     void stop();

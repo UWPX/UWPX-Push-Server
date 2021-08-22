@@ -40,10 +40,19 @@ std::optional<std::string> RedisClient::get_channel_uri(const std::string& devic
     return keys[0];
 }
 
+std::optional<std::string> RedisClient::get_account_id(const std::string& node) {
+    std::vector<std::string> keys;
+    redis->lrange(node, 0, -1, std::back_inserter(keys));
+    if (keys.size() != 3) {
+        return std::nullopt;
+    }
+    return keys[0];
+}
+
 std::optional<std::string> RedisClient::get_device_id(const std::string& node) {
     std::vector<std::string> keys;
     redis->lrange(node, 0, -1, std::back_inserter(keys));
-    if (keys.size() < 2) {
+    if (keys.size() != 3) {
         return std::nullopt;
     }
     return keys[1];
@@ -52,10 +61,10 @@ std::optional<std::string> RedisClient::get_device_id(const std::string& node) {
 std::optional<std::string> RedisClient::get_node_secret(const std::string& node) {
     std::vector<std::string> keys;
     redis->lrange(node, 0, -1, std::back_inserter(keys));
-    if (keys.empty()) {
+    if (keys.size() != 3) {
         return std::nullopt;
     }
-    return keys[0];
+    return keys[2];
 }
 
 std::vector<std::string> RedisClient::get_push_nodes(const std::string& deviceId) {
@@ -91,15 +100,15 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
     // Replace it with the new one:
     keys.clear();
     keys.push_back(channelUri);
-    for (const tcp::messages::SuccessSetPushAccountsMessage::PushAccount& account : accounts) {
-        std::string accountId = gen_account(deviceId, account.accountId);
-        keys.push_back(accountId);
+    for (const tcp::messages::SuccessSetPushAccountsMessage::PushAccount& pushAccount : accounts) {
+        std::string account = gen_account(deviceId, pushAccount.accountId);
+        keys.push_back(account);
         // Add account:
-        redis->set(accountId, account.node);
-        redis->expire(accountId, DEFAULT_ENTRY_TIMEOUT);
+        redis->set(account, pushAccount.node);
+        redis->expire(account, DEFAULT_ENTRY_TIMEOUT);
         // Add node:
-        redis->rpush(account.node, {account.secret, deviceId});
-        redis->expire(account.node, DEFAULT_ENTRY_TIMEOUT);
+        redis->rpush(pushAccount.node, {pushAccount.accountId, deviceId, pushAccount.secret});
+        redis->expire(pushAccount.node, DEFAULT_ENTRY_TIMEOUT);
     }
     redis->del(deviceId);
     redis->rpush(deviceId, keys.begin(), keys.end());

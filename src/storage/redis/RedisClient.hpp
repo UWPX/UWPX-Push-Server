@@ -36,6 +36,7 @@ class RedisClient {
     std::optional<std::string> get_device_id(const std::string& node);
     std::vector<std::string> get_push_nodes(const std::string& deviceId);
     std::optional<std::string> get_node_secret(const std::string& node);
+    std::optional<std::string> get_account_id(const std::string& node);
 
     std::optional<std::string> get_wns_token();
     std::optional<std::string> get_wns_token_type();
