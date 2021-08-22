@@ -2,7 +2,6 @@
 #include "storage/Serializer.hpp"
 
 namespace storage {
-
 ConfigurationStorage::ConfigurationStorage(const std::filesystem::path& configFilePath) : fileHandle(configFilePath) {
     LOG_DEBUG << "Initializing ConfigurationStorage, this should only happen once per execution.";
     if (std::filesystem::exists(configFilePath)) {

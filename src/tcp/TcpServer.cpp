@@ -11,7 +11,8 @@ TcpServer::TcpServer(const storage::TcpConfiguration& config, ClientSslSession::
     sslCtx = std::make_shared<CppServer::Asio::SSLContext>(asio::ssl::context::tlsv12);
     sslCtx->use_certificate_file(config.tls.serverCertPath, asio::ssl::context::pem);
     sslCtx->use_private_key_file(config.tls.serverKeyPath, asio::ssl::context::pem);
-    server = std::make_shared<SslServer>(asioService, sslCtx, CppServer::Asio::InternetProtocol::IPv4, config.port, std::move(messageHandler));
+    serverIpv4 = std::make_shared<SslServer>(asioService, sslCtx, CppServer::Asio::InternetProtocol::IPv4, config.port, ClientSslSession::messageHandlerFunc(messageHandler));
+    serverIpv6 = std::make_shared<SslServer>(asioService, sslCtx, CppServer::Asio::InternetProtocol::IPv6, config.port, ClientSslSession::messageHandlerFunc(messageHandler));
 }
 
 TcpServer::~TcpServer() {
@@ -53,12 +54,14 @@ void TcpServer::threadRun() {
     state = TcpServerState::RUNNING;
     LOG_INFO << "TCP thread started.";
     asioService->Start();
-    server->Start();
+    serverIpv4->Start();
+    serverIpv6->Start();
 
     while (state == TcpServerState::RUNNING) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    server->Stop();
+    serverIpv4->Stop();
+    serverIpv6->Stop();
     asioService->Stop();
     state = TcpServerState::WAITING_FOR_JOIN;
     LOG_DEBUG << "TCP thread ready to be joined.";

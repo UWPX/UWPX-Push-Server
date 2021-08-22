@@ -25,9 +25,10 @@ class TcpServer {
     std::optional<std::thread> thread{std::nullopt};
     TcpServerState state{TcpServerState::NOT_RUNNING};
 
-    std::shared_ptr<CppServer::Asio::Service> asioService = std::make_shared<CppServer::Asio::Service>();
+    std::shared_ptr<CppServer::Asio::Service> asioService = std::make_shared<CppServer::Asio::Service>(2, true);
     std::shared_ptr<CppServer::Asio::SSLContext> sslCtx;
-    std::shared_ptr<SslServer> server;
+    std::shared_ptr<SslServer> serverIpv4;
+    std::shared_ptr<SslServer> serverIpv6;
 
  public:
     TcpServer(const storage::TcpConfiguration& config, ClientSslSession::messageHandlerFunc&& messageHandler);

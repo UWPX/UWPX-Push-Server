@@ -37,11 +37,9 @@ void from_json(const nlohmann::json& j, Configuration& c);
 }  // namespace storage
 
 namespace storage {
-class Settings;
 struct ConfigurationStorage;
 class Serializer {
  private:
-    friend Settings;
     friend ConfigurationStorage;
     const std::filesystem::path filename;
     nlohmann::json js_int = nlohmann::json::object();
