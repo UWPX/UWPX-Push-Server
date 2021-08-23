@@ -23,7 +23,9 @@ namespace server {
 PushServer::PushServer(const storage::Configuration& config) : redisClient(config.db),
                                                                wnsClient(config.wns),
                                                                tcpServer(config.tcp, [this](const std::string& s, tcp::ClientSslSession* session) { this->on_message_received(s, session); }),
-                                                               xmppClient(config.xmpp, [this](const std::string& node, const std::string& msg) { this->on_message_for_node(node, msg); }) {}
+                                                               xmppClient(config.xmpp, [this](const std::string& node, const std::string& msg) { this->on_message_for_node(node, msg); }) {
+    xmppClient.set_redis_client(&redisClient);
+}
 
 PushServer::~PushServer() {
     assert(state == PushServerState::NOT_RUNNING);
