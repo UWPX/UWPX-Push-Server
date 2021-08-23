@@ -144,7 +144,7 @@ void PushServer::send_test_push(const std::string& deviceId, tcp::ClientSslSessi
         session->respond_with_error("Device id unknown.");
         return;
     }
-    bool result = wnsClient.send_raw_notification(*channelUri, "Test push notification from your push server.");
+    bool result = wnsClient.send_raw_notification(*channelUri, "<test/>");
     if (result) {
         session->respond_with_success();
         LOG_INFO << "Test push send to device id: " << deviceId;
