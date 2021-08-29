@@ -233,6 +233,7 @@ void PushServer::on_message_for_node(const std::string& node, const std::string&
 }
 
 constexpr bool PushServer::is_valid_channel_uri(const std::string& uri) {
-    return ctre::match<R"(https://[\w]+\.notify\.windows\.com/\?token=[\w%]+)">(uri);
+    // Sub domain validation regex based on: https://stackoverflow.com/a/7933253
+    return ctre::match<R"(https:\/\/([A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?)\.notify\.windows\.com\/\?token=[\w%]+)">(uri);
 }
 }  // namespace server
