@@ -156,9 +156,28 @@ The `account` then maps to the corresponding `node` which then maps to the `acco
 Independent of that, the push server also maps the string `WNS` to the WNS related information like the token, its type and when it expires.
 
 ## What the app server sends via the WNS to the client
+```XML
+<notification xmlns='urn:xmpp:push:0'>
+    <x xmlns='jabber:x:data'>
+        <field var='FORM_TYPE'>
+            <value>urn:xmpp:push:summary</value>
+        </field>
+        <field var='message-count'>
+            <value>1</value>
+        </field>
+        <field var='last-message-sender'>
+            <value>juliet@capulet.example/balcony</value>
+        </field>
+        <field var='last-message-body'>
+            <value>Wherefore art thou, Romeo?</value>
+        </field>
+    </x>
+    <account id="DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90"/>
+</notification>
 ```
-TODO
-```
+The push server basically forwards the content it receives from the XMPP server ([reference](https://xmpp.org/extensions/xep-0357.html#publishing)).
+It adds the `account` element to the message so the receiving client can distinguish for which of its accounts this message is.
+The `account` element contains the `account_id` published by the client during updating the push accounts.
 
 ## Dependencies
 The UWPX push server depends on the following dependencies:
@@ -232,8 +251,8 @@ If you run the server for the first time and there is no `configuration.json` pr
 ```JSON
 {
     "db": {
-		"url": "Uri to connect to the Redis server"
-	},
+        "url": "Uri to connect to the Redis server"
+    },
     "tcp": {
         "port": 1997,
         "tls": {
@@ -242,14 +261,14 @@ If you run the server for the first time and there is no `configuration.json` pr
         }
     },
     "wns": {
-		"clientSecret": "The secret obtained from the Devcenter",
+        "clientSecret": "The secret obtained from the Devcenter",
         "packetId": "The UWPX package ID starting with: 'ms-app://...'"
     },
     "xmpp": {
         "bareJid": "The bare JID of the push XMPP client (e.g. 'pushServer@xmpp.example.com')",
         "password": "The password for the push XMPP client",
-		"port": 5222,
-		"host": "The hostname of the XMPP server."
+        "port": 5222,
+        "host": "The hostname of the XMPP server."
     }
 }
 ```
