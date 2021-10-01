@@ -32,7 +32,6 @@ uwpx_push_server_option(UWPX_PUSH_SERVER_ENABLE_LINTING "Set to ON to enable cla
 uwpx_push_server_option(UWPX_PUSH_SERVER_BUILD_TESTS "Set to ON to enable building tests." ON)
 message(STATUS "=======================================================")
 
-option(ENABLE_LINTING "Enables linting while building" ON)
 option(BUILD_TESTING "Build tests" ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
@@ -43,7 +42,7 @@ include(sanitizer)
 include(gcc_analyze)
 include(clear_variable)
 
-if (${JUTTA_UI_ENABLE_LINTING})
+if (UWPX_PUSH_SERVER_ENABLE_LINTING)
     message(STATUS "Enabling linting")
     include(clang-tidy)
 else()
