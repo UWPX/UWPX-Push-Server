@@ -43,7 +43,7 @@ include(sanitizer)
 include(gcc_analyze)
 include(clear_variable)
 
-if (${JUTTA_UI_ENABLE_LINTING})
+if (ENABLE_LINTING)
     message(STATUS "Enabling linting")
     include(clang-tidy)
 else()
