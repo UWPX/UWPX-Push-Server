@@ -101,7 +101,7 @@ conan_cmake_autodetect(settings)
 conan_cmake_install(PATH_OR_REFERENCE .
                     BUILD redis-plus-plus
                     BUILD missing
-                    REMOTE conan-center
+                    REMOTE conancenter
                     SETTINGS "${settings};redis-plus-plus:compiler.cppstd=17") # Workaround for now: https://github.com/conan-io/conan-center-index/pull/6349
 
 find_package(nlohmann_json REQUIRED)
