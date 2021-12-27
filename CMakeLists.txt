@@ -86,11 +86,11 @@ else()
     set(CONAN_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 endif()
 
-conan_cmake_run(REQUIRES nlohmann_json/3.9.1
+conan_cmake_run(REQUIRES nlohmann_json/3.10.4
                          glog/0.4.0
-                         cpr/1.6.2
-                         redis-plus-plus/1.2.3
-                         catch2/2.13.6
+                         cpr/1.7.2
+                         redis-plus-plus/1.3.2
+                         catch2/2.13.7
                          libsodium/1.0.18
                          cppserver/1.0.1.0
                          ctre/3.4.1
