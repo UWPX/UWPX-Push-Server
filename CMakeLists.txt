@@ -94,6 +94,7 @@ conan_cmake_run(REQUIRES nlohmann_json/3.9.1
                          libsodium/1.0.18
                          cppserver/1.0.1.0
                          ctre/3.4.1
+                         openssl/1.1.1l # Override: 'cppserver/1.0.1.0' requires 'openssl/1.1.1k' while 'libcurl/7.79.0' requires 'openssl/1.1.1l'
                 GENERATORS cmake_find_package
                 BUILD missing)
 conan_cmake_autodetect(settings)
