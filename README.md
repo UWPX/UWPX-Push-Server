@@ -207,6 +207,7 @@ The following dependencies will be installed automatically by [conan](https://co
 * [libsodium](https://libsodium.gitbook.io/doc/) Sodium is a modern, easy-to-use software library for encryption, decryption, signatures, password hashing and more.
 * [libstrophe](https://strophe.im/libstrophe/) ibstrophe is a minimal XMPP library written in C. 
 * [ctre](https://github.com/hanickadot/compile-time-regular-expressions) Fast compile-time regular expressions with support for matching/searching/capturing during compile-time or runtime.
+* [Date](https://github.com/HowardHinnant/date) A date and time library based on the C++11/14/17 <chrono> header.
 
 ### Prosody
 The server currently only supports running in combination with a [Prosody](https://hg.prosody.im/) server.

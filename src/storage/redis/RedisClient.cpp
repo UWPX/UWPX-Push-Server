@@ -18,7 +18,7 @@ namespace storage::redis {
 // NOLINTNEXTLINE (cert-err58-cpp)
 const std::string RedisClient::WNS_TOKEN_KEY = "WNS";
 // NOLINTNEXTLINE (cert-err58-cpp)
-const std::chrono::days RedisClient::DEFAULT_ENTRY_TIMEOUT = std::chrono::days(7);
+const date::day RedisClient::DEFAULT_ENTRY_TIMEOUT = date::day(7);
 
 RedisClient::RedisClient(const storage::DbConfiguration& config) : url(config.url) {}
 
