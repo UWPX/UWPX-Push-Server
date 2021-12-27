@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 set(PROJECT_DESCRIPTION "UWPX XMPP push server.")
 
 project("UWPX_Push_Server" 
-            VERSION 0.0.0
+            VERSION 0.0.1
             DESCRIPTION "${PROJECT_DESCRIPTION}"
             HOMEPAGE_URL "https://github.com/UWPX/UWPX-Push-Server")
 set(VERSION_NAME "dev")
