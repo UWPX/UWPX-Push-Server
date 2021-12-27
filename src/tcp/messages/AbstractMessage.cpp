@@ -20,8 +20,8 @@ bool AbstractMessage::from_json(const nlohmann::json& j) {
         return false;
     }
     version = j["version"];
-    if (version != VERSION) {
-        LOG_WARNING << "Invalid message 'version' value. Expected " << VERSION << ", but received: " << action;
+    if (version < 1 || version > VERSION) {
+        LOG_WARNING << "Invalid message 'version' value. Expected version >= 1 and <= " << VERSION << ", but received: " << version;
         return false;
     }
 
