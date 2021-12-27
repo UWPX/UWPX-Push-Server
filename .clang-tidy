@@ -29,7 +29,8 @@ Checks: '*,
 -hicpp-signed-bitwise,
 -misc-no-recursion,
 -readability-function-cognitive-complexity,
--google-readability-todo
+-google-readability-todo,
+-altera-unroll-loops
 '
 WarningsAsErrors: '*'
 HeaderFilterRegex: 'src/*.hpp'

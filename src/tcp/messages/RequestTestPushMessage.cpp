@@ -2,7 +2,10 @@
 #include "logger/Logger.hpp"
 
 namespace tcp::messages {
-RequestTestPushMessage::RequestTestPushMessage(const nlohmann::json& j) { isValid = from_json(j); }
+RequestTestPushMessage::RequestTestPushMessage(const nlohmann::json& j) {
+    // NOLINTNEXTLINE (clang-analyzer-optin.cplusplus.VirtualCall) Not relevant in this case
+    isValid = from_json(j);
+}
 
 RequestTestPushMessage::RequestTestPushMessage(std::string&& deviceId) : AbstractMessage(std::string{ACTION}), deviceId(std::move(deviceId)) {}
 
