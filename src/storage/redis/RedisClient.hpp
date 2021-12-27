@@ -19,7 +19,7 @@ namespace storage::redis {
 class RedisClient {
  private:
     static const std::string WNS_TOKEN_KEY;
-    static const date::day DEFAULT_ENTRY_TIMEOUT;
+    static const std::chrono::seconds DEFAULT_ENTRY_TIMEOUT;
     const std::string url;
     std::unique_ptr<sw::redis::Redis> redis{nullptr};
 
