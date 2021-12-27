@@ -149,35 +149,21 @@ The push server stores the following data persistent for up to seven days in a [
 
 ![Redis Layout](./docs/Redis-Layout.svg)
 
-Here the `device_id` maps to the `channelUri` and all `account`s related to this device.
+Here the `device_id` maps to the `channelUri`, protocol `version` and all `account`s related to this device.
 An `account` is defined as the `SHA-256` hash of `device_id` concatenated with `_` and the `account_id`.
 The `account` then maps to the corresponding `node` which then maps to the `account_id` received from the client, the `device_id` and the node `secret`.
 
 Independent of that, the push server also maps the string `WNS` to the WNS related information like the token, its type and when it expires.
 
 ## What the app server sends via the WNS to the client
-```XML
-<notification xmlns='urn:xmpp:push:0'>
-    <x xmlns='jabber:x:data'>
-        <field var='FORM_TYPE'>
-            <value>urn:xmpp:push:summary</value>
-        </field>
-        <field var='message-count'>
-            <value>1</value>
-        </field>
-        <field var='last-message-sender'>
-            <value>juliet@capulet.example/balcony</value>
-        </field>
-        <field var='last-message-body'>
-            <value>Wherefore art thou, Romeo?</value>
-        </field>
-    </x>
-    <account id="DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90"/>
-</notification>
+```JSON
+{
+    "account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
+	"message_count": 2,
+	"pending_subscription_count": 0,
+}
 ```
-The push server basically forwards the content it receives from the XMPP server ([reference](https://xmpp.org/extensions/xep-0357.html#publishing)).
-It adds the `account` element to the message so the receiving client can distinguish for which of its accounts this message is.
-The `account` element contains the `account_id` published by the client during updating the push accounts.
+Since it is not allowed to encrypt the data send to the WNS, we do not simply forward the received message from the XMPP server ([reference](https://xmpp.org/extensions/xep-0357.html#publishing)). Instead we only send the `account_id` (published by the client during updating the push accounts) in combination with the message and pending subscription count.
 
 ## Dependencies
 The UWPX push server depends on the following dependencies:

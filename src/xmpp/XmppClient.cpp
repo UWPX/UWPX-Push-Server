@@ -9,11 +9,12 @@
 #include <strophe.h>
 
 namespace xmpp {
-XmppClient::XmppClient(const storage::XmppConfiguration& config, nodeMessageHandlerFunc&& nodeMessageHandler) : jid(config.bareJid),
-                                                                                                                password(config.password),
-                                                                                                                port(config.port),
-                                                                                                                host(config.host),
-                                                                                                                nodeMessageHandler(std::move(nodeMessageHandler)) {}
+XmppClient::XmppClient(const storage::XmppConfiguration& config, nodev1MessageHandlerFunc&& nodev1MessageHandler, nodev2MessageHandlerFunc&& nodev2MessageHandler) : jid(config.bareJid),
+                                                                                                                                                                     password(config.password),
+                                                                                                                                                                     port(config.port),
+                                                                                                                                                                     host(config.host),
+                                                                                                                                                                     nodev1MessageHandler(std::move(nodev1MessageHandler)),
+                                                                                                                                                                     nodev2MessageHandler(std::move(nodev2MessageHandler)) {}
 
 XmppClient::~XmppClient() { assert(state == XmppClientState::NOT_RUNNING); }
 
@@ -66,6 +67,75 @@ int iq_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, void* c
     return 1;
 }
 
+void XmppClient::send_v2_push(const std::string& accountId, const std::string& node, xmpp_stanza_t* notificationNode) {
+    // Parse message and pending subscription count:
+    int messageCount = 0;
+    int pendingSubscriptionCount = 0;
+    xmpp_stanza_t* xNode = xmpp_stanza_get_child_by_name(notificationNode, "x");
+    if (xNode) {
+        for (xmpp_stanza_t* fieldNode = xmpp_stanza_get_children(xNode); fieldNode != nullptr; xmpp_stanza_get_next(fieldNode)) {
+            std::string name = xmpp_stanza_get_name(fieldNode);
+            if (std::strcmp(xmpp_stanza_get_name(fieldNode), "field") == 0) {
+                const char* var = xmpp_stanza_get_attribute(fieldNode, "var");
+                if (var) {
+                    if (std::strcmp(var, "message-count") == 0) {
+                        xmpp_stanza_t* valueNode = xmpp_stanza_get_child_by_name(fieldNode, "value");
+                        if (valueNode) {
+                            char* valueStr = xmpp_stanza_get_text(valueNode);
+                            if (valueStr) {
+                                try {
+                                    messageCount = std::stoi(valueStr);
+                                } catch (const std::invalid_argument&) {}
+                                xmpp_free(ctx, valueStr);
+                            }
+                        }
+                    } else if (std::strcmp(var, "pending-subscription-count") == 0) {
+                        xmpp_stanza_t* valueNode = xmpp_stanza_get_child_by_name(fieldNode, "value");
+                        if (valueNode) {
+                            char* valueStr = xmpp_stanza_get_text(valueNode);
+                            if (valueStr) {
+                                try {
+                                    pendingSubscriptionCount = std::stoi(valueStr);
+                                } catch (const std::invalid_argument&) {}
+                                xmpp_free(ctx, valueStr);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Forward result:
+    on_v2_node_message(node, accountId, messageCount, pendingSubscriptionCount);
+}
+
+void XmppClient::send_v1_push(const std::string& accountId, const std::string& node, xmpp_stanza_t* notificationNode) {
+    // Add the 'account' attribute node:
+    xmpp_stanza_t* accountNode = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(accountNode, "account");
+    xmpp_stanza_set_attribute(accountNode, "id", accountId.c_str());
+    xmpp_stanza_add_child(notificationNode, accountNode);
+
+    // Convert the 'notification' node to a string:
+    char* msg = nullptr;
+    size_t len = 0;
+    if (xmpp_stanza_to_text(notificationNode, &msg, &len) != 0) {
+        LOG_WARNING << "Failed to convert the 'notification' node to a string...";
+    }
+    /**
+     * Raw notifications can have only a size of less than 5 KB.
+     * Reference: https://docs.microsoft.com/en-us/previous-versions/windows/apps/jj676791(v=win.10)#creating-a-raw-notification
+     **/
+    else if (len > 4096) {
+        on_v1_node_message(node, "New message received!");
+    } else {
+        // Trigger the new message for node event:
+        on_v1_node_message(node, msg);
+    }
+    xmpp_free(ctx, msg);
+}
+
 int message_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, void* const userdata) {
     XmppClient* const client = static_cast<XmppClient*>(userdata);
 
@@ -83,29 +153,14 @@ int message_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, vo
                 assert(redisClient);
                 std::optional<std::string> accountId = redisClient->get_account_id(node);
                 if (accountId) {
-                    // Add the 'account' attribute node:
-                    xmpp_stanza_t* accountNode = xmpp_stanza_new(client->get_ctx());
-                    xmpp_stanza_set_name(accountNode, "account");
-                    xmpp_stanza_set_attribute(accountNode, "id", accountId->c_str());
-                    xmpp_stanza_add_child(notificationNode, accountNode);
-
-                    // Convert the 'notification' node to a string:
-                    char* msg = nullptr;
-                    size_t len = 0;
-                    if (xmpp_stanza_to_text(notificationNode, &msg, &len) != 0) {
-                        LOG_WARNING << "Failed to convert the 'notification' node to a string...";
-                    }
-                    /**
-                     * Raw notifications can have only a size of less than 5 KB.
-                     * Reference: https://docs.microsoft.com/en-us/previous-versions/windows/apps/jj676791(v=win.10)#creating-a-raw-notification
-                     **/
-                    else if (len > 4096) {
-                        client->on_node_message(node, "New message received!");
+                    std::optional<std::string> version = redisClient->get_version(node);
+                    if (version && version == "2") {
+                        LOG_DEBUG << "Sending v2 push message.";
+                        client->send_v2_push(*accountId, node, notificationNode);
                     } else {
-                        // Trigger the new message for node event:
-                        client->on_node_message(node, msg);
+                        LOG_DEBUG << "Sending v1 push message.";
+                        client->send_v1_push(*accountId, node, notificationNode);
                     }
-                    xmpp_free(client->get_ctx(), msg);
                 } else {
                     LOG_WARNING << "Account for node not found!";
                 }
@@ -149,9 +204,14 @@ xmpp_stanza_t* XmppClient::get_items_node(xmpp_stanza_t* stanza) {
     return nullptr;
 }
 
-void XmppClient::on_node_message(const std::string& node, const std::string& msg) {
-    assert(nodeMessageHandler);
-    nodeMessageHandler(node, msg);
+void XmppClient::on_v1_node_message(const std::string& node, const std::string& msg) {
+    assert(nodev1MessageHandler);
+    nodev1MessageHandler(node, msg);
+}
+
+void XmppClient::on_v2_node_message(const std::string& node, const std::string& accountId, int messageCount, int pendingSubscriptionCount) {
+    assert(nodev2MessageHandler);
+    nodev2MessageHandler(node, accountId, messageCount, pendingSubscriptionCount);
 }
 
 void conn_handler(xmpp_conn_t* const conn, const xmpp_conn_event_t status, const int /*error*/, xmpp_stream_error_t* const /*stream_error*/, void* const userdata) {

@@ -5,6 +5,7 @@
 #include "tcp/messages/AbstractMessage.hpp"
 #include "tcp/messages/ErrorResponseMessage.hpp"
 #include "tcp/messages/Parser.hpp"
+#include "tcp/messages/PushMessage.hpp"
 #include "tcp/messages/RequestTestPushMessage.hpp"
 #include "tcp/messages/SetChannelUriMessage.hpp"
 #include "tcp/messages/SetPushAccountsMessage.hpp"
@@ -23,7 +24,10 @@ namespace server {
 PushServer::PushServer(const storage::Configuration& config) : redisClient(config.db),
                                                                wnsClient(config.wns),
                                                                tcpServer(config.tcp, [this](const std::string& s, tcp::ClientSslSession* session) { this->on_message_received(s, session); }),
-                                                               xmppClient(config.xmpp, [this](const std::string& node, const std::string& msg) { this->on_message_for_node(node, msg); }) {
+                                                               xmppClient(
+                                                                   config.xmpp,
+                                                                   [this](const std::string& node, const std::string& msg) { this->on_v1_message_for_node(node, msg); },
+                                                                   [this](const std::string& node, const std::string& accountId, int messageCount, int pendingSubscriptionCount) { this->on_v2_message_for_node(node, accountId, messageCount, pendingSubscriptionCount); }) {
     xmppClient.set_redis_client(&redisClient);
 }
 
@@ -126,7 +130,7 @@ void PushServer::on_message_received(const std::shared_ptr<tcp::messages::Abstra
         } break;
         case tcp::messages::AbstractMessage::MessageType::SET_PUSH_ACCOUNT_MESSAGE: {
             const tcp::messages::SetPushAccountsMessage* actMsg = static_cast<tcp::messages::SetPushAccountsMessage*>(msg.get());
-            set_push_accounts(actMsg->get_device_id(), actMsg->get_accounts(), session);
+            set_push_accounts(actMsg->get_device_id(), std::to_string(msg->get_version()), actMsg->get_accounts(), session);
         } break;
         case tcp::messages::AbstractMessage::MessageType::REQUEST_TEST_PUSH_MESSAGE: {
             const tcp::messages::RequestTestPushMessage* actMsg = static_cast<tcp::messages::RequestTestPushMessage*>(msg.get());
@@ -154,7 +158,7 @@ void PushServer::send_test_push(const std::string& deviceId, tcp::ClientSslSessi
     }
 }
 
-void PushServer::set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts, tcp::ClientSslSession* session) {
+void PushServer::set_push_accounts(const std::string& deviceId, const std::string& version, const std::vector<std::string>& accounts, tcp::ClientSslSession* session) {
     const std::optional<std::string> channelUri = redisClient.get_channel_uri(deviceId);
     if (!channelUri) {
         session->respond_with_error("Device id unknown.");
@@ -194,7 +198,7 @@ void PushServer::set_push_accounts(const std::string& deviceId, const std::vecto
         std::get<1>(node)->success = xmppClient.setup_push_node(std::get<0>(node));
     }
 
-    redisClient.set_push_accounts(deviceId, *channelUri, pushAccounts);
+    redisClient.set_push_accounts(deviceId, *channelUri, version, pushAccounts);
     tcp::messages::SuccessSetPushAccountsMessage resultMsg(std::move(pushAccounts), std::string{xmppClient.get_jid()});
     nlohmann::json j;
     resultMsg.to_json(j);
@@ -213,7 +217,7 @@ void PushServer::set_channel_uri(const std::string& deviceId, const std::string&
     LOG_INFO << "Channel URI set for 'device' " << deviceId << " to: " << channelUri;
 }
 
-void PushServer::on_message_for_node(const std::string& node, const std::string& msg) {
+void PushServer::on_v1_message_for_node(const std::string& node, const std::string& msg) {
     const std::optional<std::string> deviceId = redisClient.get_device_id(node);
     if (!deviceId) {
         LOG_WARNING << "Received message for an unknown node '" << node << "'. 'deviceId' not found. Dropping it...";
@@ -226,9 +230,34 @@ void PushServer::on_message_for_node(const std::string& node, const std::string&
     }
     bool result = wnsClient.send_raw_notification(*channelUri, std::string{msg});
     if (result) {
-        LOG_INFO << "Push send to node: " << node;
+        LOG_INFO << "Push v1 send to node: " << node;
     } else {
-        LOG_WARNING << "Failed to send push for node: " << node;
+        LOG_WARNING << "Failed to send v1 push for node: " << node;
+    }
+}
+
+void PushServer::on_v2_message_for_node(const std::string& node, const std::string& accountId, int messageCount, int pendingSubscriptionCount) {
+    const std::optional<std::string> deviceId = redisClient.get_device_id(node);
+    if (!deviceId) {
+        LOG_WARNING << "Received message for an unknown node '" << node << "'. 'deviceId' not found. Dropping it...";
+        return;
+    }
+    const std::optional<std::string> channelUri = redisClient.get_channel_uri(*deviceId);
+    if (!channelUri) {
+        LOG_WARNING << "Received message for an unknown node '" << node << "'. 'channelUri' not found. Dropping it...";
+        return;
+    }
+
+    tcp::messages::PushMessage push(std::string{accountId}, messageCount, pendingSubscriptionCount);
+    nlohmann::json j;
+    push.to_json(j);
+    std::string msg = j.dump();
+
+    bool result = wnsClient.send_raw_notification(*channelUri, std::string{msg});
+    if (result) {
+        LOG_INFO << "Push v2 send to node: " << node;
+    } else {
+        LOG_WARNING << "Failed to send push v2 for node: " << node;
     }
 }
 

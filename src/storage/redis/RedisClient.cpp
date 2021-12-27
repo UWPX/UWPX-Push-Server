@@ -49,6 +49,21 @@ std::optional<std::string> RedisClient::get_account_id(const std::string& node) 
     return keys[0];
 }
 
+std::optional<std::string> RedisClient::get_version(const std::string& node) {
+    std::vector<std::string> keys;
+    redis->lrange(node, 0, -1, std::back_inserter(keys));
+    if (keys.size() != 3) {
+        return std::nullopt;
+    }
+    const std::string deviceId = keys[1];
+    keys.clear();
+    redis->lrange(deviceId, 0, -1, std::back_inserter(keys));
+    if (keys.size() < 2) {
+        return std::nullopt;
+    }
+    return keys[1];
+}
+
 std::optional<std::string> RedisClient::get_device_id(const std::string& node) {
     std::vector<std::string> keys;
     redis->lrange(node, 0, -1, std::back_inserter(keys));
@@ -71,7 +86,7 @@ std::vector<std::string> RedisClient::get_push_nodes(const std::string& deviceId
     std::vector<std::string> nodes;
     std::vector<std::string> keys;
     redis->lrange(deviceId, 0, -1, std::back_inserter(keys));
-    for (size_t i = 1; i < keys.size(); i++) {
+    for (size_t i = 2; i < keys.size(); i++) {  // Skip the channel_uri and version
         std::optional<std::string> node = redis->get(keys[i]);
         assert(node);
         nodes.push_back(*node);
@@ -79,12 +94,12 @@ std::vector<std::string> RedisClient::get_push_nodes(const std::string& deviceId
     return nodes;
 }
 
-void RedisClient::set_push_accounts(const std::string& deviceId, const std::string& channelUri, const std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount>& accounts) {
+void RedisClient::set_push_accounts(const std::string& deviceId, const std::string& channelUri, const std::string& version, const std::vector<tcp::messages::SuccessSetPushAccountsMessage::PushAccount>& accounts) {
     // Remove the existing key structure:
     std::vector<std::string> keys;
     redis->lrange(deviceId, 0, -1, std::back_inserter(keys));
     if (!keys.empty()) {
-        for (size_t i = 1; i < keys.size(); i++) {
+        for (size_t i = 2; i < keys.size(); i++) {  // Skip the channel_uri and version
             // Delete account:
             const std::string& account = keys[i];
             redis->del(account);
@@ -100,6 +115,7 @@ void RedisClient::set_push_accounts(const std::string& deviceId, const std::stri
     // Replace it with the new one:
     keys.clear();
     keys.push_back(channelUri);
+    keys.push_back(version);
     for (const tcp::messages::SuccessSetPushAccountsMessage::PushAccount& pushAccount : accounts) {
         std::string account = gen_account(deviceId, pushAccount.accountId);
         keys.push_back(account);

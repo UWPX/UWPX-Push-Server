@@ -17,7 +17,8 @@ class XmppClient {
         WAITING_FOR_JOIN,
     };
 
-    using nodeMessageHandlerFunc = std::function<void(const std::string& node, const std::string& msg)>;
+    using nodev1MessageHandlerFunc = std::function<void(const std::string& node, const std::string& msg)>;
+    using nodev2MessageHandlerFunc = std::function<void(const std::string& node, const std::string& accountId, int messageCount, int pendingSubscriptionCount)>;
 
  private:
     std::optional<std::thread> thread{std::nullopt};
@@ -31,12 +32,13 @@ class XmppClient {
     const std::string password;
     const uint16_t port;
     const std::string host;
-    nodeMessageHandlerFunc nodeMessageHandler;
+    nodev1MessageHandlerFunc nodev1MessageHandler;
+    nodev2MessageHandlerFunc nodev2MessageHandler;
 
     storage::redis::RedisClient* redisClient{nullptr};
 
  public:
-    explicit XmppClient(const storage::XmppConfiguration& config, nodeMessageHandlerFunc&& nodeMessageHandler);
+    explicit XmppClient(const storage::XmppConfiguration& config, nodev1MessageHandlerFunc&& nodev1MessageHandler, nodev2MessageHandlerFunc&& nodev2MessageHandler);
     XmppClient(XmppClient&&) = delete;
     XmppClient(const XmppClient&) = delete;
     XmppClient& operator=(XmppClient&&) = delete;
@@ -64,9 +66,12 @@ class XmppClient {
     bool setup_push_node(const std::string& node);
     void delete_push_node(const std::string& node);
     void send_presence_online();
-    void on_node_message(const std::string& node, const std::string& msg);
+    void on_v1_node_message(const std::string& node, const std::string& msg);
+    void on_v2_node_message(const std::string& node, const std::string& accountId, int messageCount, int pendingSubscriptionCount);
     static xmpp_stanza_t* get_items_node(xmpp_stanza_t* stanza);
     static xmpp_stanza_t* get_notification_node(xmpp_stanza_t* itemsNode);
+    void send_v1_push(const std::string& accountId, const std::string& node, xmpp_stanza_t* notificationNode);
+    void send_v2_push(const std::string& accountId, const std::string& node, xmpp_stanza_t* notificationNode);
 
  private:
     void thread_run();

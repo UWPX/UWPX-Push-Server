@@ -14,10 +14,11 @@ class AbstractMessage {
         SET_CHANNEL_URI_MESSAGE,
         SET_PUSH_ACCOUNT_MESSAGE,
         SUCCESS_RESPONSE_MESSAGE,
-        SUCCESS_SET_PUSH_ACCOUNT_MESSAGE
+        SUCCESS_SET_PUSH_ACCOUNT_MESSAGE,
+        PUSH
     };
 
-    static constexpr int VERSION = 1;
+    static constexpr int VERSION = 2;
 
  protected:
     bool isValid{true};

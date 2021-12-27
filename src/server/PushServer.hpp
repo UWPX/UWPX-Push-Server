@@ -50,9 +50,10 @@ class PushServer {
     void on_message_received(const std::string& s, tcp::ClientSslSession* session);
     void on_message_received(const std::shared_ptr<tcp::messages::AbstractMessage>& msg, tcp::ClientSslSession* session);
     void send_test_push(const std::string& deviceId, tcp::ClientSslSession* session);
-    void set_push_accounts(const std::string& deviceId, const std::vector<std::string>& accounts, tcp::ClientSslSession* session);
+    void set_push_accounts(const std::string& deviceId, const std::string& version, const std::vector<std::string>& accounts, tcp::ClientSslSession* session);
     void set_channel_uri(const std::string& deviceId, const std::string& channelUri, tcp::ClientSslSession* session);
-    void on_message_for_node(const std::string& node, const std::string& msg);
+    void on_v1_message_for_node(const std::string& node, const std::string& msg);
+    void on_v2_message_for_node(const std::string& node, const std::string& accountId, int messageCount, int pendingSubscriptionCount);
     /**
      * Validates if the given channel URI is valid and publishes to: notify.windows.com
      * Reference: https://docs.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/windows-push-notification-services--wns--overview#requesting-a-notification-channel

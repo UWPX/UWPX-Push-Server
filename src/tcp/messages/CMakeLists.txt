@@ -17,6 +17,8 @@ add_library(tcp_messages STATIC Parser.cpp
                                 SuccessResponseMessage.cpp
                                 SuccessResponseMessage.hpp
                                 SuccessSetPushAccountsMessage.cpp
-                                SuccessSetPushAccountsMessage.hpp)
+                                SuccessSetPushAccountsMessage.hpp
+                                PushMessage.cpp
+                                PushMessage.hpp)
 
 target_link_libraries(tcp_messages PRIVATE logger nlohmann_json::nlohmann_json utils)
