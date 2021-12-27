@@ -3,7 +3,10 @@
 #include <nlohmann/json_fwd.hpp>
 
 namespace tcp::messages {
-SetPushAccountsMessage::SetPushAccountsMessage(const nlohmann::json& j) { isValid = from_json(j); }
+SetPushAccountsMessage::SetPushAccountsMessage(const nlohmann::json& j) {
+    // NOLINTNEXTLINE (clang-analyzer-optin.cplusplus.VirtualCall) Not relevant in this case
+    isValid = from_json(j);
+}
 
 SetPushAccountsMessage::SetPushAccountsMessage(std::vector<std::string>&& accounts, std::string&& deviceId) : AbstractMessage(std::string{ACTION}), accounts(std::move(accounts)), deviceId(std::move(deviceId)) {}
 

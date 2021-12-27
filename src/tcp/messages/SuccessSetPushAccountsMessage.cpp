@@ -7,7 +7,10 @@
 #include <utility>
 
 namespace tcp::messages {
-SuccessSetPushAccountsMessage::SuccessSetPushAccountsMessage(const nlohmann::json& j) { isValid = from_json(j); }
+SuccessSetPushAccountsMessage::SuccessSetPushAccountsMessage(const nlohmann::json& j) {
+    // NOLINTNEXTLINE (clang-analyzer-optin.cplusplus.VirtualCall) Not relevant in this case
+    isValid = from_json(j);
+}
 
 SuccessSetPushAccountsMessage::SuccessSetPushAccountsMessage(std::vector<PushAccount>&& accounts, std::string&& pushBareJid) : accounts(std::move(accounts)), pushBareJid(std::move(pushBareJid)) {}
 
@@ -123,7 +126,7 @@ void SuccessSetPushAccountsMessage::PushAccount::to_json(nlohmann::json& j) cons
 SuccessSetPushAccountsMessage::PushAccount SuccessSetPushAccountsMessage::PushAccount::create(const std::string& accountId) {
     std::string node = utils::url_safe_random_token(15);
     std::string secret = utils::secure_random_password(15);
-    return PushAccount(std::string{accountId}, std::move(node), std::move(secret));
+    return {std::string{accountId}, std::move(node), std::move(secret)};
 }
 
 }  // namespace tcp::messages

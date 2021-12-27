@@ -3,7 +3,10 @@
 #include "tcp/messages/AbstractResponseMessage.hpp"
 
 namespace tcp::messages {
-SuccessResponseMessage::SuccessResponseMessage(const nlohmann::json& j) { isValid = from_json(j); }
+SuccessResponseMessage::SuccessResponseMessage(const nlohmann::json& j) {
+    // NOLINTNEXTLINE (clang-analyzer-optin.cplusplus.VirtualCall) Not relevant in this case
+    isValid = from_json(j);
+}
 
 SuccessResponseMessage::SuccessResponseMessage() : AbstractResponseMessage(STATUS) {}
 

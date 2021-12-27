@@ -2,7 +2,10 @@
 #include "logger/Logger.hpp"
 
 namespace tcp::messages {
-SetChannelUriMessage::SetChannelUriMessage(const nlohmann::json& j) { isValid = from_json(j); }
+SetChannelUriMessage::SetChannelUriMessage(const nlohmann::json& j) {
+    // NOLINTNEXTLINE (clang-analyzer-optin.cplusplus.VirtualCall) Not relevant in this case
+    isValid = from_json(j);
+}
 
 SetChannelUriMessage::SetChannelUriMessage(std::string&& channelUri, std::string&& deviceId) : AbstractMessage(std::string{ACTION}), channelUri(std::move(channelUri)), deviceId(std::move(deviceId)) {}
 

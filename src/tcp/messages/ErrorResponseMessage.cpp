@@ -3,7 +3,10 @@
 #include "tcp/messages/AbstractResponseMessage.hpp"
 
 namespace tcp::messages {
-ErrorResponseMessage::ErrorResponseMessage(const nlohmann::json& j) { isValid = from_json(j); }
+ErrorResponseMessage::ErrorResponseMessage(const nlohmann::json& j) {
+    // NOLINTNEXTLINE (clang-analyzer-optin.cplusplus.VirtualCall) Not relevant in this case
+    isValid = from_json(j);
+}
 
 ErrorResponseMessage::ErrorResponseMessage(std::string&& error) : AbstractResponseMessage(STATUS), error(std::move(error)) {}
 
