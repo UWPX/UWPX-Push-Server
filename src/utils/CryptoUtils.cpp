@@ -17,7 +17,7 @@ std::string secure_random_password(size_t length) {
     std::string result;
     result.resize(length);
     for (size_t i = 0; i < length; i++) {
-        result[i] = alphanum[randombytes_uniform(alphanum.length())];
+        result[i] = alphanum[randombytes_uniform(alphanum.length() - 1)];
     }
     return result;
 }
@@ -29,13 +29,14 @@ std::string url_safe_random_token(size_t length) {
 
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    static std::uniform_int_distribution<> distr(0, static_cast<int>(alphanum.length()));
+    static std::uniform_int_distribution<> distr(0, static_cast<int>(alphanum.length() - 1));
 
     std::string result;
     result.resize(length);
     for (size_t i = 0; i < length; i++) {
         int e = distr(gen);
         result[i] = alphanum[e];
+        assert(result[i]);
     }
     return result;
 }
