@@ -73,7 +73,7 @@ void XmppClient::send_v2_push(const std::string& accountId, const std::string& n
     int pendingSubscriptionCount = 0;
     xmpp_stanza_t* xNode = xmpp_stanza_get_child_by_name(notificationNode, "x");
     if (xNode) {
-        for (xmpp_stanza_t* fieldNode = xmpp_stanza_get_children(xNode); fieldNode != nullptr; xmpp_stanza_get_next(fieldNode)) {
+        for (xmpp_stanza_t* fieldNode = xmpp_stanza_get_children(xNode); fieldNode; fieldNode = xmpp_stanza_get_next(fieldNode)) {
             std::string name = xmpp_stanza_get_name(fieldNode);
             if (std::strcmp(xmpp_stanza_get_name(fieldNode), "field") == 0) {
                 const char* var = xmpp_stanza_get_attribute(fieldNode, "var");
