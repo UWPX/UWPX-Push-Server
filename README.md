@@ -24,7 +24,7 @@ Without this identifier, it wouldn't be possible to update/remove push channels 
 #### Client -> Server
 ```JSON
 {
-	"version": 1,
+	"version": 2,
 	"action": "set_channel_uri",
 	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
 	"channel_uri": "ms-app://s-1-15-2-3598129719-3378870262-4208132049-182512184-2493220926-1891298429-4035237700"
@@ -34,7 +34,7 @@ Without this identifier, it wouldn't be possible to update/remove push channels 
 #### Success: Server -> Client
 ```JSON
 {
-	"version": 1,
+	"version": 2,
 	"action": "response",
 	"status": 1
 }
@@ -43,7 +43,7 @@ Without this identifier, it wouldn't be possible to update/remove push channels 
 #### Error: Server -> Client
 ```JSON
 {
-	"version": 1,
+	"version": 2,
 	"action": "response",
 	"status": 0,
 	"error": "Some error message e.g. Invalid JSON format."
@@ -61,7 +61,7 @@ It's suggested to use the SHA256 hash of the `device_id` concatenated with the b
 #### Client -> Server
 ```JSON
 {
-	"version": 1,
+	"version": 2,
 	"action": "set_accounts",
 	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
 	"accounts": [
@@ -81,7 +81,7 @@ It also includes a `push_bare_jid` field, which represents the bare JID of the p
 The `success` attribute indicates if creating a PubSub node was successful for the account.
 ```JSON
 {
-	"version": 1,
+	"version": 2,
 	"action": "response",
 	"status": 1,
 	"push_bare_jid": "push@xmpp.uwpx.org",
@@ -105,7 +105,7 @@ The `success` attribute indicates if creating a PubSub node was successful for t
 #### Error: Server -> Client
 ```JSON
 {
-	"version": 1,
+	"version": 2,
 	"action": "response",
 	"status": 0,
 	"error": "Some error message e.g. Invalid JSON format."
@@ -119,7 +119,7 @@ On success the server sends a test push message to the WNS, which then forwards 
 #### Client -> Server
 ```JSON
 {
-	"version": 1,
+	"version": 2,
 	"action": "request_test_push",
 	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b"
 }
@@ -128,7 +128,7 @@ On success the server sends a test push message to the WNS, which then forwards 
 #### Success: Server -> Client
 ```JSON
 {
-	"version": 1,
+	"version": 2,
 	"action": "response",
 	"status": 1
 }
@@ -137,7 +137,7 @@ On success the server sends a test push message to the WNS, which then forwards 
 #### Error: Server -> Client
 ```JSON
 {
-	"version": 1,
+	"version": 2,
 	"action": "response",
 	"status": 0,
 	"error": "Some error message e.g. `device_id` not found."
@@ -158,7 +158,8 @@ Independent of that, the push server also maps the string `WNS` to the WNS relat
 ## What the app server sends via the WNS to the client
 ```JSON
 {
-    "account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
+        "version": 2,
+        "account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
 	"message_count": 2,
 	"pending_subscription_count": 0,
 }
