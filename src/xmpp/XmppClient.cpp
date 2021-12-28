@@ -162,7 +162,7 @@ int message_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, vo
                         client->send_v1_push(*accountId, node, notificationNode);
                     }
                 } else {
-                    LOG_WARNING << "Account for node not found!";
+                    LOG_WARNING << "No account for node (" << node << ") not found!";
                 }
             } else {
                 LOG_WARNING << "Invalid message node. 'notification' node not found!";
