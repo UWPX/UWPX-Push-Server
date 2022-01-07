@@ -113,7 +113,7 @@ The `success` attribute indicates if creating a PubSub node was successful for t
 ```
 
 ### Request a Test Push
-Once an account has been registerd, the client can request a test push message.
+Once an account has been registered, the client can request a test push message.
 On success the server sends a test push message to the WNS, which then forwards it to the client.
 
 #### Client -> Server
@@ -131,6 +131,15 @@ On success the server sends a test push message to the WNS, which then forwards 
 	"version": 2,
 	"action": "response",
 	"status": 1
+}
+```
+
+#### Success: Server -> Notification Server (WNS)
+On success the push server also send a test push message to the (WNS) notification server which then forwards it to the client via the push channel.
+```JSON
+{
+	"version": 2,
+	"action": "test_push"
 }
 ```
 
@@ -158,8 +167,8 @@ Independent of that, the push server also maps the string `WNS` to the WNS relat
 ## What the app server sends via the WNS to the client
 ```JSON
 {
-        "version": 2,
-        "account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
+    "version": 2,
+    "account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
 	"message_count": 2,
 	"pending_subscription_count": 0,
 }
@@ -192,7 +201,7 @@ The following dependencies will be installed automatically by [conan](https://co
 * [catch2](https://github.com/catchorg/Catch2): Catch2 is mainly a unit testing framework for C++, but it also provides basic micro-benchmarking features, and simple BDD macros.
 * [CppServer](https://github.com/chronoxor/CppServer#requirements): Ultra fast and low latency asynchronous socket server & client C++ library with support TCP, SSL, UDP, HTTP, HTTPS, WebSocket protocols and 10K connections problem solution.
 * [libsodium](https://libsodium.gitbook.io/doc/) Sodium is a modern, easy-to-use software library for encryption, decryption, signatures, password hashing and more.
-* [libstrophe](https://strophe.im/libstrophe/) ibstrophe is a minimal XMPP library written in C. 
+* [libstrophe](https://strophe.im/libstrophe/) libstrophe is a minimal XMPP library written in C. 
 * [ctre](https://github.com/hanickadot/compile-time-regular-expressions) Fast compile-time regular expressions with support for matching/searching/capturing during compile-time or runtime.
 * [Date](https://github.com/HowardHinnant/date) A date and time library based on the C++11/14/17 <chrono> header.
 

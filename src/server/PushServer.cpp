@@ -10,6 +10,7 @@
 #include "tcp/messages/SetChannelUriMessage.hpp"
 #include "tcp/messages/SetPushAccountsMessage.hpp"
 #include "tcp/messages/SuccessSetPushAccountsMessage.hpp"
+#include "tcp/messages/TestPushMessage.hpp"
 #include "wns/WnsClient.hpp"
 #include <cassert>
 #include <ctre.hpp>
@@ -148,7 +149,19 @@ void PushServer::send_test_push(const std::string& deviceId, tcp::ClientSslSessi
         session->respond_with_error("Device id unknown.");
         return;
     }
-    bool result = wnsClient.send_raw_notification(*channelUri, "<test/>");
+
+    // Build test push message:
+    const std::optional<std::string> version = redisClient.get_version(deviceId);
+    std::string msg = "<test/>";
+    if (version && version == "2") {
+        tcp::messages::TestPushMessage testPush;
+        nlohmann::json j;
+        testPush.to_json(j);
+        msg = j.dump();
+    }
+
+    // Send it:
+    bool result = wnsClient.send_raw_notification(*channelUri, std::move(msg));
     if (result) {
         session->respond_with_success();
         LOG_INFO << "Test push send to device id: " << deviceId;

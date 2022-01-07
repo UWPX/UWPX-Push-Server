@@ -18,7 +18,7 @@ namespace storage::redis {
 // NOLINTNEXTLINE (cert-err58-cpp)
 const std::string RedisClient::WNS_TOKEN_KEY = "WNS";
 // NOLINTNEXTLINE (cert-err58-cpp)
-const std::chrono::seconds RedisClient::DEFAULT_ENTRY_TIMEOUT = std::chrono::seconds(7 * 24 * 60 * 60);  // 7 Days
+const std::chrono::seconds RedisClient::DEFAULT_ENTRY_TIMEOUT = std::chrono::seconds(30 * 7 * 24 * 60 * 60);  // 30 Days
 
 RedisClient::RedisClient(const storage::DbConfiguration& config) : url(config.url) {}
 
@@ -49,14 +49,8 @@ std::optional<std::string> RedisClient::get_account_id(const std::string& node) 
     return keys[0];
 }
 
-std::optional<std::string> RedisClient::get_version(const std::string& node) {
+std::optional<std::string> RedisClient::get_version(const std::string& deviceId) {
     std::vector<std::string> keys;
-    redis->lrange(node, 0, -1, std::back_inserter(keys));
-    if (keys.size() != 3) {
-        return std::nullopt;
-    }
-    const std::string deviceId = keys[1];
-    keys.clear();
     redis->lrange(deviceId, 0, -1, std::back_inserter(keys));
     if (keys.size() < 2) {
         return std::nullopt;

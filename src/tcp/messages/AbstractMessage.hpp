@@ -15,7 +15,8 @@ class AbstractMessage {
         SET_PUSH_ACCOUNT_MESSAGE,
         SUCCESS_RESPONSE_MESSAGE,
         SUCCESS_SET_PUSH_ACCOUNT_MESSAGE,
-        PUSH
+        PUSH,
+        TEST_PUSH
     };
 
     static constexpr int VERSION = 2;
