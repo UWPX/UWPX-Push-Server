@@ -158,7 +158,7 @@ int message_handler(xmpp_conn_t* const /*conn*/, xmpp_stanza_t* const stanza, vo
                     if (deviceId) {
                         version = redisClient->get_version(*deviceId);
                     }
-                    if (version && version == "2") {
+                    if (version && (*version) == "2") {
                         LOG_DEBUG << "Sending v2 push message.";
                         client->send_v2_push(*accountId, node, notificationNode);
                     } else {

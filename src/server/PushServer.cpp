@@ -153,7 +153,7 @@ void PushServer::send_test_push(const std::string& deviceId, tcp::ClientSslSessi
     // Build test push message:
     const std::optional<std::string> version = redisClient.get_version(deviceId);
     std::string msg = "<test/>";
-    if (version && version == "2") {
+    if (version && (*version) == "2") {
         tcp::messages::TestPushMessage testPush;
         nlohmann::json j;
         testPush.to_json(j);
