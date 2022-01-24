@@ -281,4 +281,4 @@ From the build direct you can execute the server as follows:
 In case no `configuration.json` file exist at the given location, the server will create an empty one, like described above.
 
 ### Stop
-`q`
+`exit`

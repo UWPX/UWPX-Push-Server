@@ -41,6 +41,7 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 include(sanitizer)
 include(gcc_analyze)
 include(clear_variable)
+include(FetchContent)
 
 if (UWPX_PUSH_SERVER_ENABLE_LINTING)
     message(STATUS "Enabling linting")
@@ -111,6 +112,18 @@ find_package(redis++ REQUIRED)
 find_package(libsodium REQUIRED)
 find_package(cppserver REQUIRED)
 find_package(ctre REQUIRED)
+
+# Disable linting for fetch content projects
+clear_variable(DESTINATION CMAKE_CXX_CLANG_TIDY BACKUP CMAKE_CXX_CLANG_TIDY_BKP)
+
+set(CLI_BuildExamples OFF)
+set(CLI_BuildExamples OFF)
+FetchContent_Declare(cli
+                     GIT_REPOSITORY https://github.com/daniele77/cli.git
+                     GIT_TAG v2.0.0)
+FetchContent_MakeAvailable(cli)
+
+restore_variable(DESTINATION CMAKE_CXX_CLANG_TIDY BACKUP CMAKE_CXX_CLANG_TIDY_BKP)
 
 include(libstrophe)
 

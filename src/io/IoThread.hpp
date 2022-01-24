@@ -2,6 +2,7 @@
 #include <optional>
 #include <server/PushServer.hpp>
 #include <thread>
+#include <cli/standaloneasioscheduler.h>
 
 namespace io {
 class IoThread {
@@ -18,6 +19,7 @@ class IoThread {
     const server::PushServer* server;
     std::optional<std::thread> thread{std::nullopt};
     IoThreadState state{IoThreadState::NOT_RUNNING};
+    cli::StandaloneAsioScheduler scheduler;
 
  public:
     explicit IoThread(const server::PushServer* server);
@@ -34,6 +36,5 @@ class IoThread {
 
  private:
     void threadRun();
-    static void printHelp();
 };
 }  // namespace io

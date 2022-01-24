@@ -3,6 +3,10 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <cli/cli.h>
+#include <cli/clilocalsession.h>
+#include <cli/filehistorystorage.h>
+#include <cli/standaloneasioscheduler.h>
 
 namespace io {
 IoThread::IoThread(const server::PushServer* server) : server(server) {}
@@ -27,6 +31,7 @@ void IoThread::stop() {
         if (state != IoThreadState::WAITING_FOR_JOIN) {
             LOG_DEBUG << "Stopping the IO thread...";
             state = IoThreadState::STOP_REQUESTED;
+            scheduler.Stop();
         }
         LOG_DEBUG << "Joining the IO thread...";
         thread->join();
@@ -46,27 +51,42 @@ void IoThread::threadRun() {
     state = IoThreadState::RUNNING;
     LOG_INFO << "IO thread started.";
 
-    std::string s;
-    while (state == IoThreadState::RUNNING) {
-        std::cout << "$ ";
-        std::cin >> s;
-        if (s == "help") {
-            printHelp();
-        } else if (s == "q") {
-            state = IoThreadState::STOP_REQUESTED;
-        }
-    }
+    cli::CmdHandler rootCmd;
+    std::unique_ptr<cli::Menu> rootMenu = std::make_unique<cli::Menu>("push");
+    std::unique_ptr<cli::Menu> testMenu = std::make_unique<cli::Menu>("test", "Testing the server");
+    std::unique_ptr<cli::Menu> xmppMenu = std::make_unique<cli::Menu>("xmpp", "XMPP based settings");
+    xmppMenu->Insert(
+        "send",
+        {"xml_msg"},
+        [](std::ostream& out, const std::string& msg) { out << "Sending: " + msg + "\n"; },
+        "Send the given xml message to the XMPP server");
+    testMenu->Insert(std::move((xmppMenu)));
+    testMenu->Insert(
+        "push",
+        {"<device_id>"},
+        [](std::ostream& out, const std::string& deviceId) { out << "Push to device id: " + deviceId + "\n"; },
+        "Stop the server");
+    rootMenu->Insert(std::move((testMenu)));
+
+    cli::Cli cliInst(std::move(rootMenu), std::make_unique<cli::FileHistoryStorage>(".cli"));
+    cliInst.ExitAction([](auto& out) { out << "Goodbye and thanks for all the fish.\n"; });
+    cliInst.StdExceptionHandler(
+        [](std::ostream& out, const std::string& cmd, const std::exception& e) {
+            out << "Exception caught in cli handler: "
+                << e.what()
+                << " handling command: "
+                << cmd
+                << ".\n";
+        });
+    cli::CliLocalTerminalSession localSession(cliInst, scheduler, std::cout, 1024);
+    localSession.ExitAction([this](auto& out) {
+        out << "Closing App...\n";
+        this->state = IoThreadState::STOP_REQUESTED;
+        this->scheduler.Stop();
+    });
+    scheduler.Run();
     state = IoThreadState::WAITING_FOR_JOIN;
     LOG_DEBUG << "IO thread ready to be joined.";
-}
-
-void IoThread::printHelp() {
-    std::cout << "-------------------HELP-------------------\n";
-    std::cout << "'help' - This help.\n";
-    std::cout << "'test push <device_id>' - Sends a test push to the given device ID.\n";
-    std::cout << "'test xmpp publish <nodeName>' - Publishes and subscribes to the given PubSub node.\n";
-    std::cout << "'q' or 'exit' - Stop the server.\n";
-    std::cout << "------------------------------------------\n";
 }
 
 }  // namespace io
