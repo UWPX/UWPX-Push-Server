@@ -170,7 +170,7 @@ Independent of that, the push server also maps the string `WNS` to the WNS relat
     "version": 2,
     "account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
 	"message_count": 2,
-	"pending_subscription_count": 0,
+	"pending_subscription_count": 0
 }
 ```
 Since it is not allowed to encrypt the data send to the WNS, we do not simply forward the received message from the XMPP server ([reference](https://xmpp.org/extensions/xep-0357.html#publishing)). Instead we only send the `account_id` (published by the client during updating the push accounts) in combination with the message and pending subscription count.
