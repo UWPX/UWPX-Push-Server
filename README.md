@@ -24,29 +24,29 @@ Without this identifier, it wouldn't be possible to update/remove push channels 
 #### Client -> Server
 ```JSON
 {
-	"version": 2,
-	"action": "set_channel_uri",
-	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
-	"channel_uri": "ms-app://s-1-15-2-3598129719-3378870262-4208132049-182512184-2493220926-1891298429-4035237700"
+    "version": 2,
+    "action": "set_channel_uri",
+    "device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
+    "channel_uri": "ms-app://s-1-15-2-3598129719-3378870262-4208132049-182512184-2493220926-1891298429-4035237700"
 }
 ```
 
 #### Success: Server -> Client
 ```JSON
 {
-	"version": 2,
-	"action": "response",
-	"status": 1
+    "version": 2,
+    "action": "response",
+    "status": 1
 }
 ```
 
 #### Error: Server -> Client
 ```JSON
 {
-	"version": 2,
-	"action": "response",
-	"status": 0,
-	"error": "Some error message e.g. Invalid JSON format."
+    "version": 2,
+    "action": "response",
+    "status": 0,
+    "error": "Some error message e.g. Invalid JSON format."
 }
 ```
 
@@ -61,17 +61,17 @@ It's suggested to use the SHA256 hash of the `device_id` concatenated with the b
 #### Client -> Server
 ```JSON
 {
-	"version": 2,
-	"action": "set_accounts",
-	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
-	"accounts": [
-		{
-			"account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90"
-		},
-		{
-			"account_id": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D"
-		}
-	]
+    "version": 2,
+    "action": "set_accounts",
+    "device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b",
+    "accounts": [
+        {
+            "account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90"
+        },
+        {
+            "account_id": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D"
+        }
+    ]
 }
 ```
 
@@ -81,34 +81,34 @@ It also includes a `push_bare_jid` field, which represents the bare JID of the p
 The `success` attribute indicates if creating a PubSub node was successful for the account.
 ```JSON
 {
-	"version": 2,
-	"action": "response",
-	"status": 1,
-	"push_bare_jid": "push@xmpp.uwpx.org",
-	"accounts": [
-		{
-			"account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
-			"node": "773bds9nf932",
-			"secret": "sdf/82h)=1",
-			"success": true
-		},
-		{
-			"account_id": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D",
-			"node": "8w3rn0MB3m38z2",
-			"secret": "j$o909mN87!n/0m",
-			"success": true
-		}
-	]
+    "version": 2,
+    "action": "response",
+    "status": 1,
+    "push_bare_jid": "push@xmpp.uwpx.org",
+    "accounts": [
+        {
+            "account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
+            "node": "773bds9nf932",
+            "secret": "sdf/82h)=1",
+            "success": true
+        },
+        {
+            "account_id": "16ECAB1875791E2B6ED0C9A6DAE5A12A79D92120E1C3AFBD3A9C8535CE44666D",
+            "node": "8w3rn0MB3m38z2",
+            "secret": "j$o909mN87!n/0m",
+            "success": true
+        }
+    ]
 }
 ```
 
 #### Error: Server -> Client
 ```JSON
 {
-	"version": 2,
-	"action": "response",
-	"status": 0,
-	"error": "Some error message e.g. Invalid JSON format."
+    "version": 2,
+    "action": "response",
+    "status": 0,
+    "error": "Some error message e.g. Invalid JSON format."
 }
 ```
 
@@ -119,18 +119,18 @@ On success the server sends a test push message to the WNS, which then forwards 
 #### Client -> Server
 ```JSON
 {
-	"version": 2,
-	"action": "request_test_push",
-	"device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b"
+    "version": 2,
+    "action": "request_test_push",
+    "device_id": "5486bd868050a620141f4e81c9f1d2c67ab0de27e5e26d218ca41c9394ee806b"
 }
 ```
 
 #### Success: Server -> Client
 ```JSON
 {
-	"version": 2,
-	"action": "response",
-	"status": 1
+    "version": 2,
+    "action": "response",
+    "status": 1
 }
 ```
 
@@ -138,18 +138,18 @@ On success the server sends a test push message to the WNS, which then forwards 
 On success the push server also send a test push message to the (WNS) notification server which then forwards it to the client via the push channel.
 ```JSON
 {
-	"version": 2,
-	"action": "test_push"
+    "version": 2,
+    "action": "test_push"
 }
 ```
 
 #### Error: Server -> Client
 ```JSON
 {
-	"version": 2,
-	"action": "response",
-	"status": 0,
-	"error": "Some error message e.g. `device_id` not found."
+    "version": 2,
+    "action": "response",
+    "status": 0,
+    "error": "Some error message e.g. `device_id` not found."
 }
 ```
 
@@ -169,8 +169,8 @@ Independent of that, the push server also maps the string `WNS` to the WNS relat
 {
     "version": 2,
     "account_id": "DADBBB9327C711E4B626F7820FB299871D23D6020683BBD1E08D37E0246C7E90",
-	"message_count": 2,
-	"pending_subscription_count": 0
+    "message_count": 2,
+    "pending_subscription_count": 0
 }
 ```
 Since it is not allowed to encrypt the data send to the WNS, we do not simply forward the received message from the XMPP server ([reference](https://xmpp.org/extensions/xep-0357.html#publishing)). Instead we only send the `account_id` (published by the client during updating the push accounts) in combination with the message and pending subscription count.
@@ -220,14 +220,14 @@ nano /usr/lib/prosody/modules/mod_pep.lua # Or where you have installed prosody
 Now replace the following lines. These are usually around line 53.
 ```lua
 function is_item_stanza(item)
-	return st.is_stanza(item) and item.attr.xmlns == xmlns_pubsub and item.name == "item" and #item.tags == 1;
+    return st.is_stanza(item) and item.attr.xmlns == xmlns_pubsub and item.name == "item" and #item.tags == 1;
 end
 ```
 with:
 ```lua
 function is_item_stanza(item)
-	-- return st.is_stanza(item) and item.attr.xmlns == xmlns_pubsub and item.name == "item" and #item.tags == 1;
-	return true;
+    -- return st.is_stanza(item) and item.attr.xmlns == xmlns_pubsub and item.name == "item" and #item.tags == 1;
+    return true;
 end
 ```
 Now restart your prosody server and you should be ready to go.
